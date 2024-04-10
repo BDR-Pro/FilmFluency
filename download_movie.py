@@ -1,25 +1,22 @@
-import os
+import os 
 import subprocess
-
+from time import sleep
 def download_movie(movie_name):
-    # Replace spaces in movie name with underscores
-    movie_name = movie_name.replace(" ", "_")
-
-    # Construct the torrent search command
-    search_command = f"python -m bittorrent_cli search {movie_name}"
-
-    # Execute the search command and get the output
-    search_output = subprocess.check_output(search_command, shell=True).decode("utf-8")
-
-    # Extract the magnet link from the search output
-    magnet_link = search_output.splitlines()[0].split(" ")[1]
-    # Construct the download command
+    subprocess.run(["pirate-get", movie_name, "-0"])
     
-    download_command = f"C:\Users\Public\Desktop\qBittorrent.lnk --add-torrent={magnet_link}"
 
-    # Execute the download command
-    subprocess.call(download_command, shell=True)
 
-# Example usage
-movie_name = input("Enter the movie name: ")
-download_movie(movie_name)
+def getallmovies():
+    movies = []
+    for root, dirs, files in os.walk("cvs_important_text"):
+        for file in files:
+            file=file[:25]
+            movies.append(file)
+    return movies
+
+
+
+print(getallmovies())
+for movie in getallmovies():
+    download_movie(movie)
+    sleep(5)

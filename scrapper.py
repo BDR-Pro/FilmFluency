@@ -14,8 +14,8 @@ if not os.path.exists("extracted_files"):
 
 def getlink(pagenumber):
     if pagenumber == 0:
-        return "https://www.opensubtitles.org/en/search/sublanguageid-eng/searchonlymovies-on/movielanguage-english/subformat-srt"
-    return f"https://www.opensubtitles.org/en/search/sublanguageid-eng/searchonlymovies-on/movielanguage-english/subformat-srt/offset-{pagenumber*40}"
+        return "https://www.opensubtitles.org/en/search/sublanguageid-eng/searchonlymovies-on/movielanguage-english/movieimdbratingsign-5/movieimdbrating-4/movieyearsign-5/movieyear-2010/subformat-srt/moviename-++"
+    return f"https://www.opensubtitles.org/en/search/sublanguageid-eng/searchonlymovies-on/movielanguage-english/movieimdbratingsign-5/movieimdbrating-4/movieyearsign-5/movieyear-2010/subformat-srt/moviename-++/offset-{pagenumber*40}"
 
 def clean_string(s):
     return s.translate(str.maketrans('', '', '!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~'))
@@ -34,6 +34,9 @@ def download_english_subtitle(sub_title,sub_id):
     # No need to scrape the page for a download link if you know the pattern OpenSubtitles uses
     
     response = requests.get(download_url)
+    if response.status_code == 429:
+        print("You have been rate limited. Please wait for a while before trying again.")
+        sys.exit(1)
     if response.status_code == 200:
         file_path = os.path.join("zip", f"{sub_title}.zip")
         with open(file_path, 'wb') as file:
@@ -96,10 +99,14 @@ def move_srt():
     
 
 def main():
-    if sys.argv[1] == "extract":
-        extract_srt_files()
-        move_srt()
-        return
+    if len(sys.argv) > 1:
+        if sys.argv[1] == "clean":
+            remove_extracted_files()
+            return
+        if sys.argv[1] == "extract":
+            extract_srt_files()
+            move_srt()
+            return
     with tqdm(total=10, desc="Downloading movies") as pbar:
         for i in range(10):
             get_list_of_movies(i)
