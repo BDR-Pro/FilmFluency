@@ -8,7 +8,7 @@ def text_to_csv(useful_sentences,srt_file_name):
     if len(useful_sentences)<4:
         return
     srt_file_name= srt_file_name.split("\\")[-1].replace(".srt",".csv")
-    path_file = os.path.join("cvs_important_text",srt_file_name)
+    path_file = os.path.join("csv_important_text",srt_file_name)
     with open(path_file, 'w', encoding='utf-8') as file:
         file.write("Text,Complexity,Start Time,End Time\n")
         for sentence in useful_sentences:
@@ -55,7 +55,7 @@ def process_srt_file(srt_text,srt_file_name):
                 
                 complexity = textstat.flesch_reading_ease(text)
                 
-                if complexity < 9 and complexity > 0:  
+                if complexity < 45 and complexity > 0:  
                     useful_sentences.append((text,complexity, start_time, end_time))
             pbar.update(1)
         
@@ -68,7 +68,7 @@ def main():
     with tqdm(total=len(os.listdir("srt")), desc="Srt Files") as pbar:
         for i in os.listdir("srt"):
             srt_file_name = os.path.join("srt", i)
-            if i in os.listdir("cvs_important_text"):
+            if i in os.listdir("csv_important_text"):
                 pbar.update(1)
                 continue
             srt_file_text = return_text_from_srt(i)

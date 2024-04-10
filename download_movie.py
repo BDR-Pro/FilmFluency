@@ -26,7 +26,7 @@ def is_dublicated(movies):
     dublicated_movies = []
     for movie in movies:
         for file in os.listdir("movies"):
-            if fonud_similiraty(movie[:-4],file[:-4]) in file:
+            if fonud_similiraty(movie,file) in file:
                 dublicated_movies.append(movie)
     for movie in dublicated_movies:
         movies.remove(movie)
