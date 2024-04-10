@@ -55,7 +55,7 @@ def process_srt_file(srt_text,srt_file_name):
                 
                 complexity = textstat.flesch_reading_ease(text)
                 
-                if complexity < 9:  
+                if complexity < 9 and complexity > 0:  
                     useful_sentences.append((text,complexity, start_time, end_time))
             pbar.update(1)
         
