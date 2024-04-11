@@ -48,14 +48,15 @@ def process_srt_file(srt_text,srt_file_name):
             
             if time_match and text_match:
                 
-                start_time = time_match.group(1)
+                start_time = time_match.group(1).split(',')[0]
                 text = text_match.group(1).replace('\n', ' ')  
-                end_time = time_match.group(2)
+                end_time = time_match.group(2).split(',')[0]
                 
                 
                 complexity = textstat.flesch_reading_ease(text)
                 
                 if complexity < 45 and complexity > 0:  
+                    text=text.translate(str.maketrans('', '', '!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~'))
                     useful_sentences.append((text,complexity, start_time, end_time))
             pbar.update(1)
         
