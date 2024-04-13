@@ -1,21 +1,23 @@
 {% extends 'base.html' %}
 
+{% block title %}{{ video.movie }} - Film Fluency{% endblock %}
+
 {% block content %}
 <div class="container mt-5">
     <div class="row">
-        <div class="col-md-8">
-            <div class="embed-responsive embed-responsive-16by9 mb-3">
-                <iframe class="embed-responsive-item" src="{{ video.video_url }}" allowfullscreen></iframe>
+        <div class="col-md-8 mb-3">
+            <div class="ratio ratio-16x9">
+                <iframe src="{{ video.video_url }}" frameborder="0" allowfullscreen></iframe>
             </div>
         </div>
         <div class="col-md-4">
-            <h2>{{ video.title }}</h2>
-            <p>{{ video.description }}</p>
+            <h2>{{ video.movie }}</h2>
             <hr>
             <p><strong>Complexity:</strong> {{ video.complexity }}</p>
-            <p><strong>Length:</strong> {{ video.length }} minutes</p>
-            <a href="{{ video.transcript_url }}" class="btn btn-secondary mt-2">Download Transcript</a>
-            <a href="{{ video.audio_url }}" class="btn btn-info mt-2">Download Audio</a>
+            <p><strong>Length:</strong> {{ video.length }} seconds</p>
+                        
+            <a href="{{ video.audio_url }}" class="btn btn-primary">Listen to Audio</a>
+            <a href="{{ video.transcript_url }}" class="btn btn-secondary">Read Transcript</a>
         </div>
     </div>
     <div class="row mt-4">

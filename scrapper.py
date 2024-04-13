@@ -4,13 +4,25 @@ import os
 from tqdm import tqdm
 import zipfile
 import sys
-        
+from FilmFluency.learning.models import Video
+     
 if not os.path.exists("srt"):
     os.makedirs("srt")
 if not os.path.exists("zip"):
     os.makedirs("zip")
 if not os.path.exists("extracted_files"):
     os.makedirs("extracted_files")
+
+def already_downloaded(movie_title,zip_file):
+    
+    if zip_file in os.listdir("zip") or movie_title in os.listdir("srt"):
+        return True 
+    if Video.objects.filter(movie=movie_title).exists():
+        return True
+    if Video.objects.filter(movie_icontains=movie_title).exists():
+        return True
+    
+    return False
 
 def getlink(pagenumber):
     if pagenumber == 0:
@@ -60,7 +72,7 @@ def get_list_of_movies(number):
         with tqdm(total=len(movie_ids), desc="Downloading subtitles") as pbar:
             for sub_id , movie_tile in zip(movie_ids , movie_tiles):
                 zip_file = f"{movie_tile}.zip"
-                if zip_file in os.listdir("zip") or movie_tile in os.listdir("srt"):
+                if already_downloaded(movie_tile,zip_file):
                     pbar.update(1)
                     continue
                 download_english_subtitle(movie_tile,sub_id)
@@ -96,7 +108,25 @@ def move_srt():
             
             pbar.update(1)
     remove_extracted_files()
+ 
+
+def use_it_as_a_module(option=""):
+    if option == "clean":
+        remove_extracted_files()
+        return
+    if option == "extract":
+        extract_srt_files()
+        move_srt()
+        return
+    with tqdm(total=10, desc="Downloading movies") as pbar:
+        for i in range(10):
+            get_list_of_movies(i)
+            pbar.update(1)
     
+        print(" \n All movies downloaded")
+        extract_srt_files()
+        move_srt()
+       
 
 def main():
     if len(sys.argv) > 1:
@@ -118,3 +148,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+

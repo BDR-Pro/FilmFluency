@@ -34,11 +34,13 @@ def is_dublicated(movies):
     
 
 
-list_=getallmovies()
+def main():
+    print("Downloading movies")
+    list_=getallmovies()
 
-list_ = is_dublicated(list_)
+    list_ = is_dublicated(list_)
 
-for movie in list_:
-    print(f"Downloading {movie}")
-    download_movie(movie)
-    sleep(5)
+    for movie in list_:
+        print(f"Downloading {movie}")
+        download_movie(movie)
+        sleep(5)

@@ -26,10 +26,10 @@ def home(request):
 
 def video_list(request):
     """ Show a list of all videos sorted by complexity. """
-    videos = getAllVideos().order_by('Complexity')
+    videos = getAllVideos().order_by('complexity')[:5]
     return render(request, 'video_list.html', {'videos': videos})
 
-def video_detail(request, video_id):
+def video_detail(request, random):
     """ Show details for a specific video, including related transcript and options. """
-    video = getVideoById(video_id)
+    video = getVideoById(random)
     return render(request, 'video_detail.html', {'video': video})

@@ -6,8 +6,8 @@ def get_videos_by_complexity(request, max_complexity):
     videos = Video.objects.filter(complexity__lte=max_complexity)
     return render(request, 'videos.html', {'videos': videos})
 
-def get_videos_by_movie(request, movie_name):
-    videos = Video.objects.filter(movie__icontains=movie_name)
+def get_videos_by_movie(request, slug):
+    videos = Video.objects.filter(movie__random_slug=slug)
     return render(request, 'videos.html', {'videos': videos})
 
 
