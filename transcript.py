@@ -85,6 +85,8 @@ def transcript():
         for j in os.listdir(video_dir):
             if not j.endswith(".mp4"):
                 continue
+            if j.replace(".mp4", ".txt") in os.listdir(video_dir):
+                continue
             video_path = os.path.join(video_dir, j)
             try:
                 print(f"Transcribing {video_path}")

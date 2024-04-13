@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="embed-responsive embed-responsive-16by9 mb-3">
+                <iframe class="embed-responsive-item" src="{{ video.video_url }}" allowfullscreen></iframe>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <h2>{{ video.title }}</h2>
+            <p>{{ video.description }}</p>
+            <hr>
+            <p><strong>Complexity:</strong> {{ video.complexity }}</p>
+            <p><strong>Length:</strong> {{ video.length }} minutes</p>
+            <a href="{{ video.transcript_url }}" class="btn btn-secondary mt-2">Download Transcript</a>
+            <a href="{{ video.audio_url }}" class="btn btn-info mt-2">Download Audio</a>
+        </div>
+    </div>
+    <div class="row mt-4">
+        <div class="col-12">
+            <h3>Transcript</h3>
+            <pre class="bg-light p-3 rounded">{{ video.transcript }}</pre>
+        </div>
+    </div>
+</div>
+{% endblock %}

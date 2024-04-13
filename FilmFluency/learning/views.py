@@ -33,16 +33,3 @@ def get_unique_movies():
     return [movie[0] for movie in movies]  
 
 
-unique_movies = get_unique_movies()
-#print(f"{unique_movies=}")
-
-complexty = get_videos_by_complexity(30)
-#print(f"{complexty=}")
-
-movie = get_videos_by_movie("Dune20211080pHMAXWEBDLDDP51AtmosDVH265FLUX")
-
-#print(f"{movie=}")   
-
-length = get_videos_by_length(10)
-
-#print(f"{length=}")
