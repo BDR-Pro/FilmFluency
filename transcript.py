@@ -97,6 +97,32 @@ def transcript():
             except Exception as e:
                 print(f"Failed to transcribe {video_path} with error {e}")
 
-make_table()
+def cleaner():
+    """Delete mp4 files in the directory if wav files are not present"""
+    base_dir = "cut_videos"
+    if not os.path.exists(base_dir):
+        print("Directory does not exist:", base_dir)
+        return
+    for i in os.listdir(base_dir):
+        video_dir = os.path.join(base_dir, i)
+        for j in os.listdir(video_dir):
+            if not j.endswith(".mp4"):
+                continue
+            video_path = os.path.join(video_dir, j)
+            audio_path = video_path.replace(".mp4", ".wav")
+            if not os.path.exists(audio_path):
+                print(f"Deleting {video_path}")
+                os.remove(video_path)
+                print("Deleted")
+                sql = f"DELETE FROM EnglishLearningVideos WHERE VideoPath = '{video_path}'"
+                with sqlite3.connect('english_learning.db') as conn:
+                    cur = conn.cursor()
+                    cur.execute(sql)
+                    conn.commit()
+                print("Deleted from database")
+                
+
+#cleaner() 
+#make_table()
 transcript()
 print("Transcribed all videos")
