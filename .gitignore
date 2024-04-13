@@ -6,3 +6,4 @@ english_learning.db
 /extracted_files
 /csv_important_text
 __pycache__
+*.sqlite3

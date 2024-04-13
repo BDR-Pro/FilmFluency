@@ -1,45 +1,28 @@
 # views.py
-from django.shortcuts import render
-import sqlite3
+from django.shortcuts import render, get_object_or_404
+from django.db.models import F
+from learning.models import Video, TrendingMovies
 
 def getAllVideos():
     """ Return all videos in the database. """
-    db = sqlite3.connect('english_learning.db')
-    cursor = db.cursor()
-    cursor.execute('SELECT * FROM EnglishLearningVideos')
-    videos = cursor.fetchall()
-    return videos
+    return Video.objects.all()
 
 def getVideoById(video_id):
     """ Return a specific video by its ID. """
-    db = sqlite3.connect('english_learning.db')
-    cursor = db.cursor()
-    cursor.execute('SELECT * FROM EnglishLearningVideos WHERE ID = ?', (video_id,))
-    video = cursor.fetchone()
-    #add counter in trending movies table
-    cursor.execute('SELECT * FROM TrendingMovies WHERE ID = ?', (video_id,))
-    trending = cursor.fetchone()
-    if trending:
-        cursor.execute('UPDATE TrendingMovies SET Views = Views + 1 WHERE ID = ?', (video_id,))
-    else:
-        cursor.execute('INSERT INTO TrendingMovies (ID, Title, Views) VALUES (?, ?, 1)', (video[0], video[1]))
-    db.commit()
-    
+    # Ensure the video exists or return a 404 error
+    video = get_object_or_404(Video, pk=video_id)
+    # Safely increment views using F() to avoid race conditions
+    TrendingMovies.objects.filter(title=video.movie).update(views=F('views') + 1)
     return video
 
 def getTrendingMovies():
-    """ Return all trending movies in the database. """
-    db = sqlite3.connect('english_learning.db')
-    cursor = db.cursor()
-    # make table if not exists
-    cursor.execute('CREATE TABLE IF NOT EXISTS TrendingMovies (ID INTEGER PRIMARY KEY, Title TEXT, Views INTEGER)')
-    cursor.execute('SELECT * FROM TrendingMovies')
-    movies = cursor.fetchall()
-    return movies
+    """ Return top 5 trending movies based on views. """
+    return TrendingMovies.objects.order_by('-views')[:5]
 
 def home(request):
     """ Render the homepage with introductory information. """
-    return render(request, 'index.html',{'movies':getTrendingMovies()})
+    movies = getTrendingMovies()
+    return render(request, 'index.html', {'movies': movies})
 
 def video_list(request):
     """ Show a list of all videos sorted by complexity. """

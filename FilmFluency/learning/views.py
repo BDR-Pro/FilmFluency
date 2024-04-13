@@ -1,35 +1,22 @@
-import sqlite3
+from .models import Video
+from django.shortcuts import render
 
-def get_videos_by_complexity(max_complexity):
-    conn = sqlite3.connect('english_learning.db')
-    cur = conn.cursor()
-    cur.execute('SELECT * FROM EnglishLearningVideos WHERE Complexity > ?', (max_complexity,))
-    videos = cur.fetchall()
-    conn.close()
-    return videos
 
-def get_videos_by_movie(movie_name):
-    conn = sqlite3.connect('english_learning.db')
-    cur = conn.cursor()
-    cur.execute('SELECT * FROM EnglishLearningVideos WHERE Movie = ?', (movie_name,))
-    videos = cur.fetchall()
-    conn.close()
-    return videos
+def get_videos_by_complexity(request, max_complexity):
+    videos = Video.objects.filter(complexity__lte=max_complexity)
+    return render(request, 'videos.html', {'videos': videos})
 
-def get_videos_by_length(max_length):
-    conn = sqlite3.connect('english_learning.db')
-    cur = conn.cursor()
-    cur.execute('SELECT * FROM EnglishLearningVideos WHERE Length < ?', (max_length,))
-    videos = cur.fetchall()
-    conn.close()
-    return videos
+def get_videos_by_movie(request, movie_name):
+    videos = Video.objects.filter(movie__icontains=movie_name)
+    return render(request, 'videos.html', {'videos': videos})
 
-def get_unique_movies():
-    conn = sqlite3.connect('english_learning.db')  
-    cur = conn.cursor()
-    cur.execute('SELECT DISTINCT Movie FROM EnglishLearningVideos')
-    movies = cur.fetchall()  
-    conn.close()
-    return [movie[0] for movie in movies]  
 
+def get_videos_by_length(request, max_length):
+    videos = Video.objects.filter(length__lte=max_length)
+    return render(request, 'videos.html', {'videos': videos})
+
+
+def get_unique_movies(request):
+    movies = Video.objects.values_list('movie', flat=True).distinct()
+    return render(request, 'videos.html', {'videos': movies})
 
