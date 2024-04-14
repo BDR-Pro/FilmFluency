@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'learning',
     'web',
+    'media'
 ]
 
 MIDDLEWARE = [

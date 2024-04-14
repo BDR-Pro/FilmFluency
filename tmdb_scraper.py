@@ -24,7 +24,7 @@ def fill_movie_db():
     movies = Video.objects.all().distinct('movie')
     for video in movies:
         title = video.movie
-        if not Movie.objects.filter(title=title).exists():
+        if Movie.poster_url is None:
             movie_data = fetch_movie_data(title)
             if movie_data:
                 Movie.objects.create(
