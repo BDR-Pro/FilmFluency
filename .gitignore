@@ -8,3 +8,4 @@ english_learning.db
 __pycache__
 *.sqlite3
 .env
+/FilmFluency/MovieToClips

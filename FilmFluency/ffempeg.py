@@ -5,8 +5,11 @@ import uuid
 from time import sleep
 from datetime import datetime, timedelta
 
-csv_important_text = os.path.abspath("csv_important_text")
-movies = os.path.abspath("movies")
+parent_dir = os.path.dirname(os.path.abspath(__file__))
+os.chdir(parent_dir)
+    
+csv_important_text = os.path.abspath("MovieToClips\\csv_important_text")
+movies = os.path.abspath("MovieToClips\\movies")
 
 def add_seconds(start_time, end_time):
     if type(start_time) not in [str] or type(end_time) not in [str]:

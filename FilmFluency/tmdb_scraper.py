@@ -1,5 +1,5 @@
 import requests
-from FilmFluency.learning.models import Movie, Video
+from learning.models import Movie, Video
 from dotenv import load_dotenv
 import os
 load_dotenv()

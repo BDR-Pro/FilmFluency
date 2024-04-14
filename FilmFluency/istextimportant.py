@@ -7,15 +7,19 @@ import os
 def text_to_csv(useful_sentences,srt_file_name):
     if len(useful_sentences)<4:
         return
+    parent_dir = os.path.dirname(os.path.abspath(__file__))
+    os.chdir(parent_dir)
+    
     srt_file_name= srt_file_name.split("\\")[-1].replace(".srt",".csv")
-    path_file = os.path.join("csv_important_text",srt_file_name)
+    path_file = os.path.join("MovieToClips\\csv_important_text",srt_file_name)
     with open(path_file, 'w', encoding='utf-8') as file:
         file.write("Text,Complexity,Start Time,End Time\n")
         for sentence in useful_sentences:
             file.write(f"{sentence[0]},{sentence[1]},{sentence[2]},{sentence[3]}\n")
 
 def return_text_from_srt(srt_file_name):
-    file_path = os.path.join("srt", srt_file_name)
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    file_path = os.path.join("MovieToClips\\srt", srt_file_name)
     with open(file_path, 'r', encoding='utf-8') as file:
             srt_file_text = file.read()
     return srt_file_text
@@ -66,10 +70,11 @@ def process_srt_file(srt_text,srt_file_name):
 
         
 def main():
-    with tqdm(total=len(os.listdir("srt")), desc="Srt Files") as pbar:
-        for i in os.listdir("srt"):
-            srt_file_name = os.path.join("srt", i)
-            if i in os.listdir("csv_important_text"):
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    with tqdm(total=len(os.listdir("MovieToClips\\srt")), desc="Srt Files") as pbar:
+        for i in os.listdir("MovieToClips\\srt"):
+            srt_file_name = os.path.join("MovieToClips\\srt", i)
+            if i in os.listdir("MovieToClips\\csv_important_text"):
                 pbar.update(1)
                 continue
             srt_file_text = return_text_from_srt(i)

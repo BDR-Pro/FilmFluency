@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.db.models import F
-from .models import Video, TrendingMovies
+from learning.models import Video, TrendingMovies
 
 def get_all_videos():
     """ Return all videos in the database. """

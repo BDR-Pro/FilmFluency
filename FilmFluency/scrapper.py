@@ -1,25 +1,26 @@
+import os
+import django
+import sys
 import requests
 from bs4 import BeautifulSoup
 import os
 from tqdm import tqdm
 import zipfile
 import sys
-from FilmFluency.learning.models import Video
-     
-if not os.path.exists("srt"):
-    os.makedirs("srt")
-if not os.path.exists("zip"):
-    os.makedirs("zip")
-if not os.path.exists("extracted_files"):
-    os.makedirs("extracted_files")
+import os
+from learning.isitalreadydownloaded import check_if_already_downloaded
+
+
+def django_setup():
+    sys.path.append('FilmFluency')
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'FilmFluency.settings')
+    django.setup()
 
 def already_downloaded(movie_title,zip_file):
     
-    if zip_file in os.listdir("zip") or movie_title in os.listdir("srt"):
+    if zip_file in os.listdir("MovieToClips\\zip") or movie_title in os.listdir("srt"):
         return True 
-    if Video.objects.filter(movie=movie_title).exists():
-        return True
-    if Video.objects.filter(movie_icontains=movie_title).exists():
+    if check_if_already_downloaded(movie_title):
         return True
     
     return False
@@ -34,11 +35,14 @@ def clean_string(s):
 
 
 def remove_extracted_files():
-    for i in os.listdir("extracted_files"):
-        file_path = os.path.join("extracted_files", i)
+    parent_dir = os.path.dirname(os.path.abspath(__file__))
+    os.chdir(parent_dir)
+    
+    for i in os.listdir("media_dir\\extracted_files"):
+        file_path = os.path.join("media_dir\\extracted_files", i)
         os.remove(file_path)
-    os.removedirs("extracted_files")
-    os.makedirs("extracted_files")
+    os.removedirs("media_dir\\extracted_files")
+    os.makedirs("media_dir\\extracted_files")
 def download_english_subtitle(sub_title,sub_id):
         
         
@@ -50,7 +54,7 @@ def download_english_subtitle(sub_title,sub_id):
         print("You have been rate limited. Please wait for a while before trying again.")
         sys.exit(1)
     if response.status_code == 200:
-        file_path = os.path.join("zip", f"{sub_title}.zip")
+        file_path = os.path.join("MovieToClips\\zip", f"{sub_title}.zip")
         with open(file_path, 'wb') as file:
             file.write(response.content)
     else:
@@ -81,9 +85,9 @@ def get_list_of_movies(number):
         print(f"Failed to fetch the list of movies: Status code {response.status_code}")
 
 def extract_srt_files():
-    with tqdm(total=len(os.listdir("zip")), desc="Extracting SRT files") as pbar:
-        for i in os.listdir("zip"):
-            file_path = os.path.join("zip", i)
+    with tqdm(total=len(os.listdir("MovieToClips\\zip")), desc="Extracting SRT files") as pbar:
+        for i in os.listdir("MovieToClips\\zip"):
+            file_path = os.path.join("MovieToClips\\zip", i)
             if file_path.endswith(".zip") and file_path not in os.listdir("srt"):
                 with zipfile.ZipFile(file_path, 'r') as zip_ref:
                     zip_ref.extractall("extracted_files")
@@ -111,6 +115,7 @@ def move_srt():
  
 
 def use_it_as_a_module(option=""):
+    django_setup()
     if option == "clean":
         remove_extracted_files()
         return
@@ -127,26 +132,3 @@ def use_it_as_a_module(option=""):
         extract_srt_files()
         move_srt()
        
-
-def main():
-    if len(sys.argv) > 1:
-        if sys.argv[1] == "clean":
-            remove_extracted_files()
-            return
-        if sys.argv[1] == "extract":
-            extract_srt_files()
-            move_srt()
-            return
-    with tqdm(total=10, desc="Downloading movies") as pbar:
-        for i in range(10):
-            get_list_of_movies(i)
-            pbar.update(1)
-    
-        print(" \n All movies downloaded")
-        extract_srt_files()
-        move_srt()
-
-if __name__ == "__main__":
-    main()
-
-

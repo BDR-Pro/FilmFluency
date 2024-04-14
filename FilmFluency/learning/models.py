@@ -4,6 +4,7 @@ import random
 from django.utils.text import slugify
 from django.db import models
 import uuid
+from django.contrib.auth.models import User
 
 def random_slug_generator(size=12):  # Adjusted to default 12 characters
     return ''.join(random.choices(string.ascii_lowercase + string.digits, k=size))
@@ -17,9 +18,9 @@ class BaseMedia(models.Model):
 
 class Movie(models.Model):
     title = models.CharField(max_length=100, unique=True)
-    description = models.TextField()
-    release_date = models.DateField()
-    rating = models.FloatField()
+    description = models.TextField(null=True)
+    release_date = models.DateField(null=True)
+    rating = models.FloatField(default=0)
     poster = models.ImageField(upload_to="posters/")
     random_slug = models.SlugField(max_length=50, unique=True, blank=True)
 
@@ -30,9 +31,7 @@ class Movie(models.Model):
     def poster_url(self):
         return self.poster.url
 
-    @property
-    def trailer_url(self):
-        return self.trailer.url
+
 
     def save(self, *args, **kwargs):
         if not self.random_slug:
@@ -50,50 +49,80 @@ class TrendingMovies(models.Model):
 
 
 
+from urllib.parse import quote
 
-
-class OneTimeLink(models.Model):
-    key = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
-    content_type = models.CharField(max_length=10, choices=(('video', 'Video'), ('audio', 'Audio'), ('transcript', 'Transcript')))
-    file_path = models.CharField(max_length=255)  # Path to the file
-    accessed = models.BooleanField(default=False)
-
-    def generate_link(self):
-        if not self.accessed:
-            self.accessed = True
-            self.save()
-            return f'https://yourdomain.com/media/{self.content_type}/{self.key}'
-        else:
-            return None
 
 class Video(BaseMedia):
-    video = models.FileField(upload_to="videos/")
-    movie = models.ForeignKey(Movie, on_delete=models.CASCADE, related_name='videos')
+    video = models.FileField()
+    movie = models.ForeignKey('Movie', on_delete=models.CASCADE, related_name='videos')
     complexity = models.FloatField()
     length = models.FloatField()
 
     def __str__(self):
+        # This function should only be defined once.
         return f"{self.movie.title} - Video"
 
-    def create_one_time_link(self, content_type):
-        file_path_map = {
-            'video': self.video.path,
-            'audio': self.video.path.replace('.mp4', '.wav'),
-            'transcript': self.video.path.replace('.mp4', '.txt')
-        }
-        file_path = file_path_map[content_type]
-        link = OneTimeLink(content_type=content_type, file_path=file_path)
-        link.save()
-        return link.generate_link()
+    def video_path(self):
+        # Renamed from path to video_path for clarity
+        return quote(self.video.path)
 
-    @property
-    def video_url(self):
-        return self.create_one_time_link('video')
-
-    @property
     def audio_url(self):
-        return self.create_one_time_link('audio')
+        # Ensures the method returns a URL path for the audio file
+        return quote(self.video.url.replace(".mp4", ".wav"))
 
-    @property
-    def transcript_url(self):
-        return self.create_one_time_link('transcript')
+    def text(self):
+        # Ensures the method returns a URL path for the audio file
+        return quote(self.video.url.replace(".mp4", ".txt"))
+    
+    
+
+class Language(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    iso_code = models.CharField(max_length=10, unique=True)  # ISO language code
+
+    def __str__(self):
+        return self.name
+
+
+class Community(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    description = models.TextField()
+    members = models.ManyToManyField(User, related_name='communities')
+
+    def __str__(self):
+        return self.name
+
+
+class Post(models.Model):
+    title = models.CharField(max_length=200)
+    body = models.TextField()
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
+    community = models.ForeignKey(Community, on_delete=models.CASCADE, related_name='posts')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.title
+
+
+class Comment(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Comment by {self.author} on {self.post}"
+
+
+class Notification(models.Model):
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    title = models.CharField(max_length=200)
+    message = models.TextField()
+    read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Notification for {self.recipient.username}"
+
+

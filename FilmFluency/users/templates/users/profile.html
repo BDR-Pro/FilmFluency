@@ -1,0 +1,21 @@
+<!-- users/templates/users/profile.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Profile</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .stats { margin-top: 20px; }
+        .stat { margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Welcome, {{ request.user.username }}</h1>
+    <div class="stats">
+        <div class="stat">Videos Completed: {{ progress.completed_videos_count }}</div>
+        <div class="stat">Percentage of Movies Completed: {{ progress.percentage_movies_completed }}%</div>
+        <div class="stat">Average Complexity of Watched Videos: {{ progress.average_complexity }}</div>
+    </div>
+    <a href="{% url 'logout' %}">Logout</a>
+</body>
+</html>
