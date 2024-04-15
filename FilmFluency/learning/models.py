@@ -3,7 +3,8 @@ import string
 import random
 from django.utils.text import slugify
 from django.db import models
-import uuid
+from urllib.parse import quote
+from django.utils import timezone
 from django.contrib.auth.models import User
 
 def random_slug_generator(size=12):  # Adjusted to default 12 characters
@@ -19,6 +20,7 @@ class BaseMedia(models.Model):
 class Movie(models.Model):
     title = models.CharField(max_length=100, unique=True)
     description = models.TextField(null=True)
+    date_added = models.DateTimeField(default=timezone.now)
     release_date = models.DateField(null=True)
     rating = models.FloatField(default=0)
     poster = models.ImageField(upload_to="posters/")
@@ -49,11 +51,9 @@ class TrendingMovies(models.Model):
 
 
 
-from urllib.parse import quote
-
-
 class Video(BaseMedia):
     video = models.FileField()
+    date_added = models.DateTimeField(default=timezone.now)
     movie = models.ForeignKey('Movie', on_delete=models.CASCADE, related_name='videos')
     complexity = models.FloatField()
     length = models.FloatField()
@@ -73,8 +73,10 @@ class Video(BaseMedia):
     def text(self):
         # Ensures the method returns a URL path for the audio file
         return quote(self.video.url.replace(".mp4", ".txt"))
-    
-    
+    def thumbnail_url(self):
+        # Ensures the method returns a URL path for the thumbnail
+        return quote(self.video.url.replace(".mp4", ".jpg"))
+
 
 class Language(models.Model):
     name = models.CharField(max_length=100, unique=True)
