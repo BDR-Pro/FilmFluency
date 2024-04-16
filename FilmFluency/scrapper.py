@@ -8,7 +8,7 @@ from tqdm import tqdm
 import zipfile
 import sys
 import os
-from learning.isitalreadydownloaded import check_if_already_downloaded
+from learning.isitalreadydownloaded import check_if_already_downloaded , movies_without_title , set_title
 
 
 def django_setup():
@@ -132,3 +132,31 @@ def use_it_as_a_module(option=""):
         extract_srt_files()
         move_srt()
        
+def search_srt(movie_title):
+    base_link = f"https://www.opensubtitles.org/ar/search2/sublanguageid-all/moviename-{movie_title}"
+    
+    response = BeautifulSoup(requests.get(base_link).content, 'html.parser')
+    
+    if response.find('div', class_='search_results') is None:
+        print(f"No results found for {movie_title}")
+        return None
+    
+    movie_link = response.find('div', class_='search_results').find('a')['href']
+    movie_id = movie_link.split('/')[-2]
+    
+    zip_file = f"{movie_title}.zip"
+    
+    if already_downloaded(movie_title,zip_file):
+        return None
+    download_english_subtitle(movie_title, movie_id)
+    
+    print(f"Downloaded {movie_title}")
+    
+    
+    
+
+def search():
+    for i in movies_without_title():
+        path_srt=search_srt(i.original_title)
+        set_title(i,path_srt)
+        

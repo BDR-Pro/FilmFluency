@@ -14,10 +14,10 @@ def signup_view(request):
             user = authenticate(username=username, password=password)
             login(request, user)
             UserProgress.objects.create(user=user)  # Initialize progress tracking
-            return redirect('home')
+            return redirect('web:home')
     else:
         form = UserCreationForm()
-    return render(request, 'users/signup.html', {'form': form})
+    return render(request, 'signup.html', {'form': form})
 
 def login_view(request):
     if request.method == 'POST':
@@ -26,23 +26,23 @@ def login_view(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            return redirect('home')
+            return redirect('web:home')
         else:
-            return render(request, 'users/login.html', {'error': 'Invalid credentials'})
-    return render(request, 'users/login.html')
+            return render(request, 'login.html', {'error': 'Invalid credentials'})
+    return render(request, 'login.html')
 
 def logout_view(request):
     logout(request)
-    return redirect('home')
+    return redirect('web:home')
 
 @login_required
 def profile(request):
     user_progress = UserProgress.objects.get(user=request.user)
-    return render(request, 'users/profile.html', {
+    return render(request, 'profile.html', {
         'progress': user_progress
     })
 
 @login_required
 def leaderboard(request):
     entries = LeaderboardEntry.objects.all()[:10]  # Top 10 entries
-    return render(request, 'users/leaderboard.html', {'entries': entries})
+    return render(request, 'leaderboard.html', {'entries': entries})

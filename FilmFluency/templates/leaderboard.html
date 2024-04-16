@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Leaderboard - Film Fluency{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Leaderboard</h2>
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Nickname</th>
+                    <th scope="col">Score</th>
+                    <th scope="col">Location</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in leaderboard %}
+                <tr>
+                    <th scope="row">{{ forloop.counter }}</th>
+                    <td>{{ entry.user.userprofile.nickname }}</td>
+                    <td>{{ entry.score }}</td>
+                    <td>{{ entry.user.userprofile.location }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4">No entries found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

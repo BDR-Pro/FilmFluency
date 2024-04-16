@@ -1,21 +1,84 @@
 {% extends 'base.html' %}
 
+{% block title %}list of videos - Film Fluency{% endblock %}
+
 {% block content %}
+<style>
+
+    .card-custom {
+        transition: all 0.3s ease-in-out; /* Smooth transition for all properties */
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Initial shadow for depth */
+        border: none; /* Optional: removes the border */
+    }
+
+    .card-custom:hover {
+        transform: scale(1.03) translateY(-5px); /* Slightly enlarge and raise the card */
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); /* Increased shadow for lifted effect */
+    }
+
+    /* Card body styling for flexible content alignment */
+    .card-body {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between; /* Ensures the button aligns to the bottom */
+    }
+
+    .btn-primary {
+        transition: background-color 0.2s, box-shadow 0.2s; /* Smooth transition for button */
+    }
+
+    .btn-primary:hover {
+        background-color: #0056b3; /* Darker shade on hover */
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15); /* Subtle shadow for the button */
+    }
+    
+</style>
 <div class="container mt-5">
     <h2 class="mb-4">Browse Learning Videos</h2>
-    <div class="row">
-        {% for video in videos %}
-        <div class="col-lg-4 col-md-6 d-flex align-items-stretch">
-            <div class="card mb-4 shadow-sm">
-                <img src="{{ video.thumbnail_url }}" class="card-img-top" alt="{{ video.title }}" style="height: 225px; width: 100%; display: block;">
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title">{{ video.title }}</h5>
-                    <p class="card-text">{{ video.description|truncatewords:20 }}</p>
-                    <a href="{% url 'video_detail' video.id %}" class="btn btn-primary mt-auto">View Details</a>
+    <div class="btn-group mb-3">
+        <a href="{% url 'web:video_list' %}?orderby=length" class="btn btn-outline-secondary {% if current_order == 'length' %}active{% endif %}">Sort by Length</a>
+        <a href="{% url 'web:video_list' %}?orderby=date_added" class="btn btn-outline-secondary {% if current_order == 'date_added' %}active{% endif %}">Sort by Date Added</a>
+        <a href="{% url 'web:video_list' %}?orderby=complexity" class="btn btn-outline-secondary {% if current_order == 'complexity' %}active{% endif %}">Sort by Complexity</a>
+    </div>
+        <div class="row">
+            {% for video in videos %}
+            <div class="col-lg-4 col-md-6 d-flex align-items-stretch">
+                <div class="card mb-4 shadow-sm card-custom">
+                    <img src="{{ MEDIA_URL }}{{ video.thumbnail_url }}" class="card-img-top" alt="{{ video.movie.original_title }}" style="height: 225px; width: 100%; display: block;">
+                    <div class="card-body">
+                        <h5 class="card-title" id="title-{{ forloop.counter }}">
+                            {{ video.movie.original_title }} -- <span class="complexity" data-complexity="{{ video.complexity }}">{{ video.complexity }}</span>
+                        </h5>
+                        <h4 class="card-subtitle mb-2 text-muted">{{ video.length }} seconds</h4>
+                        <p class="card-text">{{ video.movie.description|truncatewords:20 }}</p>
+                        {% if current_order == 'date_added' %}
+                        <p class="card-text"><small class="text-muted">Added on {{ video.date_added|date:"F j, Y" }}</small></p>
+                        {% endif %}
+                        <p class="card-text"><small class="text-muted">Movie Release Date {{ video.movie.release_date|date:"F j, Y" }}</small></p>
+                        <a href="{% url 'web:video_detail' video.random_slug %}" class="btn btn-primary mt-auto">View Details</a>
+                    </div>
                 </div>
             </div>
+            {% empty %}
+        <div class="col-12">
+            <p>No videos available.</p>
         </div>
         {% endfor %}
+    </div>
+    <div class="pagination">
+        <span class="step-links">
+            {% if videos.has_previous %}
+                <a href="?page=1&orderby={{ current_order }}">&laquo; first</a>
+                <a href="?page={{ videos.previous_page_number }}&orderby={{ current_order }}">previous</a>
+            {% endif %}
+            <span class="current">
+                Page {{ videos.number }} of {{ videos.paginator.num_pages }}.
+            </span>
+            {% if videos.has_next %}
+                <a href="?page={{ videos.next_page_number }}&orderby={{ current_order }}">next</a>
+                <a href="?page={{ videos.paginator.num_pages }}&orderby={{ current_order }}">last &raquo;</a>
+            {% endif %}
+        </span>
     </div>
 </div>
 {% endblock %}

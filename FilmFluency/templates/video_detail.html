@@ -1,30 +1,110 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ video.movie }} - Film Fluency{% endblock %}
+{% block title %}{{ video.movie.original_title }} - Film Fluency{% endblock %}
 
 {% block content %}
+<style>
+    /* Transcript and video container styles */
+    #transcriptContent {
+        background-color: #f8f9fa;
+        border: 1px solid #ddd;
+        border-radius: 0.25rem;
+        padding: 1rem;
+        margin-top: 1rem;
+        max-height: 300px;
+        overflow-y: auto;  /* Allows vertical scrolling */
+        display: none;
+        font-size: 1.2rem;
+        line-height: 1.5;
+        white-space: pre-wrap; /* Ensures that data is wrapped within the container */
+        word-wrap: break-word; /* Breaks long words that can't be wrapped */
+    }
+
+    /* Custom button styles aligned with Bootstrap conventions */
+    .btn-custom {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 0.4rem 0.8rem;
+        border-radius: 0.25rem;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        margin-top: 10px; /* Adds spacing between audio player and buttons */
+    }
+
+    .btn-custom:hover {
+        background-color: #0056b3;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-custom:active {
+        background-color: #004085;
+        box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .audio-control-panel {
+        text-align: center; /* Centering the control buttons below the audio */
+    }
+</style>
+
 <div class="container mt-5">
     <div class="row">
-        <div class="col-md-8 mb-3">
-            <div class="ratio ratio-16x9">
-                <iframe src="{{ video.video_url }}" frameborder="0" allowfullscreen></iframe>
+        <div class="col-lg-8 mb-3">
+            <div class="video-container">
+                <div class="ratio ratio-16x9">
+                    <video id="videoPlayer" controls preload="auto" class="w-100">
+                        <source src="{{ MEDIA_URL }}{{ video.video_url }}" type="video/mp4">
+                        Sorry, your browser does not support embedded videos.
+                    </video>
+                </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <h2>{{ video.movie }}</h2>
+        <div class="col-lg-4">
+            <h2>{{ video.movie.original_title }}</h2>
             <hr>
             <p><strong>Complexity:</strong> {{ video.complexity }}</p>
             <p><strong>Length:</strong> {{ video.length }} seconds</p>
-                        
-            <a href="{{ video.audio_url }}" class="btn btn-primary">Listen to Audio</a>
-            <a href="{{ video.transcript_url }}" class="btn btn-secondary">Read Transcript</a>
+            <audio controls preload="none" class="w-100">
+                <source src="{{ MEDIA_URL }}{{ video.audio_url }}" type="audio/wav">
+                Sorry, your browser does not support embedded audio.
+            </audio>
+            <div class="audio-control-panel">
+                <button onclick="restartVideo()" class="btn btn-primary btn-custom">Replay Video</button>
+                <button id="transcriptButton" class="btn btn-success btn-custom">Show Transcript</button>
+            </div>
         </div>
     </div>
-    <div class="row mt-4">
-        <div class="col-12">
-            <h3>Transcript</h3>
-            <pre class="bg-light p-3 rounded">{{ video.transcript }}</pre>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-12">
+                <div id="transcriptContent">
+                    <pre>{{ video.transcript|safe }}</pre>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const videoPlayer = document.getElementById('videoPlayer');
+        videoPlayer.addEventListener('ended', function() {
+            videoPlayer.play(); // Auto replay the video when it ends
+        });
+
+        document.getElementById('transcriptButton').addEventListener('click', function() {
+            var content = document.getElementById('transcriptContent');
+            content.style.display = content.style.display === 'none' ? 'block' : 'none';
+            if (content.style.display === 'block') {
+                content.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    });
+
+    function restartVideo() {
+        const videoPlayer = document.getElementById('videoPlayer');
+        videoPlayer.currentTime = 0; // Reset the video time
+        videoPlayer.play(); // Play the video
+    }
+</script>
 {% endblock %}

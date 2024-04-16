@@ -1,25 +1,94 @@
 <!DOCTYPE html>
+{% extends 'base.html' %}
+
+{% block title %}Unique Movies{% endblock %}
+{% block content %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Movies</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .pagination {
+            display: flex;
+            justify-content: center;
+            padding: 20px 0;
+        }
+        .list-group-item-action {
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Centers the content vertically */
+            margin-bottom: 10px; /* Provides space between rows */
+        }
+        .img-fluid {
+            max-height: 200px;
+            width: 100%; /* Ensures the image takes up the entire width of its parent */
+            object-fit: cover; /* Keeps aspect ratio, but crops the image */
+            margin-bottom: 10px; /* Space between the image and text */
+        }
+    </style>
 </head>
 <body>
 <div class="container mt-5">
-    <h1>Movies</h1>
-    <div class="list-group">
+    {% if query %}
+
+        <h1>Search results for "{{ query }}"</h1>
+    {% else %}
+        <h1>Movies</h1>
+    {% endif %}
+    <div class="mb-3 d-flex justify-content-start align-items-center">
+        <span class="me-2">Sort by:</span>
+        <a href="{% url 'learning:unique_movies' %}?orderby=vote_average" class="btn btn-outline-secondary btn-sm me-1">Rating</a>
+        <a href="{% url 'learning:unique_movies' %}?orderby=release_date" class="btn btn-outline-secondary btn-sm me-1">Release Date</a>
+        <a href="{% url 'learning:unique_movies' %}?orderby=date_added" class="btn btn-outline-secondary btn-sm">Date Added</a>
+    </div>
+    <div class="row">
+        {% if no_res %}
+            <div class="col-12">
+                <p>No movies found.</p>
+            </div>
+        {% endif %}
+
         {% for movie in movies %}
-            <a href="#" class="list-group-item list-group-item-action">
-                <h5 class="mb-1">{{ movie.title }}</h5>
-                <p class="mb-1">{{ movie.description|default:"No description available." }}</p>
-                <small>Released on: {{ movie.release_date|date:"Y-m-d" }}</small>
-            </a>
+            <div class="col-md-6"> <!-- Two movies per line -->
+                <a href="{% url 'web:movie_detail' movie.random_slug %}" class="list-group-item list-group-item-action">
+                    <h5 class="mb-1">{{ movie.original_title }}</h5>
+                    <img src="{{ movie.poster_url }}" alt="{{ movie.original_title }}" class="img-fluid">
+                    <p class="mb-1">{{ movie.description|default:"No description available." }}</p>
+                    <small>Released on: {{ movie.release_date|date:"Y-m-d" }}</small>
+                </a>
+            </div>
         {% empty %}
-            <p>No movies found.</p>
+            <div class="col-12">
+                <p>No movies found.</p>
+            </div>
         {% endfor %}
     </div>
+    <div class="pagination">
+        <nav aria-label="Movie pages">
+            <ul class="pagination">
+                {% if movies.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ movies.previous_page_number }}">Previous</a>
+                    </li>
+                {% endif %}
+                
+                <li class="page-item active">
+                    <span class="page-link">{{ movies.number }}</span>
+                </li>
+                
+                {% if movies.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ movies.next_page_number }}">Next</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
 </div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+{% endblock %}  

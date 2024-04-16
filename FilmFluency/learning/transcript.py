@@ -3,6 +3,7 @@ from moviepy.editor import VideoFileClip
 from django.conf import settings
 from .models import Video, Movie
 from gradio_client import Client
+from tmdb_scraper import fill_movie_db as tmdb_scarpper
 
 def get_complexity(video_path):
     return float(os.path.basename(video_path).split("_")[0])
@@ -61,17 +62,22 @@ def populate_and_transcribe():
         video_dir = os.path.join(base_dir, subdir)
         for file_name in os.listdir(video_dir):
             if file_name.endswith(".mp4"):
-                local_video_path = os.path.join(video_dir, file_name)
-                movie, created = Movie.objects.get_or_create(title=subdir) 
-                
+                dir_name = os.path.basename(video_dir)
+                local_video_path = os.path.join(dir_name, file_name)
+                print(f"Processing {local_video_path} for database insertion.")
+                full_path = os.path.join(base_dir, local_video_path)
+                existed = Movie.objects.filter(title=dir_name).exists()
+                if not existed:
+                    print(f"Created movie {dir_name} for database insertion.")
+                    tmdb_scarpper(dir_name)
                 video_instance, created = Video.objects.get_or_create(
                     video=local_video_path,
-                    movie=movie,
-                    defaults={'complexity': get_complexity(local_video_path),
-                              'length': get_length(local_video_path)}
+                    movie=Movie.objects.get(title=dir_name),
+                    defaults={'complexity': get_complexity(full_path),
+                              'length': get_length(full_path)}
                 )
 
-                video = EnglishLearningVideo(video_instance=video_instance, movie=movie)
+                video = EnglishLearningVideo(video_instance=video_instance, movie=video_instance.movie)
                 video.extract_audio()
                 video.transcribe_audio()
 

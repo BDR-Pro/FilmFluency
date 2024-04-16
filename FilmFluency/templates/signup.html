@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign Up - Film Fluency{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <h2>Sign Up</h2>
+            <form action="{% url 'web:signup' %}" method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="signUpEmail" class="form-label">Email address</label>
+                    <input type="email" class="form-control" id="signUpEmail" name="email" required>
+                    <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
+                </div>
+                <div class="mb-3">
+                    <label for="signUpPassword" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="signUpPassword" name="password" required>
+                </div>
+                <div class="mb-3">
+                    <label for="signUpConfirmPassword" class="form-label">Confirm Password</label>
+                    <input type="password" class="form-control" id="signUpConfirmPassword" name="confirm_password" required>
+                </div>
+                <button type="submit" class="btn btn-success">Sign Up</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

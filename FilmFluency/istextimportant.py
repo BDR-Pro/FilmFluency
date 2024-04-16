@@ -84,5 +84,3 @@ def main():
             
     print("All SRT files processed")    
     
-
-main()

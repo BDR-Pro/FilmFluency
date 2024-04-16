@@ -27,8 +27,14 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+import os
+from django.conf import settings
+
 
 # Application definition
+
+MEDIA_ROOT = os.path.join(settings.BASE_DIR, 'MovieToClips', 'cut_videos')
+MEDIA_URL = '/media/'
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -41,6 +47,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'learning',
     'web',
+    'users',
     
 ]
 
@@ -52,7 +59,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware'
+    'corsheaders.middleware.CorsMiddleware',
+    'web.middleware.BrowserCheckMiddleware'
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True 
