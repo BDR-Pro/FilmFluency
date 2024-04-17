@@ -19,7 +19,9 @@ TMDB_BASE_URL = 'https://api.themoviedb.org/3'
 
 def image_path(title,url):
     """Download image from URL and return path to local file."""
-    image_dir=os.path.join(os.path.dirname(os.path.abspath(__file__)),f'MovieToClips\\cut_videos\\{title}')
+    image_dir=os.path.join(os.path.dirname(os.path.abspath(__file__)),f'MovieToClips')
+    image_dir=os.path.join(image_dir,'cut_videos')
+    image_dir=os.path.join(image_dir,f'{title}')
     os.chdir(image_dir)
     if url:
         response = requests.get(url)

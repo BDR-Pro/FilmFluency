@@ -7,7 +7,7 @@ from django.utils import timezone
 from urllib.parse import quote
 from django.contrib.auth.models import User 
 import re
-
+import sys
 def format_transcript(text):
     """Formats the transcript text to add new lines after each '.', ',', or every 8 words."""
     
@@ -91,7 +91,10 @@ class Video(BaseMedia):
 
     def video_path(self):
         # Renamed from path to video_path for clarity
-        return quote(self.video.path)
+        if sys.platform.startswith('linux'):
+            return quote(self.video.path.replace("\\", "/"))
+        if sys.platform.startswith('win32'):
+            return quote(self.video.path).replace("/", "\\")
 
     def audio_url(self):
         # Ensures the method returns a URL path for the audio file

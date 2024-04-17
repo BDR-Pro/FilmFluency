@@ -9,7 +9,10 @@ import zipfile
 import sys
 import os
 from learning.isitalreadydownloaded import check_if_already_downloaded , movies_without_title , set_title
-
+MOVIETOCLIPS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "MovieToClips")
+SRT = os.path.join(MOVIETOCLIPS, "srt")
+EXTRACTED_FILES = os.path.join(MOVIETOCLIPS, "extracted_files")
+ZIP = os.path.join(MOVIETOCLIPS, "zip")
 
 def django_setup():
     sys.path.append('FilmFluency')
@@ -18,7 +21,7 @@ def django_setup():
 
 def already_downloaded(movie_title,zip_file):
     
-    if zip_file in os.listdir("MovieToClips\\zip") or movie_title in os.listdir("srt"):
+    if zip_file in os.listdir(ZIP) or movie_title in os.listdir(SRT):
         return True 
     if check_if_already_downloaded(movie_title):
         return True
@@ -38,11 +41,11 @@ def remove_extracted_files():
     parent_dir = os.path.dirname(os.path.abspath(__file__))
     os.chdir(parent_dir)
     
-    for i in os.listdir("media_dir\\extracted_files"):
-        file_path = os.path.join("media_dir\\extracted_files", i)
+    for i in os.listdir(EXTRACTED_FILES):
+        file_path = os.path.join(EXTRACTED_FILES, i)
         os.remove(file_path)
-    os.removedirs("media_dir\\extracted_files")
-    os.makedirs("media_dir\\extracted_files")
+    os.removedirs(EXTRACTED_FILES)
+    os.makedirs(EXTRACTED_FILES)
 def download_english_subtitle(sub_title,sub_id):
         
         
@@ -54,7 +57,7 @@ def download_english_subtitle(sub_title,sub_id):
         print("You have been rate limited. Please wait for a while before trying again.")
         sys.exit(1)
     if response.status_code == 200:
-        file_path = os.path.join("MovieToClips\\zip", f"{sub_title}.zip")
+        file_path = os.path.join(ZIP, f"{sub_title}.zip")
         with open(file_path, 'wb') as file:
             file.write(response.content)
     else:
@@ -85,12 +88,12 @@ def get_list_of_movies(number):
         print(f"Failed to fetch the list of movies: Status code {response.status_code}")
 
 def extract_srt_files():
-    with tqdm(total=len(os.listdir("MovieToClips\\zip")), desc="Extracting SRT files") as pbar:
-        for i in os.listdir("MovieToClips\\zip"):
-            file_path = os.path.join("MovieToClips\\zip", i)
-            if file_path.endswith(".zip") and file_path not in os.listdir("srt"):
+    with tqdm(total=len(os.listdir(ZIP)), desc="Extracting SRT files") as pbar:
+        for i in os.listdir(ZIP):
+            file_path = os.path.join(ZIP, i)
+            if file_path.endswith(".zip") and file_path not in os.listdir(SRT):
                 with zipfile.ZipFile(file_path, 'r') as zip_ref:
-                    zip_ref.extractall("extracted_files")
+                    zip_ref.extractall(EXTRACTED_FILES)
                 os.remove(file_path)
                 pbar.update(1)
     

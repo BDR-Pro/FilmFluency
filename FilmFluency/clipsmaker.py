@@ -29,13 +29,18 @@ def create_folders():
     
     parent_dir = os.path.dirname(os.path.abspath(__file__))
     os.chdir(parent_dir)
-    
-    if not os.path.exists("MovieToClips\\extracted_files"):
-        os.makedirs("MovieToClips\\extracted_files")
-    if not os.path.exists("MovieToClips\\srt"):
-        os.makedirs("MovieToClips\\srt")
-    if not os.path.exists("MovieToClips\\csv_important_text"):
-        os.makedirs("MovieToClips\\csv_important_text")
+    MovieToClips = os.path.join(parent_dir, "MovieToClips")
+    extracted_files = os.path.join(MovieToClips, "extracted_files")
+    srt = os.path.join(MovieToClips, "srt")
+    csv_important_text = os.path.join(MovieToClips, "csv_important_text")
+    if not os.path.exists("MovieToClips"):
+        os.makedirs("MovieToClips")
+    if not os.path.exists(extracted_files):
+        os.makedirs(extracted_files)
+    if not os.path.exists(srt):
+        os.makedirs(srt)
+    if not os.path.exists(csv_important_text):
+        os.makedirs(csv_important_text)
 
 def scrape_srt():
     use_it_as_a_module()
@@ -54,7 +59,7 @@ def download_moives():
     download()
     
 def last_touch():
-    get_video_and_subtitle
+    get_video_and_subtitle()
     
     
 def main():
