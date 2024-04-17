@@ -19,14 +19,10 @@ RUN pip install --upgrade pip
 RUN git clone https://github.com/BDR-Pro/FilmFluency.git .
 
 # Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install -r requirements.txt
 
 # Expose port 8000 to the outside once the container has launched
 EXPOSE 8000
-
-# Run Django migrations
-RUN python FilmFluency/manage.py makemigrations && \
-    python FilmFluency/manage.py migrate 
 
 # Define environment variable
 ENV NAME World
