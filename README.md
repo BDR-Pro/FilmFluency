@@ -56,6 +56,3 @@ This README is more than just a guide; it's an invite to a whole new world of le
 
 So, what are you waiting for? Let's get this party started! 🥳👩‍💻👨‍💻
 
-![alt text](img/image.png)
-
-![alt text](img/film.jpg)
