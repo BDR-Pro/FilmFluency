@@ -42,7 +42,7 @@ class Movie(models.Model):
     date_added = models.DateTimeField(default=timezone.now)
     release_date = models.DateField(null=True)
     rating = models.FloatField(default=0)
-    poster = models.ImageField(upload_to="posters/")
+    poster = models.TextField(default='no-image.jpg')
     random_slug = models.SlugField(max_length=50, unique=True, blank=True)
     backdrop_path = models.CharField(max_length=200, null=True, blank=True)
     tmdb_id = models.IntegerField(null=True, blank=True)

@@ -8,13 +8,12 @@ import random
 from urllib.parse import quote
 from datetime import datetime
 from pathlib import Path
-from upload_to_s3 import upload_to_s3
+from api.upload_to_s3 import upload_to_s3
 
 def random_string():
     """Generate a random string of 6 characters."""
     return ''.join(random.choices('abcdefghijklmnopqrstuvwxyz', k=6))
 
-load_dotenv()
 TMDB_API_KEY = os.getenv('TMDB_API_KEY')
 TMDB_BASE_URL = 'https://api.themoviedb.org/3'
 

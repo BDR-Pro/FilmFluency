@@ -4,29 +4,29 @@ FROM python:3.8
 # Set the working directory in the container
 WORKDIR /usr/src/app
 
-# Copy the current directory contents into the container at /usr/src/app
-COPY . /usr/src/app
-
-RUN pip install --upgrade pip
-
+# Install Git, necessary libraries, and system utilities
 RUN apt-get update && apt-get install -y \
     libpq-dev \
     gcc \
-    ffmpeg\
+    ffmpeg \
     python3-dev \
-    musl-dev
+    musl-dev \
+    git
 
+# Upgrade pip
+RUN pip install --upgrade pip
 
+RUN git clone https://github.com/BDR-Pro/FilmFluency.git .
 
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-
+# Expose port 8000 to the outside once the container has launched
 EXPOSE 8000
 
+# Run Django migrations
 RUN python FilmFluency/manage.py makemigrations && \
-    python FilmFluency/manage.py migrate && \
-    python FilmFluency/manage.py check
+    python FilmFluency/manage.py migrate 
 
 # Define environment variable
 ENV NAME World

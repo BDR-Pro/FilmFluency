@@ -81,21 +81,17 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'FilmFluency.wsgi.application'
 
+import os
+import dj_database_url
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
+DATABASE_URL = os.getenv('DATABASE_URL', 'postgres://user:password@localhost/dbname')
 
+# Use dj-database-url to parse the connection string
 DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.getenv('DB_NAME') ,
-            'USER': os.getenv('DB_USER') ,
-            'PASSWORD': os.getenv('DB_PASSWORD') ,
-            'HOST': os.getenv('DB_HOST') ,
-            'PORT': os.getenv('DB_PORT') 
-        }
-    }
-
+    'default': dj_database_url.parse(DATABASE_URL)
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
