@@ -86,11 +86,17 @@ import dj_database_url
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-DATABASE_URL = os.getenv('DATABASE_URL', 'postgres://user:password@localhost/dbname')
+DATABASE_URL = os.getenv('DATABASE_URL')
 
 # Use dj-database-url to parse the connection string
 DATABASES = {
-    'default': dj_database_url.parse(DATABASE_URL)
+    'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600)
+}
+
+# If using verify-ca or verify-full, specify paths to certificate files
+
+DATABASES['default']['OPTIONS'] = {
+    'sslrootcert': os.path.join(os.getcwd(), 'ca-certificate.crt')  # Adjust the path as necessary
 }
 
 # Password validation
