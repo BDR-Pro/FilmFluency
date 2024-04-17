@@ -3,20 +3,55 @@
 {% block title %}{{ movie.original_title }} - Movie Details{% endblock %}
 
 {% block content %}
+<style>
+    body {
+        font-family: 'Arial', sans-serif; /* Simplify the font family for broad compatibility */
+        background-color: #f8f9fa;
+    }
+    h1 {
+        font-weight: 300; /* Lighter font-weight for headings */
+    }
+    .btn-primary {
+        font-weight: bold; /* Bold font for buttons to make them stand out */
+    }
+    .lead {
+        font-size: 1.25rem; /* Larger font size for the lead paragraph */
+        color: #555; /* Dark grey color for better readability */
+    }
+    .badge {
+        font-size: 1rem; /* Ensure badges are not too large */
+    }
+    .bi {
+        margin-right: 0.5rem; /* Add spacing after icons */
+    }
+</style>
+
 <div class="container mt-5">
-    <div class="row">
-        <div class="col-lg-4 mb-3">
-            <img src="{{ movie.poster_url }}" alt="{{ movie.original_title }} Poster" class="img-fluid rounded">
+    <div class="row g-4 align-items-center">
+        <div class="col-md-5 col-lg-4">
+            <img src="{{ movie.poster_url }}" alt="{{ movie.original_title }} Poster" class="img-fluid rounded shadow">
         </div>
-        <div class="col-lg-8">
-            <h1 class="display-4">{{ movie.original_title }}</h1>
-            <p class="text-muted mb-2"><i class="bi bi-calendar3"></i> Release Date: {{ movie.release_date|date:"Y-m-d" }}</p>
-            <p class="mb-2"><i class="bi bi-star-fill text-warning"></i> Rating: {{ movie.rating }}/10</p>
+        <div class="col-md-7 col-lg-8">
+            <h1 class="display-5">{{ movie.original_title }}</h1>
+            <p class="text-muted fst-italic mb-1">
+                <i class="bi bi-calendar3"></i> Released on {{ movie.release_date|date:"Y-m-d" }}
+            </p>
+            <p class="mb-1">
+                <span class="badge bg-warning text-dark"><i class="bi bi-star-fill"></i> {{ movie.rating }}/10</span>
+            </p>
             <p class="lead">{{ movie.description }}</p>
-            <p><i class="bi bi-graph-up"></i> Popularity: {{ movie.popularity }}</p>
-            <p><i class="bi bi-eye-fill"></i> Views: {{ views }}</p>
-            <a href="{% url 'learning:videos_by_movie' movie.random_slug %}" class="btn btn-primary"><i class="bi bi-play-fill"></i> View Related Videos</a>
+            <p class="mb-1">
+                <i class="bi bi-graph-up"></i> Popularity: {{ movie.popularity }}
+            </p>
+            <p class="mb-3">
+                <i class="bi bi-eye-fill"></i> Views: {{ views }}
+            </p>
+            <a href="{% url 'learning:videos_by_movie' movie.random_slug %}" class="btn btn-primary btn-lg">
+                <i class="bi bi-play-fill"></i> View Related Videos
+            </a>
         </div>
     </div>
 </div>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
 {% endblock %}

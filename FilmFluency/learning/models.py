@@ -140,7 +140,7 @@ class Video(BaseMedia):
 class Language(models.Model):
     name = models.CharField(max_length=100, unique=True)
     tmdb_code = models.CharField(max_length=10, unique=True)
-    fb_code = models.CharField(max_length=10, unique=True)
+    fb_code = models.CharField(max_length=10, unique=True,default='en_XX')
     is_src_lang = models.BooleanField(default=False)
 
     def __str__(self):

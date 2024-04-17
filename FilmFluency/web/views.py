@@ -39,7 +39,7 @@ def get_video_by_slug(slug):
     
     return video
 
-@login_required
+@login_required(login_url='users:login')
 def video_detail(request, random_slug):
     """ Show details for a specific video, including related transcript and options. """
     user_progress = UserProgress.objects.get(user=request.user)

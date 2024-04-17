@@ -10,11 +10,17 @@ class UserProfile(models.Model):
     cover_picture = models.ImageField(upload_to='cover_pictures/', null=True, blank=True)
     bio = models.TextField(null=True, blank=True)
     location = models.CharField(max_length=255, null=True, blank=True)
-    friends = models.ManyToManyField('self', symmetrical=True, related_name='friends_with')
+    language = models.ForeignKey('learning.Language', on_delete=models.SET_NULL, null=True, blank=True)
+    favourite_languages = models.ManyToManyField('learning.Language', related_name='favourite_of')
+    friends = models.ManyToManyField('self', symmetrical=True)
 
     def __str__(self):
         return self.nickname
     
+    def get_friends(self):
+        return self.friends.all()
+    
+
 class UserProgress(models.Model):
     
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -95,6 +101,26 @@ class LeaderboardEntry(models.Model):
     class Meta:
         ordering = ['-score']
 
+    def __str__(self):
+        return self.user.userProfile.nickname
+    
+    def update_score(self, points):
+        self.score += points
+        self.save()
+        return self.score
+    
+    def update_level(self):
+        if self.score >= (self.level * 100):
+            self.level += 1
+            self.save()
+            return self.level
+        return self.level
+    
+    def getTopUsers():
+        return LeaderboardEntry.objects.all()[:10]
+    
+    def getTopUserRank(user):
+        return LeaderboardEntry.objects.filter(score__gt=user.score).count() + 1  
 
 class Report(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)

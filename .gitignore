@@ -9,3 +9,4 @@ __pycache__
 *.sqlite3
 .env
 /FilmFluency/MovieToClips
+film_venv

@@ -38,10 +38,11 @@
         <h1>Movies</h1>
     {% endif %}
     <div class="mb-3 d-flex justify-content-start align-items-center">
-        <span class="me-2">Sort by:</span>
-        <a href="{% url 'learning:unique_movies' %}?orderby=vote_average" class="btn btn-outline-secondary btn-sm me-1">Rating</a>
-        <a href="{% url 'learning:unique_movies' %}?orderby=release_date" class="btn btn-outline-secondary btn-sm me-1">Release Date</a>
-        <a href="{% url 'learning:unique_movies' %}?orderby=date_added" class="btn btn-outline-secondary btn-sm">Date Added</a>
+        <span class="me-2">Sort by:</span>  
+        <a href="{% url 'learning:unique_movies' %}?orderby=vote_average" class="btn btn-outline-secondary btn-sm me-1 {% if order_by == 'vote_average' %}active{% endif %}">Rating</a>
+        <a href="{% url 'learning:unique_movies' %}?orderby=release_date" class="btn btn-outline-secondary btn-sm me-1 {% if order_by == 'release_date' %}active{% endif %}">Release Date</a>
+        <a href="{% url 'learning:unique_movies' %}?orderby=date_added" class="btn btn-outline-secondary btn-sm {% if order_by == 'date_added' %}active{% endif %}">Date Added</a>
+   
     </div>
     <div class="row">
         {% if no_res %}

@@ -91,7 +91,7 @@ def get_unique_movies(request):
         # If page is out of range (e.g. 9999), deliver last page of results.
         movies = paginator.page(paginator.num_pages)
 
-    return render(request, 'movies.html', {'movies': movies})
+    return render(request, 'movies.html', {'movies': movies , 'order_by':order_by})
 
 
 from learning.models import Movie

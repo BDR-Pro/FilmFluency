@@ -35,14 +35,14 @@ def logout_view(request):
     logout(request)
     return redirect('web:home')
 
-@login_required
+@login_required(login_url='users:login')
 def profile(request):
     user_progress = UserProgress.objects.get(user=request.user)
     return render(request, 'profile.html', {
         'progress': user_progress
     })
 
-@login_required
+
 def leaderboard(request):
     entries = LeaderboardEntry.objects.all()[:10]  # Top 10 entries
     return render(request, 'leaderboard.html', {'entries': entries})
