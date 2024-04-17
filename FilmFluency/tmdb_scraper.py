@@ -8,6 +8,7 @@ import random
 from urllib.parse import quote
 from datetime import datetime
 from pathlib import Path
+from upload_to_s3 import upload_to_s3
 
 def random_string():
     """Generate a random string of 6 characters."""
@@ -23,13 +24,16 @@ def image_path(title,url):
     image_dir=os.path.join(image_dir,'cut_videos')
     image_dir=os.path.join(image_dir,f'{title}')
     os.chdir(image_dir)
+    path_=os.path.join(title,image_path)
     if url:
         response = requests.get(url)
         if response.status_code == 200:
             image_path = f'poster{random_string()}.jpg'
             with open(image_path, 'wb') as file:
                 file.write(response.content)
-            return os.path.join(title,image_path)
+                
+            return upload_to_s3(path_,'.jpg')
+    
     return None
     
 def search_imdb_id(title):

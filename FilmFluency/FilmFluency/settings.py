@@ -31,11 +31,6 @@ import os
 from django.conf import settings
 
 
-# Application definition
-
-MEDIA_ROOT = os.path.join(settings.BASE_DIR, 'MovieToClips', 'cut_videos')
-MEDIA_URL = '/media/'
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -48,6 +43,7 @@ INSTALLED_APPS = [
     'users',
     'learning',
     'web',
+    'api',
     
 ]
 
@@ -91,14 +87,6 @@ WSGI_APPLICATION = 'FilmFluency.wsgi.application'
 
 DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-            'password': 'password',
-        }
-    }
-""" uncomment this code to use postgresql for production
-DATABASES = {
-        'default': {
             'ENGINE': 'django.db.backends.postgresql',
             'NAME': os.getenv('DB_NAME') ,
             'USER': os.getenv('DB_USER') ,
@@ -107,7 +95,7 @@ DATABASES = {
             'PORT': os.getenv('DB_PORT') 
         }
     }
-"""
+
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators

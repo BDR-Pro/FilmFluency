@@ -1,10 +1,12 @@
 import os 
+from upload_to_s3 import upload_to_s3
 
 def get_thumbnail(video_file):
     """ Generate a thumbnail image from a video file. """
     output_thumbnail = video_file.replace(".mp4", ".jpg")
     command = f'ffmpeg -i "{video_file}" -ss 00:00:01.000 -vframes 1 {output_thumbnail}""'
     os.system(command)
+    upload_to_s3(output_thumbnail, ".jpg")
 
 
 

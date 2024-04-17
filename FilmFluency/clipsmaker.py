@@ -3,6 +3,7 @@ import django
 import sys
 
 
+from time import sleep
 
 # Add the path of your Django project to the system path using realative path
 sys.path.insert(0, 'FilmFluency')
@@ -21,8 +22,7 @@ from ffempeg import get_video_and_subtitle
 from learning.transcript import populate_and_transcribe
 from tmdb_scraper import fill_movie_db, populateDBwithTopMovies
 from thumbnail import main as get_thumbnail
-from turn_it_into_mp3 import main as turn_it_into_mp3
-from MovieToClips.find_word_translate import find_hardest_words , find_not_translated , fill_languages
+from learning.find_word_translate import find_hardest_words , find_not_translated , fill_languages
 
 
 def create_folders():
@@ -65,19 +65,15 @@ def last_touch():
 def main():
     fill_languages()
     populateDBwithTopMovies()
-    populate_and_transcribe()
     create_folders()
     scrape_srt()
     isitimportanttxt()
     regex()
     download_moives()
+    populate_and_transcribe()
     last_touch()
     fill_movie_db()
     get_thumbnail()
-    turn_it_into_mp3()
     find_not_translated()
     find_hardest_words()
     
-    
-if __name__ == "__main__":
-    main()

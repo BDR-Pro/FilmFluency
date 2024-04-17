@@ -8,6 +8,7 @@ from urllib.parse import quote
 from django.contrib.auth.models import User 
 import re
 import sys
+
 def format_transcript(text):
     """Formats the transcript text to add new lines after each '.', ',', or every 8 words."""
     
@@ -90,11 +91,7 @@ class Video(BaseMedia):
         return f"{self.movie.title} - Video"
 
     def video_path(self):
-        # Renamed from path to video_path for clarity
-        if sys.platform.startswith('linux'):
-            return quote(self.video.path.replace("\\", "/"))
-        if sys.platform.startswith('win32'):
-            return quote(self.video.path).replace("/", "\\")
+        return self.video.path
 
     def audio_url(self):
         # Ensures the method returns a URL path for the audio file
@@ -143,7 +140,6 @@ class Video(BaseMedia):
 class Language(models.Model):
     name = models.CharField(max_length=100, unique=True)
     tmdb_code = models.CharField(max_length=10, unique=True)
-    fb_code = models.CharField(max_length=10, unique=True,default='en_XX')
     is_src_lang = models.BooleanField(default=False)
 
     def __str__(self):
@@ -153,7 +149,8 @@ class translation(models.Model):
     video = models.ForeignKey(Video, on_delete=models.CASCADE, related_name='translations')
     language = models.ForeignKey(Language, on_delete=models.CASCADE, related_name='translations')
     translated_text = models.TextField()
-    is_hardest_word = models.BooleanField(default=False)
+    hardest_word = models.TextField(null=True)
+    
     
 
     def __str__(self):
