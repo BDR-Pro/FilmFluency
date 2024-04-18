@@ -55,4 +55,3 @@ Distributed under the MIT License. See `LICENSE` for more information.
 This README is more than just a guide; it's an invite to a whole new world of learning - stylish, effective, and absolutely Gen Z-approved! 🎉👾
 
 So, what are you waiting for? Let's get this party started! 🥳👩‍💻👨‍💻
-
