@@ -9,8 +9,8 @@ def client_s3():
     session.client('s3',
                             region_name='fra1',
                             endpoint_url='https://fra1.digitaloceanspaces.com',
-                            aws_access_key_id=os.getenv('ACCESS_KEY'),
-                            aws_secret_access_key=os.getenv('SECRET_KEY'))
+                            aws_access_key_id="DO00R2DAZHDRZ6AL6WWN",
+                            aws_secret_access_key="0y89R9pVomnKriTIfLjSltNy/rdmgJdWnbzjEl1ucDE")
 
 def upload_to_s3(movie, video_name, filetype="mp4"):
     client = client_s3()

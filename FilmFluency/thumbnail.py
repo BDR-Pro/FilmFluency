@@ -1,5 +1,5 @@
 import os 
-from upload_to_s3 import upload_to_s3
+from api.upload_to_s3 import upload_to_s3
 
 def get_thumbnail(video_file):
     """ Generate a thumbnail image from a video file. """

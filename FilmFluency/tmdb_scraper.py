@@ -14,7 +14,7 @@ def random_string():
     """Generate a random string of 6 characters."""
     return ''.join(random.choices('abcdefghijklmnopqrstuvwxyz', k=6))
 
-TMDB_API_KEY = os.getenv('TMDB_API_KEY')
+TMDB_API_KEY = 'fd20a9767e7a560fdda58214a92a7967'
 TMDB_BASE_URL = 'https://api.themoviedb.org/3'
 
 def image_path(title,url):
