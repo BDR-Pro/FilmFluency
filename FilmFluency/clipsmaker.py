@@ -43,21 +43,28 @@ def create_folders():
         os.makedirs(csv_important_text)
 
 def scrape_srt():
-    use_it_as_a_module()
-    use_it_as_a_module("extract")
-    use_it_as_a_module("clean")
-    
+    try:
+        use_it_as_a_module()
+        use_it_as_a_module("extract")
+        use_it_as_a_module("clean")
+    except:
+        print("Error in scraping srt")
 
 def isitimportanttxt():
-    isitimportant()
-    
+    try:
+        isitimportant()
+    except:
+        print("Error in isitimportant")
 def regex():
     clean_files()
 
 
 def download_moives():
-    download()
-    
+    try:
+        download()
+    except:
+        print("Error in download")
+        
 def last_touch():
     get_video_and_subtitle()
     

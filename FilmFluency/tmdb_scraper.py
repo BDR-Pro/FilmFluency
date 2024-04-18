@@ -199,9 +199,12 @@ def update_movies():
     last_call_path.write_text(datetime.datetime.now().isoformat())
 
 def populateDBwithTopMovies():
-    if not is_it_one_week_yet():
-        return
-    update_movies()
+    try:
+        if not is_it_one_week_yet():
+            return
+        update_movies()
+    except Exception as e:
+        print(f"Error updating movies: {str(e)}")
 
 def is_it_one_week_yet():
     """Check if a week has passed since the last successful call."""
