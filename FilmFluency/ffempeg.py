@@ -4,11 +4,10 @@ import csv
 import boto3
 from botocore.client import Config
 import uuid
-from upload_to_s3 import upload_to_s3
+from api.upload_to_s3 import upload_to_s3
 from datetime import datetime, timedelta
-from load_env import load_env
 import string
-load_env()
+
 parent_dir = os.path.dirname(os.path.abspath(__file__))
 os.chdir(parent_dir)
 

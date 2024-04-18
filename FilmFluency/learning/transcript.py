@@ -3,7 +3,7 @@ from moviepy.editor import VideoFileClip
 from django.conf import settings
 from .models import Video, Movie
 from gradio_client import Client
-from upload_to_s3 import upload_to_s3
+from api.upload_to_s3 import upload_to_s3
 from tmdb_scraper import fill_movie_db as tmdb_scarpper
 
 def get_complexity(video_path):
