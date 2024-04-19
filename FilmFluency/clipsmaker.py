@@ -90,6 +90,7 @@ def main():
         print("Movies filled")
     
     if args.download:
+        print("Downloading movies")
         download_from_zip()
         print("Movies downloaded")
         return

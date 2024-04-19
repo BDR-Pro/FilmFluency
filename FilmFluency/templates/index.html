@@ -35,7 +35,7 @@
         {% for movie in movies %}
         <div class="col-md-4 mb-4">
             <div class="card card-custom">
-                <img src="{{ movie.poster_url }}" class="card-img-top" alt="{{ movie.original_title }}">
+                <img src="{{ movie.poster }}" class="card-img-top" alt="{{ movie.original_title }}">
                 <div class="card-body">
                     <h5 class="card-title">{{ movie.original_title }}</h5>
                     <p class="card-text">{{ movie.get_desc }}</p>

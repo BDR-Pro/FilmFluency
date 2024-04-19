@@ -57,10 +57,6 @@ class Movie(models.Model):
     def __str__(self):
         return self.title
 
-    @property
-    def poster_url(self):
-        return self.poster.url
-
 
 
     def save(self, *args, **kwargs):
