@@ -8,11 +8,15 @@ from api.upload_to_s3 import upload_to_s3
 from datetime import datetime, timedelta
 import string
 
-parent_dir = os.path.dirname(os.path.abspath(__file__))
-os.chdir(parent_dir)
+def change_dir():
+        
+    parent_dir = os.path.dirname(os.path.abspath(__file__))
+    os.chdir(parent_dir)
 
-csv_important_text = os.path.join("MovieToClips", "csv_important_text")
-movies = os.path.join("MovieToClips", "movies")
+    csv_important_text = os.path.join("MovieToClips", "csv_important_text")
+    movies = os.path.join("MovieToClips", "movies")
+    
+    return parent_dir, csv_important_text, movies
 
 def add_seconds(start_time, end_time):
     if type(start_time) not in [str] or type(end_time) not in [str]:
@@ -42,12 +46,17 @@ def find_similarity(k, j):
     return similarity / max(len(k_base), len(j_base)) > 0.3
 
 def find_subtitle(video_name):
+    a,b, csv_important_text = change_dir()
     for subtitle_file in os.listdir(csv_important_text):
         if find_similarity(video_name, subtitle_file):
             return subtitle_file
 
 
 def get_video_and_subtitle():
+    parent_dir, csv_important_text, movies = change_dir()
+
+    os.chdir(parent_dir)
+    os.chdir
     for video_name in os.listdir(movies):
         subtitle_name = find_subtitle(video_name)
         if subtitle_name:
