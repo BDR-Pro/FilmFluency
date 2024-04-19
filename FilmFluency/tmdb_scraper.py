@@ -10,6 +10,7 @@ from pathlib import Path
 from api.upload_to_s3 import upload_to_s3
 from django.conf import settings
 
+
 def create_dir(path):
     """Create a directory if it doesn't exist."""
     if not os.path.exists(path):
@@ -55,7 +56,7 @@ def search_imdb_id(title):
 def get_poster_url(poster_path):
     """Construct full URL for movie poster."""
     if poster_path:
-        link = f"https://image.tmdb.org/t/p/original{poster_path}"
+        link = f"image.tmdb.org/t/p/original{poster_path}"
         return quote(link)
     return None
 
