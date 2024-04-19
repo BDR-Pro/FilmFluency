@@ -5,15 +5,11 @@
 
 # find  the hardest words in the movie and translate them to the user's language
 from django.db import transaction
-
-import requests
+from functools import cache
 import csv
 from .models import Language, Translation
 import requests
-import json
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
-tokenizer = AutoTokenizer.from_pretrained("google/madlad400-10b-mt")
-model = AutoModelForSeq2SeqLM.from_pretrained("google/madlad400-10b-mt")
 
 src_langs = {
     "en": "English",
@@ -78,8 +74,16 @@ def find_hardest_words():
                 translation.hardest_word = translated_word
                 translation.save()
 
+@cache
+def load_model():
+        
+    tokenizer = AutoTokenizer.from_pretrained("google/madlad400-10b-mt",cache_dir="/mnt/volume_fra1_01/cache_models")
+    model = AutoModelForSeq2SeqLM.from_pretrained("google/madlad400-10b-mt",cache_dir="/mnt/volume_fra1_01/cache_models")
+    
+    return tokenizer, model
 def translate_words(word, target_language):
     """Translate the given word to the given language using transformers."""
+    tokenizer, model = load_model()
     try:
         input_text = f">>{target_language}<< {word}"
         input_ids = tokenizer.encode(input_text, return_tensors="pt")
