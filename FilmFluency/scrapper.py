@@ -118,6 +118,7 @@ def move_srt():
  
 
 def use_it_as_a_module(option=""):
+    create_folders()
     django_setup()
     if option == "clean":
         print("Cleaning extracted files")
@@ -166,3 +167,13 @@ def search():
         path_srt=search_srt(i.original_title)
         set_title(i,path_srt)
         
+        
+def create_folders(): 
+    if not os.path.exists(MOVIETOCLIPS):
+        os.makedirs(MOVIETOCLIPS)
+    if not os.path.exists(EXTRACTED_FILES):
+        os.makedirs(EXTRACTED_FILES)
+    if not os.path.exists(SRT):
+        os.makedirs(SRT)
+    if not os.path.exists(ZIP):
+        os.makedirs(ZIP)
