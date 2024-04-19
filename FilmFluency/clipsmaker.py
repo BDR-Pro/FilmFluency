@@ -84,3 +84,6 @@ def main():
     find_not_translated()
     find_hardest_words()
     
+
+if __name__ == "__main__":
+    main()

@@ -120,13 +120,16 @@ def move_srt():
 def use_it_as_a_module(option=""):
     django_setup()
     if option == "clean":
+        print("Cleaning extracted files")
         remove_extracted_files()
         return
     if option == "extract":
+        print("Extracting srt files")
         extract_srt_files()
         move_srt()
         return
     with tqdm(total=10, desc="Downloading movies") as pbar:
+        print("Downloading movies")
         for i in range(10):
             get_list_of_movies(i)
             pbar.update(1)

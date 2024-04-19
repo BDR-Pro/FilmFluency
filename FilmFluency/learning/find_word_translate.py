@@ -31,6 +31,7 @@ src_langs = {
 
 
 def fill_languages():
+    print("Filling languages...")
     existing_codes = set(Language.objects.values_list('tmdb_code', flat=True))
     new_languages = [Language(tmdb_code=code, name=name) for code, name in src_langs.items() if code not in existing_codes]
     
@@ -62,10 +63,12 @@ def is_hard_word(words):
 
 def find_hardest_words():
     """Finds the hardest words in each movie translation and updates them."""
+    
     languages = Language.objects.all()
     for language in languages:
         translations = Translation.objects.filter(language=language)
         for translation in translations:
+            print(f"Checking translation for {translation.original_text}...")
             words = translation.translated_text.split()
             if not words:
                 continue
@@ -95,6 +98,7 @@ def find_not_translated():
         # Get the list of translations for the given language
         translations = Translation.objects.filter(language=language)
         for translation in translations:
+            print(f"Checking translation for {translation.original_text}...")
             # Check if the translation is empty
             if not translation.translated_text:
                 # Get the original text

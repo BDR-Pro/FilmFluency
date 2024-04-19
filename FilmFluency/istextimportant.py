@@ -78,6 +78,7 @@ def process_srt_file(srt_text,srt_file_name):
         
 def main():
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    print("Processing SRT files...")
     with tqdm(total=len(os.listdir(srt)), desc="Srt Files") as pbar:
         for i in os.listdir(srt):
             srt_file_name = os.path.join(srt, i)

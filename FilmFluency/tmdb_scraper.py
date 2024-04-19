@@ -148,6 +148,9 @@ def is_time_to_update(last_call_time):
     return False
 
 def update_movies():
+    print("Updating movies...")
+    print("Fetching top movies...")
+    print("Number of Movies",Movie.objects.all().count())
     last_call_path = Path('calls.txt')
     if last_call_path.exists():
         last_call_time = datetime.datetime.fromisoformat(last_call_path.read_text().strip())
@@ -199,6 +202,7 @@ def update_movies():
     last_call_path.write_text(datetime.datetime.now().isoformat())
 
 def populateDBwithTopMovies():
+    print("Populating database with top movies...")
     try:
         if not is_it_one_week_yet():
             return

@@ -29,8 +29,10 @@ def get_all_videos():
 
 
 def main():
+    
     videos = get_all_videos()
     for video in videos:
+        print(f"Generating thumbnail for {video}")
         get_thumbnail(video)
     
     print("All thumbnails generated successfully.")

@@ -59,10 +59,12 @@ def ai_model(audio_url):
 
 
 def populate_and_transcribe():
+    print("Populating database and transcribing audio.")
     base_dir = get_video_directory()
     for subdir in os.listdir(base_dir):
         video_dir = os.path.join(base_dir, subdir)
         for file_name in os.listdir(video_dir):
+            print(f"Processing {file_name} for database insertion.")
             if file_name.endswith(".mp4"):
                 dir_name = os.path.basename(video_dir)
                 local_video_path = os.path.join(dir_name, file_name)
