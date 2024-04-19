@@ -92,7 +92,11 @@ def fill_movie_db(title):
     normalized_title = normalize_title(title)
     imdb_id = search_imdb_id(normalized_title)
     movie_data = fetch_movie_data_by_id(imdb_id)
-    movie_data = movie_data['movie_results'][0] if movie_data else None
+    try:
+        movie_data = movie_data['movie_results'][0] if movie_data else None
+    except:
+        movie_data = None
+        
     if movie_data:
         try:
         # Corrected to use actual data from movie_data
