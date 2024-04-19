@@ -68,12 +68,15 @@ def download_moives():
 def last_touch():
     get_video_and_subtitle()
     
-    
+import argparse
 def main():
+    args = argparse.ArgumentParser()
     print("Starting the process")
     fill_languages()
     print("Languages filled")
-    #populateDBwithTopMovies()
+    if args.fill:
+        populateDBwithTopMovies()
+        print("Movies filled")
     create_folders()
     scrape_srt()
     isitimportanttxt()
@@ -81,7 +84,6 @@ def main():
     download_moives()
     populate_and_transcribe()
     last_touch()
-    fill_movie_db()
     get_thumbnail()
     find_not_translated()
     find_hardest_words()
