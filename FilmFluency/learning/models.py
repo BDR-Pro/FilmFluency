@@ -38,6 +38,7 @@ class BaseMedia(models.Model):
 
 class Movie(models.Model):
     title = models.CharField(max_length=100, unique=True)
+    genre = models.CharField(max_length=100, default="28")
     description = models.TextField(null=True)
     random_slug = models.SlugField(max_length=50, unique=True, blank=True)
     type = models.CharField(max_length=10, default='movie')
