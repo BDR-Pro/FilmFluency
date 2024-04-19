@@ -4,7 +4,6 @@ import re
 from learning.models import Movie  
 from imdb import IMDb
 import random
-from urllib.parse import quote
 from datetime import datetime
 from pathlib import Path
 from api.upload_to_s3 import upload_to_s3
@@ -56,8 +55,7 @@ def search_imdb_id(title):
 def get_poster_url(poster_path):
     """Construct full URL for movie poster."""
     if poster_path:
-        link = f"image.tmdb.org/t/p/original{poster_path}"
-        return quote(link)
+        return f"https://image.tmdb.org/t/p/original{poster_path}"
     return None
 
 def fetch_movie_data_by_id(tmdb_id):
