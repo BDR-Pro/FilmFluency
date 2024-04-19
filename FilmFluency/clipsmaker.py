@@ -54,8 +54,8 @@ def download_from_zip():
     try:
         print("Downloading from zip")
         use_it_as_a_module("download")
-    except:
-        print("Error in downloading from zip")
+    except Exception as e:
+        print("Error in downloading from zip\n",e)
 
 def isitimportanttxt():
     try:
