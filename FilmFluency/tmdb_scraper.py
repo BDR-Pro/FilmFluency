@@ -29,14 +29,13 @@ def image_path(title,url):
     image_dir=os.path.join(image_dir,f'{title}')
     create_dir(image_dir)
     os.chdir(image_dir)
-    path_=os.path.join(title,image_path)
     if url:
         response = requests.get(url)
         if response.status_code == 200:
             image_path = f'poster{random_string()}.jpg'
             with open(image_path, 'wb') as file:
                 file.write(response.content)
-                
+            path_=os.path.join(title,image_path)
             return upload_to_s3(path_,'.jpg')
     
     return None
