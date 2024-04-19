@@ -1,6 +1,8 @@
+import tempfile
 import os
+tempfile.tempdir = "/mnt/volume_fra1_01/tmp"
+print("Temporary directory set to:", os.getenv('TMPDIR'))
 from moviepy.editor import VideoFileClip
-from django.conf import settings
 from .models import Video, Movie
 from gradio_client import Client
 from api.upload_to_s3 import upload_to_s3
