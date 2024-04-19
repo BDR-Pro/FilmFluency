@@ -151,8 +151,12 @@ cursor = connection.cursor()
 cursor.execute("SELECT 1")
 print("Database pinged successfully")
 
+setup = [TMDB_API_KEY, SECRET_KEY, ACCESS_KEY, STRING_URL]
 
-
+if all(setup):
+    print("All environment variables loaded successfully")
+else:
+    print("Some environment variables are not set. Please check your environment variables.")
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
