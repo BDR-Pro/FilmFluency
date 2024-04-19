@@ -221,7 +221,7 @@ def fill_with_random_movies():
 def check_existing_movies(category, identifier=None, count=10):
     """Check if there are at least 'count' movies of a given category or language in the database."""
     if category == 'genre':
-        existing_count = Movie.objects.filter(genre__id=identifier).count()
+        existing_count = Movie.objects.filter(genre=identifier).count()
     elif category == 'language':
         existing_count = Movie.objects.filter(original_language=identifier).count()
     else:
