@@ -70,7 +70,9 @@ def last_touch():
     
     
 def main():
+    print("Starting the process")
     fill_languages()
+    print("Languages filled")
     populateDBwithTopMovies()
     create_folders()
     scrape_srt()

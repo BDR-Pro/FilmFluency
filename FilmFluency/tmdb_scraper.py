@@ -88,13 +88,7 @@ def fill_already_existing_movie(movie:Movie,title):
     
 def fill_movie_db(title):
     """Process a title and update or create a movie record in the database."""
-    if movie := Movie.objects.filter(title=title).first():
-        print(f"Movie already exists: {movie.title}")
-        return
-    if movie := Movie.objects.filter(original_title=title).first():
-        fill_already_existing_movie(movie,title)
-        return
-    
+   
     normalized_title = normalize_title(title)
     imdb_id = search_imdb_id(normalized_title)
     movie_data = fetch_movie_data_by_id(imdb_id)
@@ -148,22 +142,11 @@ def fetch_movies(category, genre_id=None, language=None):
 
 
 
-def is_time_to_update(last_call_time):
-    """Check if it's been a week since the last API call."""
-    if (datetime.datetime.now() - last_call_time).days >= 7:
-        return True
-    return False
-
 def update_movies():
     print("Updating movies...")
     print("Fetching top movies...")
     print("Number of Movies",Movie.objects.all().count())
-    last_call_path = Path('calls.txt')
-    if last_call_path.exists():
-        last_call_time = datetime.datetime.fromisoformat(last_call_path.read_text().strip())
-        if not is_time_to_update(last_call_time):
-            return "No need to update yet."
-
+ 
     movie_types = {
         'top_rated': None,
         'latest': None,
@@ -206,27 +189,11 @@ def update_movies():
         fetch_movies('popular', None, lang_code)
         
     # Record the time of this call
-    last_call_path.write_text(datetime.datetime.now().isoformat())
 
 def populateDBwithTopMovies():
     print("Populating database with top movies...")
-    try:
-        if not is_it_one_week_yet():
-            return
-        update_movies()
-    except Exception as e:
-        print(f"Error updating movies: {str(e)}")
+    update_movies()
 
-def is_it_one_week_yet():
-    """Check if a week has passed since the last successful call."""
-    try:
-        with open('calls.txt', 'r') as file:
-            last_call = datetime.datetime.fromisoformat(file.read().strip())
-            return is_time_to_update(last_call)
-    except FileNotFoundError:
-        # If file not found, assume it's time for an update
-        fill_with_random_movies()
-        return True
 
 def fill_with_random_movies():
     """Fill the database with random movies."""
