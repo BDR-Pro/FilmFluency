@@ -15,7 +15,7 @@ def change_dir():
 
     csv_important_text = os.path.join("MovieToClips", "csv_important_text")
     movies = os.path.join("MovieToClips", "movies")
-    
+    os.mkdir(movies)
     return parent_dir, csv_important_text, movies
 
 def add_seconds(start_time, end_time):
