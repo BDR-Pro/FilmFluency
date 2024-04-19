@@ -10,6 +10,11 @@ from pathlib import Path
 from api.upload_to_s3 import upload_to_s3
 from django.conf import settings
 
+def create_dir(path):
+    """Create a directory if it doesn't exist."""
+    if not os.path.exists(path):
+        os.makedirs(path)
+    
 def random_string():
     """Generate a random string of 6 characters."""
     return ''.join(random.choices('abcdefghijklmnopqrstuvwxyz', k=6))
@@ -22,6 +27,7 @@ def image_path(title,url):
     image_dir=os.path.join(os.path.dirname(os.path.abspath(__file__)),f'MovieToClips')
     image_dir=os.path.join(image_dir,'cut_videos')
     image_dir=os.path.join(image_dir,f'{title}')
+    create_dir(image_dir)
     os.chdir(image_dir)
     path_=os.path.join(title,image_path)
     if url:
@@ -218,9 +224,10 @@ def is_it_one_week_yet():
             return is_time_to_update(last_call)
     except FileNotFoundError:
         # If file not found, assume it's time for an update
+        fill_with_random_movies()
         return True
 
 def fill_with_random_movies():
     """Fill the database with random movies."""
-    for i in range(10):
+    for i in range(1000):
         fetch_movies('popular')
