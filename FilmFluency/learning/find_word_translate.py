@@ -8,7 +8,6 @@ from django.db import transaction
 from functools import cache
 import csv
 from .models import Language, Translation
-import requests
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 
 src_langs = {
