@@ -1,9 +1,7 @@
 import os
 import boto3
 import uuid
-from dotenv import load_dotenv  
 from django.conf import settings
-load_dotenv()
 
 def client_s3():
     session = boto3.session.Session()
