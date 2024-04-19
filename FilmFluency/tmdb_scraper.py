@@ -1,5 +1,4 @@
 import requests
-from dotenv import load_dotenv
 import os
 import re
 from learning.models import Movie  
@@ -216,3 +215,8 @@ def is_it_one_week_yet():
     except FileNotFoundError:
         # If file not found, assume it's time for an update
         return True
+
+def fill_with_random_movies():
+    """Fill the database with random movies."""
+    for i in range(10):
+        fetch_movies('popular')
