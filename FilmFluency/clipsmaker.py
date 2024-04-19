@@ -73,7 +73,7 @@ def main():
     print("Starting the process")
     fill_languages()
     print("Languages filled")
-    populateDBwithTopMovies()
+    #populateDBwithTopMovies()
     create_folders()
     scrape_srt()
     isitimportanttxt()
