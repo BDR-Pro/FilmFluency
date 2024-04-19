@@ -2,8 +2,8 @@ import os
 import django
 import sys
 
+import argparse
 
-from time import sleep
 
 # Add the path of your Django project to the system path using realative path
 sys.path.insert(0, 'FilmFluency')
@@ -68,9 +68,13 @@ def download_moives():
 def last_touch():
     get_video_and_subtitle()
     
-import argparse
 def main():
-    args = argparse.ArgumentParser()
+    
+    parser = argparse.ArgumentParser(description='Process some movies.')
+    parser.add_argument('--fill', action='store_true', help='If set, fill the database with top movies')
+    
+    args = parser.parse_args()
+    
     print("Starting the process")
     fill_languages()
     print("Languages filled")
