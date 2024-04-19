@@ -97,7 +97,7 @@ PAYPAL_MODE = os.environ.get('PAYPAL_MODE')
 COINGATE_API_KEY = os.environ.get('COINGATE_API_KEY')
 TAP_SECRET_KEY = os.environ.get('TAP_SECRET_KEY')
 #DB 
-STRING_URL = os.environ.get('STRING_URL')
+DB_PASS = os.environ.get('DB_PASS')
 
 # EMAIL
 EMAIL_HOST = 'smtp.gmail.com'
@@ -119,7 +119,7 @@ IPINFO_API_KEY = os.environ.get('IPINFO_API_KEY')
 
 # Create a list of these variables
 config_keys = [SECRET_KEY, ACCESS_KEY, 
-               COINGATE_API_KEY, STRING_URL,PAYPAL_MODE,TAP_SECRET_KEY, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD,PAYPAL_CLIENT_ID, PAYPAL_CLIENT_SECRET,
+               COINGATE_API_KEY, DB_PASS,PAYPAL_MODE,TAP_SECRET_KEY, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD,PAYPAL_CLIENT_ID, PAYPAL_CLIENT_SECRET,
         TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER,IPINFO_API_KEY, TMDB_API_KEY]
 
 # Check if all elements are not None
@@ -129,17 +129,25 @@ if not is_loaded and not DEBUG:
     raise ValueError("Some configuration variables are not set. Please check your environment variables.")
 
 # Database
+
 import os
-import dj_database_url
 
+# Ensure that all your credentials are safe and only referenced here in a secure manner.
 DATABASES = {
-    'default': dj_database_url.parse(STRING_URL)
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'defaultdb',  # Database name
+        'USER': 'doadmin',  # Database user
+        'PASSWORD': 'your_password',  # Database password
+        'HOST': 'dbaas-db-6762329-do-user-16336582-0.c.db.ondigitalocean.com',  # Database host
+        'PORT': '25060',  # Database port
+        'OPTIONS': {
+            'sslmode': 'require',
+            'sslrootcert': os.path.join(os.path.dirname(__file__), 'ca-certificate.crt')  # Path to the certificate
+        }
+    }
 }
 
-DATABASES['default']['OPTIONS'] = {
-    'sslmode': 'require',  # This is required for SSL connections
-    'sslrootcert': os.path.join(os.path.dirname(__file__), 'ca-certificate.crt')  # Adjust the path as necessary
-}
 
 
 
@@ -150,7 +158,7 @@ cursor = connection.cursor()
 cursor.execute("SELECT 1")
 print("Database pinged successfully")
 
-setup = [TMDB_API_KEY, SECRET_KEY, ACCESS_KEY, STRING_URL]
+setup = [TMDB_API_KEY, SECRET_KEY, ACCESS_KEY, DB_PASS]
 
 if all(setup):
     print("All environment variables loaded successfully")
