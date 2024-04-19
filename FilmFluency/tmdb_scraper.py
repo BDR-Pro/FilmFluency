@@ -96,6 +96,7 @@ def fill_movie_db(title):
         movie_data = movie_data['movie_results'][0] if movie_data else None
     except:
         movie_data = None
+        return True
         
     if movie_data:
         try:
@@ -119,9 +120,13 @@ def fill_movie_db(title):
                 vote_count=movie_data.get('vote_count', 0)
             )
         except Exception as e:
+            
             print(f"Error creating movie: {str(e)}")
+            return True
     else:
         print("No data found for:", normalized_title)
+        return True
+        
         
         
 
@@ -186,17 +191,26 @@ def update_movies():
 
     # Fetch by genre
     for key, genre_id in movie_types.get('genres', {}).items():
-        fetch_movies('top_rated', key)
+        print(f"Fetching {genre_id} movies...")
+        is_in_db=fetch_movies('top_rated', key)
+        if is_in_db:
+            print(f"Movies already in DB")
+            continue
 
     # Fetch by language
     for lang_code, lang_description in movie_types.get('languages', {}).items():
-        fetch_movies('popular', None, lang_code)
+        print(f"Fetching {lang_description} movies...")
+        is_in_db=fetch_movies('popular', None, lang_code)
+        if is_in_db:
+            print(f"Movies already in DB")
+            continue
         
     # Record the time of this call
 
 def populateDBwithTopMovies():
     print("Populating database with top movies...")
     update_movies()
+    fill_with_random_movies()
 
 
 def fill_with_random_movies():
