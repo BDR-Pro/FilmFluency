@@ -27,6 +27,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+
 import os
 from django.conf import settings
 
@@ -44,6 +45,9 @@ INSTALLED_APPS = [
     'learning',
     'web',
     'api',
+    'payment',
+    'contact',
+    
     
 ]
 
@@ -60,7 +64,6 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True 
-import os
 ROOT_URLCONF = 'FilmFluency.urls'
 
 TEMPLATES = [
@@ -82,22 +85,73 @@ TEMPLATES = [
 WSGI_APPLICATION = 'FilmFluency.wsgi.application'
 
 import os
-import dj_database_url
+TMDB_API_KEY = os.environ.get('TMDB_API_KEY')
+# Database
+# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
+#S3 BUCKET
+SECRET_KEY = os.environ.get('SECRET_KEY')
+ACCESS_KEY = os.environ.get('ACCESS_KEY')
+# Payment
+PAYPAL_CLIENT_SECRET = os.environ.get('PAYPAL_CLIENT_SECRET')
+PAYPAL_CLIENT_ID = os.environ.get('PAYPAL_CLIENT_ID')
+PAYPAL_MODE = os.environ.get('PAYPAL_MODE')
+COINGATE_API_KEY = os.environ.get('COINGATE_API_KEY')
+TAP_SECRET_KEY = os.environ.get('TAP_SECRET_KEY')
+#DB 
+STRING_URL = os.environ.get('STRING_URL')
+
+# EMAIL
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+
+#Twilio
+TWILIO_ACCOUNT_SID = os.environ.get('TWILIO_ACCOUNT_SID')
+TWILIO_AUTH_TOKEN = os.environ.get('TWILIO_AUTH_TOKEN')
+TWILIO_PHONE_NUMBER = os.environ.get('TWILIO_PHONE_NUMBER')
+
+#ipinfo
+
+IPINFO_API_KEY = os.environ.get('IPINFO_API_KEY')
+
+# Create a list of these variables
+config_keys = [SECRET_KEY, ACCESS_KEY, 
+               COINGATE_API_KEY, STRING_URL,PAYPAL_MODE,TAP_SECRET_KEY, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD,PAYPAL_CLIENT_ID, PAYPAL_CLIENT_SECRET,
+        TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER,IPINFO_API_KEY, TMDB_API_KEY]
+
+# Check if all elements are not None
+is_loaded = all(key is not None for key in config_keys)
+
+if not is_loaded and not DEBUG:
+    raise ValueError("Some configuration variables are not set. Please check your environment variables.")
 
 # Database
 import os
 import dj_database_url
 
-DATABASE_URL = "postgresql://doadmin:AVNS_ALvM0xL9CJqC-3WFdSV@dbaas-db-6762329-do-user-16336582-0.c.db.ondigitalocean.com:25060/mydatabase"
-
 DATABASES = {
-    'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600)
+    'default': dj_database_url.parse(STRING_URL, conn_max_age=600)
 }
 
 DATABASES['default']['OPTIONS'] = {
     'sslmode': 'require',  # This is required for SSL connections
     'sslrootcert': os.path.join(os.path.dirname(__file__), 'ca-certificate.crt')  # Adjust the path as necessary
 }
+
+
+
+print("Database loaded successfully")
+# ping it
+from django.db import connection
+cursor = connection.cursor()
+cursor.execute("SELECT 1")
+print("Database pinged successfully")
+
+
 
 
 # Password validation

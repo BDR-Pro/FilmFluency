@@ -93,11 +93,3 @@ def get_unique_movies(request):
 
     return render(request, 'movies.html', {'movies': movies , 'order_by':order_by})
 
-
-from learning.models import Movie
-from django.utils.text import slugify
-
-movies = Movie.objects.filter(random_slug__exact='')
-for movie in movies:
-    movie.random_slug = slugify(movie.title)
-    movie.save()

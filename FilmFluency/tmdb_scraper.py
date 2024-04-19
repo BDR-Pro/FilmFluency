@@ -9,12 +9,13 @@ from urllib.parse import quote
 from datetime import datetime
 from pathlib import Path
 from api.upload_to_s3 import upload_to_s3
+from django.conf import settings
 
 def random_string():
     """Generate a random string of 6 characters."""
     return ''.join(random.choices('abcdefghijklmnopqrstuvwxyz', k=6))
 
-TMDB_API_KEY = 'fd20a9767e7a560fdda58214a92a7967'
+TMDB_API_KEY = settings.TMDB_API_KEY
 TMDB_BASE_URL = 'https://api.themoviedb.org/3'
 
 def image_path(title,url):

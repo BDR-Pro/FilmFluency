@@ -1,0 +1,216 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Home</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body { background-color: #f7f7f7; font-family: 'Arial', sans-serif; }
+        .container { max-width: 960px; margin: 50px auto; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); }
+        .payment-method { display: flex; justify-content: space-between; margin-bottom: 30px; }
+        .payment-method .card { border: 1px solid #ddd; padding: 20px; border-radius: 8px; width: 30%; text-align: center; cursor: pointer; }
+        .payment-method .card:hover, .payment-method .card.active { border-color: #0d6efd; background: #e7f3ff; }
+        .payment-method .card i { font-size: 2rem; margin-bottom: 10px; }
+        .payment-method .card.active i { color: #0d6efd; }
+        .product-info { margin-bottom: 20px; }
+        .product-info h4 { margin-bottom: 15px; color: #333; font-weight: 500; }
+        .product-info label { font-weight: bold; }
+        .form-check-label { cursor: pointer; }
+        .gift-option { margin-top: 10px; }
+        
+    </style>
+    <style>
+        /* Global Settings */
+        body {
+            background-color: #f7f7f7;
+            font-family: 'Arial', sans-serif;
+        }
+        .container {
+            max-width: 960px;
+            margin: 50px auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+    
+        /* Product Info Specific Styles */
+        .product-info h4 {
+            color: #333;
+            font-weight: bold;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        .product-info img {
+            width: 100%;
+            max-height: 200px;
+            object-fit: cover;
+            margin-bottom: 20px;
+        }
+        .product-info p {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #666;
+        }
+        .product-info label {
+            font-weight: bold;
+            color: #000;
+        }
+        .form-check.gift-option {
+            margin-top: 10px;
+            font-size: 16px;
+        }
+        .form-check-input {
+            cursor: pointer;
+        }
+        .form-check-label {
+            margin-left: 5px;
+            cursor: pointer;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border: none;
+            padding: 10px 15px;
+            font-size: 18px;
+            line-height: 1.5;
+            border-radius: 5px;
+            cursor: pointer;
+            display: block;
+            width: 100%;
+            transition: background-color 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <h2 class="text-center mb-4">Payment</h2>
+        <div class="payment-method">
+            <div class="card active" data-payment-type="tap">
+                <i class="bi bi-credit-card-2-front-fill"></i>
+                <p>Pay with Tap</p>
+            </div>
+            <div class="card" data-payment-type="paypal">
+                <i class="bi bi-paypal"></i>
+                <p>Pay with PayPal</p>
+            </div>
+            <div class="card" data-payment-type="crypto">
+                <i class="bi bi-currency-bitcoin"></i>
+                <p>Pay with Crypto</p>
+            </div>
+        </div>
+        <div class="container">
+            <h2 class="text-center mb-4">Payment</h2>
+            <div class="product-info">
+                <h4>Product Details</h4>
+                <img src="product_image.jpg" alt="Product Image">
+                <p><label>Name:</label> Product Name</p>
+                <p><label>Price:</label> $99</p>
+                <p><label>Quantity:</label> 1</p>
+                <div class="mb-3">
+                    <label for="subscriptionType" class="form-label"><strong>Type of Subscription:</strong></label>
+                    <select class="form-select" id="subscriptionType">
+                        <option value="1 Month">1 Month</option>
+                        <option value="1 Year" selected>1 Year</option>
+                        <option value="2 Years">2 Years</option>
+                    </select>
+                </div>
+                <p><label>Description:</label> Detailed description of the product...</p>
+                <div class="form-check gift-option">
+                    <input class="form-check-input" type="checkbox" id="giftCheckbox">
+                    <label class="form-check-label" for="giftCheckbox">Make this a gift</label>
+                </div>
+                <button class="btn btn-primary" onclick="createToken()">Submit Payment</button>
+            </div>
+        </div>
+        
+    </div>
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <!-- Tap Payments SDK -->
+    <script src="https://secure.gosell.io/js/sdk/tap.min.js"></script>
+    <!-- PayPal SDK for JavaScript -->
+    <script src="https://www.paypal.com/sdk/js?client-id=YOUR_CLIENT_ID&currency=USD"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const paymentCards = document.querySelectorAll('.payment-method .card');
+            const formSection = document.querySelector('.form-section');
+            paymentCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    paymentCards.forEach(c => c.classList.remove('active'));
+                    this.classList.add('active');
+                    const paymentType = this.getAttribute('data-payment-type');
+                    switch (paymentType) {
+                        case 'tap':
+                            formSection.style.display = 'block';
+                            loadTap();
+                            break;
+                        case 'paypal':
+                            formSection.style.display = 'none';
+                            loadPayPalButtons();
+                            break;
+                        case 'crypto':
+                            formSection.style.display = 'none';
+                            alert('Crypto payment functionality to be integrated here.');
+                            break;
+                    }
+                });
+            });
+        });
+
+        function loadTap() {
+            var tap = Tapjsli('YOUR_PUBLIC_KEY');
+            var elements = tap.elements({});
+            var style = {
+                base: {
+                    color: '#535353',
+                    lineHeight: '18px',
+                    fontFamily: 'sans-serif',
+                    fontSmoothing: 'antialiased',
+                    fontSize: '16px',
+                    '::placeholder': {
+                        color: 'rgba(0, 0, 0, 0.26)',
+                        fontSize: '15px'
+                    }
+                }
+            };
+            var card = elements.create('card', {style: style});
+            card.mount('#card-element');
+            window.createToken = function() {
+                tap.createToken(card).then(function(result) {
+                    if (result.error) {
+                        console.error(result.error.message);
+                    } else {
+                        console.log(result.token);
+                        // Send the token to your server for the payment process
+                    }
+                });
+            };
+        }
+
+        function loadPayPalButtons() {
+            paypal.Buttons({
+                createOrder: function(data, actions) {
+                    return actions.order.create({
+                        purchase_units: [{
+                            amount: { currency_code: 'USD', value: '100.00' }
+                        }]
+                    });
+                },
+                onApprove: function(data, actions) {
+                    return actions.order.capture().then(function(details) {
+                        alert('Transaction completed by ' + details.payer.name.given_name);
+                    });
+                }
+            }).render('.paypal-button-container'); // Ensure this selector is correct
+        }
+    </script>
+</body>
+</html>

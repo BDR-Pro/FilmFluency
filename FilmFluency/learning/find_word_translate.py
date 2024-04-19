@@ -4,10 +4,11 @@
 # Path: FilmFluency/MovieToClips/find_word_translate.py
 
 # find  the hardest words in the movie and translate them to the user's language
+from django.db import transaction
 
 import requests
 import csv
-from .models import Language, translation
+from .models import Language, Translation
 import requests
 import json
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
@@ -28,70 +29,63 @@ src_langs = {
     "de": "German"
 }
 
+
 def fill_languages():
-    for src_lang_code, src_lang_name in src_langs.items():
-        # Check if the language already exists in the database
-        if not Language.objects.filter(code=src_lang_code).exists():
-            # Create a new Language object
-            language = Language.objects.create(tmdb_code=src_lang_code, name=src_lang_name)
-            language.save()
-            print(f"Added language: {src_lang_name} ({src_lang_code})")
-        else:
-            print(f"Language already exists: {src_lang_name} ({src_lang_code})")
+    existing_codes = set(Language.objects.values_list('tmdb_code', flat=True))
+    new_languages = [Language(tmdb_code=code, name=name) for code, name in src_langs.items() if code not in existing_codes]
+    
+    with transaction.atomic():
+        Language.objects.bulk_create(new_languages)
+        print(f"Added {len(new_languages)} new languages.")
+
+
+
+def load_word_frequencies():
+    with open('word_frequency.csv', 'r') as csv_file:
+        csv_reader = csv.reader(csv_file)
+        return {row[0]: int(row[1]) for row in csv_reader if row}
 
 
 def is_hard_word(words):
     """Return the lowest frequency word in the list."""
-    csv_file = open('word_frequency.csv', 'r')
-    csv_reader = csv.reader(csv_file)
-    lowest_frequency = {'word': '', 'frequency': 1000000}
-    for word in words:
-        for row in csv_reader:
-            if word == row[0]:
-                frequency = row[1]
-                if frequency < lowest_frequency['frequency']:
-                    lowest_frequency['word'] = word
-                    lowest_frequency['frequency'] = frequency
-            break
-        if word.isalpha() and word not in lowest_frequency:
-            lowest_frequency['word'] = word
-            lowest_frequency['frequency'] = 0
-         
-    return lowest_frequency['word']
-        
-
-def translate_words(words, language):
-    """Translate the given words to the given language using transformers"""
+    lowest_frequency_word = None
+    word_frequencies = load_word_frequencies()
     
-    input_text = f">>{language}<< {words}"
-    input_ids = tokenizer.encode(input_text, return_tensors="pt")
+    lowest_frequency = float('inf')
 
-    # Generate translation
-    output_tokens = model.generate(input_ids)
+    for word in words:
+        if word in word_frequencies and word_frequencies[word] < lowest_frequency:
+            lowest_frequency = word_frequencies[word]
+            lowest_frequency_word = word
 
-    # Decode the translation
-    translated_text = tokenizer.decode(output_tokens[0], skip_special_tokens=True)
-    return translated_text
+    return lowest_frequency_word
 
 def find_hardest_words():
-    """Finds the hardest words in the movie and translates them to the user's language."""
-    # Get the list of languages
+    """Finds the hardest words in each movie translation and updates them."""
     languages = Language.objects.all()
     for language in languages:
-        # Get the list of translations for the given language
-        translations = translation.objects.filter(language=language)
+        translations = Translation.objects.filter(language=language)
         for translation in translations:
-            # Get the translated text
-            translated_text = translation.translated_text
-            # Split the text into words
-            words = translated_text.split()
-            if language.tmdb_code=="en":
-                hardest_words = is_hard_word(words)
-            # Translate the hardest words to the user's language
-            translated_words = translate_words(hardest_words, language.tmdb_code)
-            # Save the translated words to the database
-            translation.hardest_word = translated_words
-            translation.save()
+            words = translation.translated_text.split()
+            if not words:
+                continue
+            hardest_word = is_hard_word(words)
+            if hardest_word:
+                translated_word = translate_words(hardest_word, language.tmdb_code)
+                translation.hardest_word = translated_word
+                translation.save()
+
+def translate_words(word, target_language):
+    """Translate the given word to the given language using transformers."""
+    try:
+        input_text = f">>{target_language}<< {word}"
+        input_ids = tokenizer.encode(input_text, return_tensors="pt")
+        output_tokens = model.generate(input_ids)
+        return tokenizer.decode(output_tokens[0], skip_special_tokens=True)
+    except Exception as e:
+        print(f"Error in translating word: {e}")
+        return ""
+
 
 def find_not_translated():
     """Finds the words that have not been translated yet."""
@@ -99,7 +93,7 @@ def find_not_translated():
     languages = Language.objects.all()
     for language in languages:
         # Get the list of translations for the given language
-        translations = translation.objects.filter(language=language)
+        translations = Translation.objects.filter(language=language)
         for translation in translations:
             # Check if the translation is empty
             if not translation.translated_text:

@@ -9,6 +9,7 @@ from django.contrib.auth.models import User
 import re
 import sys
 
+
 def format_transcript(text):
     """Formats the transcript text to add new lines after each '.', ',', or every 8 words."""
     
@@ -38,12 +39,12 @@ class BaseMedia(models.Model):
 class Movie(models.Model):
     title = models.CharField(max_length=100, unique=True)
     description = models.TextField(null=True)
+    random_slug = models.SlugField(max_length=50, unique=True, blank=True)
     type = models.CharField(max_length=10, default='movie')
     date_added = models.DateTimeField(default=timezone.now)
     release_date = models.DateField(null=True)
     rating = models.FloatField(default=0)
     poster = models.TextField(default='no-image.jpg')
-    random_slug = models.SlugField(max_length=50, unique=True, blank=True)
     backdrop_path = models.CharField(max_length=200, null=True, blank=True)
     tmdb_id = models.IntegerField(null=True, blank=True)
     original_title = models.CharField(max_length=100, null=True, blank=True)
@@ -117,9 +118,9 @@ class Video(BaseMedia):
         except Exception as e:
             return f"An error occurred while reading the transcript: {str(e)}"
         
-    def translation(self, language="ar_AR"):
+    def translation(self, language="ar"):
         """Returns the contents of the translation file as a formatted string with added newlines for readability."""
-        translation_path = translation.objects.get(video=self, language__fb_code=language).translated_text
+        translation_path = Translation.objects.get(video=self.title,tmdb_code=language).translated_text
         try:
             with open(translation_path, 'r', encoding='utf-8') as file:
                 content = "".join(file.readlines())
@@ -127,9 +128,9 @@ class Video(BaseMedia):
         except FileNotFoundError:
             return "No translation available."
         
-    def get_hardest_word(self, language="ar_AR"):
+    def get_hardest_word(self, language="ar"):
         """Returns the contents of the translation file as a formatted string with added newlines for readability."""
-        translation_path = translation.objects.get(video=self, language__fb_code=language).translated_text
+        translation_path = Translation.objects.get(video=self.title,tmdb_code=language).translated_text
         try:
             with open(translation_path, 'r', encoding='utf-8') as file:
                 content = "".join(file.readlines())
@@ -145,7 +146,7 @@ class Language(models.Model):
     def __str__(self):
         return self.name
 
-class translation(models.Model):
+class Translation(models.Model):
     video = models.ForeignKey(Video, on_delete=models.CASCADE, related_name='translations')
     language = models.ForeignKey(Language, on_delete=models.CASCADE, related_name='translations')
     translated_text = models.TextField()
@@ -196,5 +197,4 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"Notification for {self.recipient.username}"
-
 
