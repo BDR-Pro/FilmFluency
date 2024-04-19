@@ -55,7 +55,7 @@
             <div class="col-md-6"> <!-- Two movies per line -->
                 <a href="{% url 'web:movie_detail' movie.random_slug %}" class="list-group-item list-group-item-action">
                     <h5 class="mb-1">{{ movie.original_title }}</h5>
-                    <img src="{{ movie.poster_url }}" alt="{{ movie.original_title }}" class="img-fluid">
+                    <img src="{{ movie.poster }}" alt="{{ movie.original_title }}" class="img-fluid">
                     <p class="mb-1">{{ movie.description|default:"No description available." }}</p>
                     <small>Released on: {{ movie.release_date|date:"Y-m-d" }}</small>
                 </a>
