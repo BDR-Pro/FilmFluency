@@ -188,22 +188,21 @@ def update_movies():
         }
     }
 
-
     # Fetch by genre
-    for key, genre_id in movie_types.get('genres', {}).items():
-        print(f"Fetching {genre_id} movies...")
-        is_in_db=fetch_movies('top_rated', key)
-        if is_in_db:
-            print(f"Movies already in DB")
+    for key, genre_description in movie_types.get('genres', {}).items():
+        if check_existing_movies('genre', key, 10):
+            print(f"Skipping {genre_description} movies, already populated.")
             continue
+        print(f"Fetching {genre_description} movies...")
+        fetch_movies('top_rated', genre_id=key)
 
     # Fetch by language
     for lang_code, lang_description in movie_types.get('languages', {}).items():
-        print(f"Fetching {lang_description} movies...")
-        is_in_db=fetch_movies('popular', None, lang_code)
-        if is_in_db:
-            print(f"Movies already in DB")
+        if check_existing_movies('language', lang_code, 10):
+            print(f"Skipping {lang_description} movies, already populated.")
             continue
+        print(f"Fetching {lang_description} movies...")
+        fetch_movies('popular', language=lang_code)
         
     # Record the time of this call
 
@@ -217,3 +216,15 @@ def fill_with_random_movies():
     """Fill the database with random movies."""
     for i in range(1000):
         fetch_movies('popular')
+        
+
+def check_existing_movies(category, identifier=None, count=10):
+    """Check if there are at least 'count' movies of a given category or language in the database."""
+    if category == 'genre':
+        existing_count = Movie.objects.filter(genre__id=identifier).count()
+    elif category == 'language':
+        existing_count = Movie.objects.filter(original_language=identifier).count()
+    else:
+        existing_count = Movie.objects.count()
+
+    return existing_count >= count
