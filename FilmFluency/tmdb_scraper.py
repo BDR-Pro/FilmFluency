@@ -101,22 +101,25 @@ def fill_movie_db(title):
     movie_data = movie_data['movie_results'][0] if movie_data else None
     if movie_data:
         try:
+        # Corrected to use actual data from movie_data
+            backdrop_url = get_poster_url(movie_data.get('backdrop_path'))
+            poster_url = get_poster_url(movie_data.get('poster_path'))  # Assuming there is a 'poster_path'
+
             movie = Movie.objects.create(
                 tmdb_id=movie_data['id'],
-                title=title,  # Assuming 'title' is a variable you've already defined
+                title=title,
                 original_title=movie_data.get('original_title', ''),
                 description=movie_data.get('overview', ''),
-                type=movie_data.get('media_type', 'movie'),  # Ensure 'type' field exists in your model
+                type=movie_data.get('media_type', 'movie'),
                 release_date=movie_data.get('release_date'),
                 rating=movie_data.get('vote_average', 0),
-                backdrop_path=get_poster_url('backdrop_path'),
-                poster=image_path(title,get_poster_url(movie_data.get('backdrop_path'))),
+                backdrop_path=backdrop_url,
+                poster=poster_url,
                 original_language=movie_data.get('original_language', ''),
                 popularity=movie_data.get('popularity', 0),
                 vote_average=movie_data.get('vote_average', 0),
                 vote_count=movie_data.get('vote_count', 0)
             )
-            print(f"New movie created: {movie.title}")
         except Exception as e:
             print(f"Error creating movie: {str(e)}")
     else:
