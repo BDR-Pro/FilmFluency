@@ -79,7 +79,7 @@ def main():
     
     parser = argparse.ArgumentParser(description='Process some movies.')
     parser.add_argument('--fill', action='store_true', help='If set, fill the database with top movies')
-    
+    parser.add_argument('--download', action='store_true', help='If set, download movies from zip')
     args = parser.parse_args()
     
     print("Starting the process")
