@@ -2,6 +2,8 @@ import re
 import os
 
 def clean_files():
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    os.chdir("MovieToClips")
     for filename in os.listdir("csv_important_text"):
         file_path = os.path.join("csv_important_text", filename)
         with open(file_path, 'r', encoding='utf-8') as file:
