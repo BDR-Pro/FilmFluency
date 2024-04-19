@@ -49,6 +49,13 @@ def scrape_srt():
         use_it_as_a_module("clean")
     except:
         print("Error in scraping srt")
+        
+def download_from_zip():
+    try:
+        print("Downloading from zip")
+        use_it_as_a_module("download")
+    except:
+        print("Error in downloading from zip")
 
 def isitimportanttxt():
     try:
@@ -81,6 +88,11 @@ def main():
     if args.fill:
         populateDBwithTopMovies()
         print("Movies filled")
+    
+    if args.download:
+        download_from_zip()
+        print("Movies downloaded")
+        return
     create_folders()
     scrape_srt()
     isitimportanttxt()

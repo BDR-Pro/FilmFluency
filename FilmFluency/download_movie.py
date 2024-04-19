@@ -2,6 +2,9 @@ import os
 import subprocess
 from time import sleep
 def download_movie(movie_name):
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    os.chdir("movies")
+    print(f"Downloading {movie_name} from piratebay")
     subprocess.run(["pirate-get", movie_name, "-0"])
     
 
@@ -39,7 +42,7 @@ def main():
     list_=getallmovies()
 
     list_ = is_dublicated(list_)
-
+    print(f"Downloading {len(list_)} movies")
     for movie in list_:
         print(f"Downloading {movie}")
         download_movie(movie)

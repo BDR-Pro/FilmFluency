@@ -13,6 +13,7 @@ MOVIETOCLIPS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "MovieTo
 SRT = os.path.join(MOVIETOCLIPS, "srt")
 EXTRACTED_FILES = os.path.join(MOVIETOCLIPS, "extracted_files")
 ZIP = os.path.join(MOVIETOCLIPS, "zip")
+MOVIES = os.path.join(MOVIETOCLIPS, "movies")
 
 def django_setup():
     sys.path.append('FilmFluency')
@@ -138,7 +139,10 @@ def use_it_as_a_module(option=""):
         print(" \n All movies downloaded")
         extract_srt_files()
         move_srt()
-       
+    
+    if option == "download":
+        download()
+        return
 def search_srt(movie_title):
     base_link = f"https://www.opensubtitles.org/ar/search2/sublanguageid-all/moviename-{movie_title}"
     
@@ -177,3 +181,15 @@ def create_folders():
         os.makedirs(SRT)
     if not os.path.exists(ZIP):
         os.makedirs(ZIP)
+        
+import subprocess   
+def download():
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    os.chdir(ZIP)
+    print("Downloading movies")
+    print(os.listdir(ZIP))
+    
+    for i in os.listdir(ZIP):
+        i.replace(".zip","")
+        subprocess.run(["pirate-get", i, "-S",MOVIES])
+        print(f"Downloaded {i}")
