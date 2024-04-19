@@ -67,6 +67,8 @@ def fetch_movie_data_by_id(tmdb_id):
     response = requests.get(url, params=params)
     if response.status_code == 200:
         return response.json()
+    else:
+        print(f"Error fetching movie data for {tmdb_id}---{response.status_code}")
     return None
 
 def normalize_title(title):
