@@ -2,4 +2,4 @@ from .models import Movie
 
 
 def getAllMoviesWithoutVideo():
-    return Movie.objects.filter(video__isnull=True)
+    return Movie.objects.filter(videos__isnull=True)
