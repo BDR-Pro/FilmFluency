@@ -82,18 +82,21 @@ def main():
     parser.add_argument('--download', action='store_true', help='If set, download movies from zip')
     args = parser.parse_args()
     
-    print("Starting the process")
-    fill_languages()
-    print("Languages filled")
-    if args.fill:
-        populateDBwithTopMovies()
-        print("Movies filled")
-    
     if args.download:
         print("Downloading movies")
         download_from_zip()
         print("Movies downloaded")
         sys.exit()
+        
+    if args.fill:
+        populateDBwithTopMovies()
+        print("Movies filled")
+    
+    
+    print("Starting the process")
+    fill_languages()
+    print("Languages filled")
+    
     create_folders()
     scrape_srt()
     isitimportanttxt()
