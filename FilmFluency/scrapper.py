@@ -203,6 +203,8 @@ def download():
     for i in os.listdir(MOVIES):
         add_torrents_to_transmission(os.path.join(MOVIES,i))
 
+
+
 def save_torrents_or_magnets(search_term, directory):
     command = [
         "pirate-get",
@@ -210,19 +212,23 @@ def save_torrents_or_magnets(search_term, directory):
         "--save-magnets",  # Save magnet links
         "-S", directory,   # Directory to save files
         "-l",              # List the torrents without downloading (if only saving)
-        "-r", "1"
-        "-0"
+        "-r", "1",         # Fetch only one page of results
+        "-0"               # Automatically select the top result
     ]
-    subprocess.run(command, shell=True)
-
+    # Execute without shell=True for better security
+    subprocess.run(command, check=True)
 
 
 def add_torrents_to_transmission(directory):
     for file_name in os.listdir(directory):
-        full_path = os.path.join(directory, file_name)
-        command = [
-            "transmission-remote",
-            "-n", "admin:password",  # Authentication
-            "-a", full_path          # Add torrent
-        ]
-        subprocess.run(command, shell=True)
+        if file_name.endswith('.torrent') or file_name.endswith('.magnet'):  # Ensure it's a torrent or magnet file
+            full_path = os.path.join(directory, file_name)
+            command = [
+                "transmission-remote",
+                "-n", "admin:password",  # Authentication
+                "-a", full_path          # Add torrent
+            ]
+            try:
+                subprocess.run(command, check=True)
+            except subprocess.CalledProcessError as e:
+                print(f"Failed to add {full_path}: {str(e)}")
