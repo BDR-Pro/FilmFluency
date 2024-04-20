@@ -193,18 +193,31 @@ def download():
     Movies = getAllMoviesWithoutVideo()
     for i in Movies:
         print(i.original_title)
-        download_with_pirate_get(i)
+        os.makedirs(i.original_title)
+        save_torrents_or_magnets(i.original_title,os.path.join(MOVIES,i.original_title))
         print("Downloaded of "+i.original_title)
+    for i in os.listdir(MOVIES):
+        add_torrents_to_transmission(os.path.join(MOVIES,i))
 
-def download_with_pirate_get(movie):
+def save_torrents_or_magnets(search_term, directory):
     command = [
         "pirate-get",
-        movie.original_title,
-        "-0",  # Automatically choose the top result
-        "-t",  # Open magnets with transmission-remote
-        "-A", "admin:password",  # RPC authentication for transmission-remote
-        "-E", "localhost:9091"  # Default RPC endpoint; adjust if necessary
+        search_term,
+        "--save-magnets",  # Save magnet links
+        "-S", directory,   # Directory to save files
+        "-l",              # List the torrents without downloading (if only saving)
+        "-r", "10"         # Limit to 10 results for example
     ]
+    subprocess.run(command, shell=True)
 
-    # Ensure the command runs in the background
-    subprocess.Popen(command, shell=True)
+
+
+def add_torrents_to_transmission(directory):
+    for file_name in os.listdir(directory):
+        full_path = os.path.join(directory, file_name)
+        command = [
+            "transmission-remote",
+            "-n", "admin:password",  # Authentication
+            "-a", full_path          # Add torrent
+        ]
+        subprocess.run(command, shell=True)
