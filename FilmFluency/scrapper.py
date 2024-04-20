@@ -188,7 +188,7 @@ def download():
     
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     os.chdir(MOVIES)
-    print(os.cwd())
+    print(os.getcwd())
     print("Downloading movies")
     Movies = getAllMoviesWithoutVideo()
     for i in Movies:
