@@ -192,5 +192,6 @@ def download():
     print("Downloading movies")
     Movies = getAllMoviesWithoutVideo()
     for i in Movies:
+        print(i.original_title)
         subprocess.run(["pirate-get",i.original_title])
         
