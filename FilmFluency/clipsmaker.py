@@ -91,7 +91,7 @@ def main():
     if args.fill:
         populateDBwithTopMovies()
         print("Movies filled")
-    
+        
     
     print("Starting the process")
     fill_languages()
