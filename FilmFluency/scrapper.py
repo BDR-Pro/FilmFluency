@@ -187,7 +187,8 @@ from learning.getAllMovies import getAllMoviesWithoutVideo
 def download():
     
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
-    os.chdir(ZIP)
+    os.chdir(MOVIES)
+    print(os.cwd())
     print("Downloading movies")
     Movies = getAllMoviesWithoutVideo()
     for i in Movies:
