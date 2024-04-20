@@ -52,10 +52,10 @@ def scrape_srt():
         
 def download_from_zip():
     try:
-        print("Downloading from zip")
+        print("Downloading from DB")
         use_it_as_a_module("download")
     except Exception as e:
-        print("Error in downloading from zip\n",e)
+        print("Error in downloading from DB\n",e)
 
 def isitimportanttxt():
     try:
