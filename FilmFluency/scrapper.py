@@ -119,8 +119,7 @@ def move_srt():
  
 
 def use_it_as_a_module(option=""):
-    create_folders()
-    django_setup()
+   
     if option == "clean":
         print("Cleaning extracted files")
         remove_extracted_files()
@@ -130,6 +129,10 @@ def use_it_as_a_module(option=""):
         extract_srt_files()
         move_srt()
         return
+    if option == "download":
+        download()
+        return
+    
     with tqdm(total=10, desc="Downloading movies") as pbar:
         print("Downloading movies")
         for i in range(10):
@@ -139,10 +142,6 @@ def use_it_as_a_module(option=""):
         print(" \n All movies downloaded")
         extract_srt_files()
         move_srt()
-    
-    if option == "download":
-        download()
-        return
 def search_srt(movie_title):
     base_link = f"https://www.opensubtitles.org/ar/search2/sublanguageid-all/moviename-{movie_title}"
     
