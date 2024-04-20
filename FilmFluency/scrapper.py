@@ -194,6 +194,6 @@ def download():
     for i in Movies:
         print(i.original_title)
         #print result stdout
-        subprocess.run(["pirate-get",i.original_title,"-0"])
+        subprocess.run(["pirate-get",i.original_title,"-0","-t"])
       
         
