@@ -93,7 +93,7 @@ def main():
         print("Downloading movies")
         download_from_zip()
         print("Movies downloaded")
-        return
+        sys.exit()
     create_folders()
     scrape_srt()
     isitimportanttxt()
