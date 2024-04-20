@@ -193,7 +193,18 @@ def download():
     Movies = getAllMoviesWithoutVideo()
     for i in Movies:
         print(i.original_title)
-        #print result stdout
-        subprocess.run(["pirate-get",i.original_title,"-0","-t"," -A admin:password"])
-      
-        
+        download_with_pirate_get(i)
+        print("Downloaded of "+i.original_title)
+
+def download_with_pirate_get(movie):
+    command = [
+        "pirate-get",
+        movie.original_title,
+        "-0",  # Automatically choose the top result
+        "-t",  # Open magnets with transmission-remote
+        "-A", "admin:password",  # RPC authentication for transmission-remote
+        "-E", "localhost:9091"  # Default RPC endpoint; adjust if necessary
+    ]
+
+    # Ensure the command runs in the background
+    subprocess.Popen(command, shell=True)
