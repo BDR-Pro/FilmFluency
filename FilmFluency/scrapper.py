@@ -183,7 +183,7 @@ def create_folders():
         os.makedirs(ZIP)
         
 import subprocess 
-from FilmFluency.learning.getAllMovies import getAllMoviesWithoutVideo
+from learning.getAllMovies import getAllMoviesWithoutVideo
 
 def download():
     
