@@ -193,7 +193,11 @@ def download():
     Movies = getAllMoviesWithoutVideo()
     for i in Movies:
         print(i.original_title)
-        os.makedirs(i.original_title)
+        
+        if not os.path.exists(i.original_title):
+            
+            os.makedirs(i.original_title)
+            
         save_torrents_or_magnets(i.original_title,os.path.join(MOVIES,i.original_title))
         print("Downloaded of "+i.original_title)
     for i in os.listdir(MOVIES):
