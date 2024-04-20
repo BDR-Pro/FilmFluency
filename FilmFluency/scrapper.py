@@ -206,7 +206,8 @@ def save_torrents_or_magnets(search_term, directory):
         "--save-magnets",  # Save magnet links
         "-S", directory,   # Directory to save files
         "-l",              # List the torrents without downloading (if only saving)
-        "-r", "10"         # Limit to 10 results for example
+        "-r", "1"
+        "-0"
     ]
     subprocess.run(command, shell=True)
 
