@@ -182,15 +182,15 @@ def create_folders():
     if not os.path.exists(ZIP):
         os.makedirs(ZIP)
         
-import subprocess   
+import subprocess 
+from FilmFluency.learning.getAllMovies import getAllMoviesWithoutVideo
+
 def download():
     
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     os.chdir(ZIP)
     print("Downloading movies")
-    print(os.listdir(ZIP))
-    
-    for i in os.listdir(ZIP):
-        i.replace(".zip","")
-        subprocess.run(["pirate-get", i, "-S",MOVIES])
-        print(f"Downloaded {i}")
+    Movies = getAllMoviesWithoutVideo()
+    for i in Movies:
+        subprocess.run(["pirate-get",i.original_title])
+        
