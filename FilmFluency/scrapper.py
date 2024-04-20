@@ -183,52 +183,54 @@ def create_folders():
         
 import subprocess 
 from learning.getAllMovies import getAllMoviesWithoutVideo
-
-def download():
-    
-    os.chdir(os.path.dirname(os.path.abspath(__file__)))
-    os.chdir(MOVIES)
-    print(os.getcwd())
-    print("Downloading movies")
-    Movies = getAllMoviesWithoutVideo()
-    for i in Movies:
-        print(i.original_title)
-        
-        if not os.path.exists(i.original_title):
-            
-            os.makedirs(i.original_title)
-            
-        save_torrents_or_magnets(i.original_title,os.path.join(MOVIES,i.original_title))
-        print("Downloaded of "+i.original_title)
-    for i in os.listdir(MOVIES):
-        add_torrents_to_transmission(os.path.join(MOVIES,i))
-
-
+import os
+import subprocess
+from pathlib import Path
 
 def save_torrents_or_magnets(search_term, directory):
     command = [
         "pirate-get",
         search_term,
-        "--save-magnets",  # Save magnet links
-        "-S", directory,   # Directory to save files
-        "-l",              # List the torrents without downloading (if only saving)
-        "-r", "1",         # Fetch only one page of results
-        "-0"               # Automatically select the top result
+        "--save-magnets",
+        "-S", directory,
+        "-l",
+        "-r", "1",
+        "-0"
     ]
-    # Execute without shell=True for better security
-    subprocess.run(command, check=True)
-
+    # Run the command and capture output for debugging
+    result = subprocess.run(command, capture_output=True, text=True)
+    if result.returncode != 0:
+        print(f"Error with pirate-get: {result.stdout}, {result.stderr}")
 
 def add_torrents_to_transmission(directory):
     for file_name in os.listdir(directory):
-        if file_name.endswith('.torrent') or file_name.endswith('.magnet'):  # Ensure it's a torrent or magnet file
+        if file_name.endswith('.torrent') or file_name.endswith('.magnet'):
             full_path = os.path.join(directory, file_name)
             command = [
                 "transmission-remote",
-                "-n", "admin:password",  # Authentication
-                "-a", full_path          # Add torrent
+                "-n", "admin:password",
+                "-a", full_path
             ]
-            try:
-                subprocess.run(command, check=True)
-            except subprocess.CalledProcessError as e:
-                print(f"Failed to add {full_path}: {str(e)}")
+            result = subprocess.run(command, capture_output=True, text=True)
+            if result.returncode != 0:
+                print(f"Failed to add {full_path}: {result.stderr}")
+
+def download():
+    base_dir = Path(__file__).resolve().parent
+    movies_dir = base_dir / 'MOVIES'
+    print(f"Working Directory: {movies_dir}")
+    print("Downloading movies...")
+
+    # Assuming getAllMoviesWithoutVideo is correctly implemented and available
+    Movies = getAllMoviesWithoutVideo()
+    for movie in Movies:
+        movie_dir = movies_dir / movie.original_title
+        movie_dir.mkdir(parents=True, exist_ok=True)
+        
+        print(f"Processing: {movie.original_title}")
+        save_torrents_or_magnets(movie.original_title, str(movie_dir))
+        
+    for movie_dir in movies_dir.iterdir():
+        add_torrents_to_transmission(str(movie_dir))
+
+# Adjust with the actual Movie model and getAllMoviesWithoutVideo function
