@@ -1,7 +1,5 @@
 import tempfile
 import os
-tempfile.tempdir = "/mnt/volume_fra1_01/tmp"
-print("Temporary directory set to:", os.getenv('TMPDIR'))
 from moviepy.editor import VideoFileClip
 from .models import Video, Movie
 from gradio_client import Client

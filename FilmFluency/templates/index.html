@@ -3,46 +3,110 @@
 {% block title %}Home - Film Fluency{% endblock %}
 
 {% block content %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.0.0/css/flag-icons.min.css"/>
 <style>
-    .card-custom {
+    .ff-card-custom {
         box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         transition: all 0.2s ease-in-out;
     }
-    .card-custom:hover {
+    .ff-card-custom:hover {
         transform: scale(1.05);
         box-shadow: 0 6px 12px rgba(0,0,0,0.2);
     }
-    .btn-custom {
-        background-color: #007bff;
+    .ff-btn-custom {
+        background-color: #007bffa0;
         border-color: #007bff;
+        color: white;
+        transition: background-color 0.2s, border-color 0.2s;
     }
-    .btn-custom:hover {
+    .ff-btn-custom:hover {
         background-color: #0056b3;
         border-color: #004085;
+        color: rgb(156, 101, 211);
+    }
+    .ff-flag-icon-custom {
+        width: 32px;
+        height: 32px;
+        background-size: cover;
+        background-position: center;
+        border-radius: 50%;
+    }
+    .ff-flag-button {
+        padding: 5px;
+        margin: 0 5px;
+    }
+    .ff-btn-group, .ff-d-flex {
+        display: flex;
+        justify-content: center;
+        width: 80%;
+        margin: 20px auto;
+    }
+    
+    .btn-custom {
+        background-color: #007bffa0; /* Light blue color for normal state */
+        border-color: #007bff; /* Slightly darker border color for contrast */
+        color: white; /* White text for better visibility */
+        padding: 8px 15px; /* Adequate padding for button sizing */
+        border-radius: 4px; /* Rounded corners for a modern look */
+    }
+
+    .btn-custom:hover {
+        background-color: #0056b3; /* Darker blue on hover for user feedback */
+        border-color: #004085; /* Corresponding darker border on hover */
+    }
+
+    .btn-group {
+        display: flex;
+        justify-content: center;
+        width: 80%; /* Sets the width of the button groups centrally */
+        margin: 20px auto; /* Centers the button group with top and bottom margin */
+    }
+
+    .d-flex {
+        display: flex;
+        justify-content: center; /* Ensures contents within are centered */
+        align-items: center; /* Aligns items vertically */
     }
 </style>
 
-<div class="container">
+
+<div class="container mt-5">
+    <h2 class="mb-3">{{ message }}</h2>
+    
+    <div class="btn-group mb-3" role="group" aria-label="Movie Sources">
+        <a href="?source=trending" class="btn btn-custom {% if current_source == 'trending' %}active{% endif %}">Trending Movies</a>
+        <a href="?source=latest_updated" class="btn btn-custom {% if current_source == 'latest_updated' %}active{% endif %}">Latest Updated Movies</a>
+        <a href="?source=latest" class="btn btn-custom {% if current_source == 'latest' %}active{% endif %}">Latest Movies</a>
+        <a href="?reset_preferences=true" class="btn btn-custom">Reset Preferences</a> <!-- Reset button -->
+    </div>
+    
+
+    <div class="d-flex flex-wrap mb-3">
+        {% for flag in unique_country_flag %}
+        <a href="?source={{ current_source }}&country={{ flag }}" class="btn flag-button btn-outline-secondary {% if current_country == flag %}active{% endif %}">
+            <span class="flag-icon-custom fi fi-{{ flag|lower }}"></span>
+        </a>
+        {% endfor %}
+    </div>
+
     <div class="row">
-        <h2>{{ message }}</h2>
-        <!-- Buttons for choosing the movie source -->
-        <div class="btn-group mb-3" role="group" aria-label="Movie Sources">
-            <a href="?source=trending" class="btn {% if current_source == 'trending' %}btn-primary{% else %}btn-outline-primary{% endif %}">Trending Movies</a>
-            <a href="?source=latest_updated" class="btn {% if current_source == 'latest_updated' %}btn-primary{% else %}btn-outline-primary{% endif %}">Latest Updated Movies</a>
-            <a href="?source=latest" class="btn {% if current_source == 'latest' %}btn-primary{% else %}btn-outline-primary{% endif %}">Latest Movies</a>
-        </div>
-        
         {% for movie in movies %}
         <div class="col-md-4 mb-4">
             <div class="card card-custom">
-                <img src="{{ movie.poster }}" class="card-img-top" alt="{{ movie.original_title }}">
-                <div class="card-body">
-                    <h5 class="card-title">{{ movie.original_title }}</h5>
-                    <p class="card-text">{{ movie.get_desc }}</p>
-                    {% if movie.random_slug %}
-                    <a href="{% url 'web:movie_detail' movie.random_slug %}" class="btn btn-primary btn-custom">Learn More</a>
-                    {% endif %}
-                </div>
+                <a href="{% url 'web:movie_detail' movie.random_slug %}" style="text-decoration: none; color: inherit;">
+                    <img src="{{ movie.poster }}" class="card-img-top" alt="{{ movie.original_title }}">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ movie.original_title }}</h5>
+                        <p class="card-text">{{ movie.get_desc }}</p>
+                        <span class="flag-icon-custom fi fi-{{ movie.country_flag |lower }}"></span>
+                        <p class="card-text">
+                            <small class="text-muted">
+                                <span class="badge bg-primary">{{ movie.rating }}</span>
+                                <span class="badge bg-success">{{ movie.release_date }}</span>
+                            </small>
+                        </p>
+                    </div>
+                </a>
             </div>
         </div>
         {% endfor %}

@@ -23,7 +23,10 @@ from learning.transcript import populate_and_transcribe
 from tmdb_scraper import fill_movie_db, populateDBwithTopMovies
 from thumbnail import main as get_thumbnail
 from learning.find_word_translate import find_hardest_words , find_not_translated , fill_languages
+from learning.getAllMovies import foo
 
+def local_movies():
+    foo()
 
 def create_folders():
     
@@ -80,6 +83,7 @@ def main():
     parser = argparse.ArgumentParser(description='Process some movies.')
     parser.add_argument('--fill', action='store_true', help='If set, fill the database with top movies')
     parser.add_argument('--download', action='store_true', help='If set, download movies from zip')
+    parser.add_argument('--movies', action='store_true', help='If set, download movies from zip')
     args = parser.parse_args()
     
     if args.download:
@@ -91,7 +95,12 @@ def main():
     if args.fill:
         populateDBwithTopMovies()
         print("Movies filled")
+        sys.exit()
         
+    if args.movies:
+        local_movies()
+        sys.exit()
+    
     
     print("Starting the process")
     fill_languages()

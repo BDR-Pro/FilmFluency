@@ -50,6 +50,7 @@ class Movie(models.Model):
     tmdb_id = models.IntegerField(null=True, blank=True)
     original_title = models.CharField(max_length=100, null=True, blank=True)
     original_language = models.CharField(max_length=10, null=True, blank=True)
+    country_flag = models.CharField(max_length=2, null=True, blank=True)
     popularity = models.FloatField(null=True, blank=True)
     vote_average = models.FloatField(null=True, blank=True)
     vote_count = models.IntegerField(null=True, blank=True)

@@ -3,10 +3,38 @@
 {% block title %}Leaderboard - Film Fluency{% endblock %}
 
 {% block content %}
+<style>
+    .table-custom {
+        border-collapse: separate;
+        border-spacing: 0 0.5rem; /* Spacing between rows */
+    }
+    .table-custom thead th {
+        background-color: #007bff; /* Primary color */
+        color: white;
+    }
+    .table-custom tbody tr {
+        background-color: #f8f9fa; /* Light background for rows */
+        transition: background-color 0.3s ease; /* Smooth transition for hover */
+    }
+    .table-custom tbody tr:hover {
+        background-color: #e2e6ea; /* Slightly darker on hover */
+    }
+    .table-custom th, .table-custom td {
+        border-top: none; /* Removes the top border */
+        border-bottom: thin solid #dee2e6; /* Subtle bottom border */
+        vertical-align: middle; /* Centers content vertically */
+    }
+    .no-entries {
+        text-align: center; /* Center-align text */
+        color: #6c757d; /* Bootstrap's secondary text color for contrast */
+        padding: 10px; /* Padding for aesthetics */
+    }
+</style>
+
 <div class="container mt-5">
     <h2>Leaderboard</h2>
     <div class="table-responsive">
-        <table class="table table-hover">
+        <table class="table table-custom table-hover">
             <thead class="table-dark">
                 <tr>
                     <th scope="col">#</th>
@@ -24,8 +52,8 @@
                     <td>{{ entry.user.userprofile.location }}</td>
                 </tr>
                 {% empty %}
-                <tr>
-                    <td colspan="4">No entries found.</td>
+                <tr class="no-entries">
+                    <td colspan="4">No entries found. Be the first to get on the leaderboard!</td>
                 </tr>
                 {% endfor %}
             </tbody>

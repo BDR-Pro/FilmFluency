@@ -119,7 +119,8 @@ def fill_movie_db(title):
                 original_language=movie_data.get('original_language', ''),
                 popularity=movie_data.get('popularity', 0),
                 vote_average=movie_data.get('vote_average', 0),
-                vote_count=movie_data.get('vote_count', 0)
+                vote_count=movie_data.get('vote_count', 0),
+                country_flag=get_country_flag(movie_data.get('original_language', '')),
             )
         except Exception as e:
             
@@ -129,8 +130,36 @@ def fill_movie_db(title):
         print("No data found for:", normalized_title)
         return True
         
-        
-        
+def get_country_flag(original_language):
+    # Mapping from language codes to country flags using ISO 3166-1 alpha-2 codes
+    language_to_country = {
+        'en': 'US',  # English
+        'es': 'ES',  # Spanish
+        'fr': 'FR',  # French
+        'de': 'DE',  # German
+        'it': 'IT',  # Italian
+        'pt': 'PT',  # Portuguese
+        'ru': 'RU',  # Russian
+        'ja': 'JP',  # Japanese
+        'zh': 'CN',  # Chinese
+        'ko': 'KR',  # Korean
+        'sv': 'SE',  # Swedish
+        'da': 'DK',  # Danish
+        'pl': 'PL',  # Polish
+        'nl': 'NL',  # Dutch
+        'hi': 'IN',  # Hindi
+        'ar': 'SA',  # Arabic
+        'he': 'IL',  # Hebrew
+        'th': 'TH',  # Thai
+        'cs': 'CZ',  # Czech
+        'tr': 'TR',  # Turkish
+        'fi': 'FI',  # Finnish
+        'hu': 'HU',  # Hungarian
+        'no': 'NO',  # Norwegian
+        'el': 'GR'   # Greek
+    }
+    return language_to_country.get(original_language, 'ZZ')
+
 
 
 def fetch_movies(category, genre_id=None, language=None):

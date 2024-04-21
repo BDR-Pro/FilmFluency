@@ -21,7 +21,6 @@ def get_video_with_highest_complexity():
     return video
 
 
-
 def get_videos_by_complexity(request):
     # Retrieve the complexity level from GET parameters or default to a minimum value
     lowest_complexity = request.GET.get('lowest_complexity', 0)
@@ -77,8 +76,13 @@ def get_unique_movies(request):
     
     if order_by not in valid_orderings:
         order_by = 'vote_average'
-
-    movies = Movie.objects.distinct().order_by('-' + order_by)  # Note the '-' for descending order
+    
+    country = request.GET.get('country', '')
+    if country:
+        movies = Movie.objects.filter(country_flag=country).distinct().order_by('-' + order_by)
+    else:
+        movies = Movie.objects.distinct().order_by('-' + order_by)  # Note the '-' for descending order
+        
     paginator = Paginator(movies, 6)  # Show 6 movies per page
 
     page = request.GET.get('page')
@@ -91,5 +95,10 @@ def get_unique_movies(request):
         # If page is out of range (e.g. 9999), deliver last page of results.
         movies = paginator.page(paginator.num_pages)
 
-    return render(request, 'movies.html', {'movies': movies , 'order_by':order_by})
+    
+    return render(request, 'movies.html', {'movies': movies , 'order_by':order_by , 'unique_country_flag':get_unique_country_flag(), 'country':country})
+
+
+def get_unique_country_flag():
+    return Movie.objects.values_list('country_flag',flat =True ).distinct()
 

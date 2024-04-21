@@ -7,6 +7,7 @@ from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.shortcuts import render
 from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
+from learning.views import get_unique_country_flag
 
 
 def get_latest_updated_movies():
@@ -65,7 +66,8 @@ def get_movie_by_slug(request,random_slug):
     movie = get_object_or_404(Movie, random_slug=random_slug)  
     isittrendy = TrendingMovies.objects.get_or_create(movie=movie)
     views=isittrendy[0].views
-    return render(request, 'movie_detail.html', {'movie': movie, 'views': views})
+    does_it_have_videos = Video.objects.filter(movie=movie).count() > 0
+    return render(request, 'movie_detail.html', {'movie': movie, 'views': views, 'does_it_have_videos': does_it_have_videos})
 
 def get_trending_movies():
     return Movie.objects.filter(trendingmovies__isnull=False).order_by('-trendingmovies__views')
@@ -76,20 +78,27 @@ def get_latest_updated_movies():
 def get_latest_movies():
     return Movie.objects.order_by('-release_date')
 
-
 def home(request):
     """ Render the homepage with introductory information and top trending movies based on user selection or cookie. """
     
     # Default source
     default_source = 'trending'
-    
+    if 'reset_preferences' in request.GET:
+        response = redirect('web:home')  # Assuming 'home' is the name of the URL pattern for this view
+        response.delete_cookie('preferred_movies')
+        response.delete_cookie('country')
+        return response
     # Check if there is a user preference in cookies or use the default
     user_choice = request.COOKIES.get('preferred_movies', default_source)
+    country_flag = request.COOKIES.get('country', '')
     
     # Check if a new choice has been made via GET request
     if 'source' in request.GET:
         user_choice = request.GET['source']
     
+    if 'country' in request.GET:
+        country_flag = request.GET['country']
+        
     # Map source names to function calls
     movie_sources = {
         'trending': get_trending_movies,
@@ -98,17 +107,28 @@ def home(request):
     }
     
     # Fetch movies from the chosen source
-    movies = movie_sources.get(user_choice, get_trending_movies)()[:5]
+    movies = movie_sources.get(user_choice, get_trending_movies)()
+    if country_flag:
+        movies = movies.filter(country_flag=country_flag)  # Assuming Movie model has 'country_flag' attribute
+    
     message = f"{user_choice.replace('_', ' ').title()} Movies"
     
-    # Render response
-    response = render(request, 'index.html', {'movies': movies, 'message': message, 'current_source': user_choice})
+    # Render response with initial movie data
+    response = render(request, 'index.html', {
+        'movies': movies[:5],  # Limit to 5 movies for simplicity
+        'message': message,
+        'current_source': user_choice,
+        'unique_country_flag': get_unique_country_flag(),
+        'current_country': country_flag
+    })
+    if not 'reset_preferences' in request.GET:
 
-    # Set/update cookie for user's movie source preference
-    response.set_cookie('preferred_movies', user_choice, max_age=30*24*60*60)  # Expires in 30 days
-    
-    
+        # Set/update cookie for user's movie source preference and country
+        response.set_cookie('preferred_movies', user_choice, max_age=30*24*60*60)  # Expires in 30 days
+        response.set_cookie('country', country_flag, max_age=30*24*60*60)  # Expires in 30 days
+        
     return response
+
 
 
 def video_list(request):
@@ -157,7 +177,7 @@ def random_movie(request):
 
 def search_movies(request):
     query = request.GET.get('query')
-    movies = Movie.objects.filter(original_title__icontains=query)
+    movies = Movie.objects.filter(title__icontains=query)
     if not movies:
         return render(request, 'movies.html', {'no_res': True})
     return render(request, 'movies.html', {'movies': movies, 'query': query})

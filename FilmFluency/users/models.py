@@ -1,25 +1,33 @@
 from django.db import models
 from django.contrib.auth.models import User
 from learning.models import Video, Movie
+import random
+
+def upload_to(instance, filename):
+    # This function generates a path like: 'profile_pictures/user_123/myphoto.jpg'
+    return f'{instance._meta.app_label}/{instance._meta.model_name}/{instance.user.id}/{filename}'
+
+def dice_beer():
+   """Generate a random profile picture using the DiceBear API."""
+   seeds = ['Simon', 'Felix', 'Nala', 'Midnight','Luna', 'Bella', 'Charlie', 'Lucy', 'Cooper', 'Daisy', 'Max', 'Bailey', 'Sadie', 'Molly', 'Buddy', 'Duke', 'Rocky', 'Lola', 'Stella', 'Harley', 'Zoe', 'Ginger', 'Bear', 'Toby', 'Roxy', 'Maggie', 'Sophie', 'Chloe', 'Penny', 'Riley', 'Gracie', 'Lily', 'Mia', 'Jake', 'Leo', 'Milo', 'Murphy', 'Oscar', 'Piper', 'Ruby', 'Scout', 'Shadow', 'Sunny', 'Teddy', 'Willow', 'Winston', 'Zara', 'Zeus', 'Ziggy', 'Zara', 'Zoe']
+   return f'https://api.dicebear.com/8.x/adventurer/svg?seed={random.choice(seeds)}'
 
 class UserProfile(models.Model):
-    
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     nickname = models.CharField(max_length=255)
-    profile_picture = models.ImageField(upload_to='profile_pictures/', null=True, blank=True)
-    cover_picture = models.ImageField(upload_to='cover_pictures/', null=True, blank=True)
+    profile_picture = models.ImageField(upload_to=upload_to, default=dice_beer())
+    cover_picture = models.ImageField(upload_to=upload_to, default="https://www.worldatlas.com/r/w1200/upload/56/c5/7c/shutterstock-520792630.jpg")
     bio = models.TextField(null=True, blank=True)
     location = models.CharField(max_length=255, null=True, blank=True)
     language = models.ForeignKey('learning.Language', on_delete=models.SET_NULL, null=True, blank=True)
     favourite_languages = models.ManyToManyField('learning.Language', related_name='favourite_of')
     friends = models.ManyToManyField('self', symmetrical=True)
-
+   
     def __str__(self):
         return self.nickname
-    
+
     def get_friends(self):
         return self.friends.all()
-    
 
 class UserProgress(models.Model):
     
@@ -43,8 +51,12 @@ class UserProgress(models.Model):
     notifications = models.ManyToManyField('learning.Notification', related_name='notified_to')
 
     def next_level_points(self):
-        """ Calculate points needed for the next level dynamically. """
-        return (self.points / 2) * self.user_level
+        """Calculate points needed for the next level, with a difficulty multiplier."""
+        next_level = self.user_level + 1
+        multiplier = 10  # Adjust the multiplier to set the difficulty curve
+        points_required = (next_level ** 2) * multiplier
+        return points_required
+
 
     @property
     def completed_videos_count(self):
