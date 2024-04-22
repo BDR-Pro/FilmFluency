@@ -8,6 +8,15 @@ from tqdm import tqdm
 import zipfile
 import sys
 import os
+import django
+
+# Setup the Django environment
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'FilmFluency.settings')
+django.setup()
+
+# Now import your Django dependent modules
+# Continue with your script logic
+
 from learning.isitalreadydownloaded import check_if_already_downloaded , movies_without_title , set_title
 MOVIETOCLIPS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "MovieToClips")
 SRT = os.path.join(MOVIETOCLIPS, "srt")

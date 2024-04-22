@@ -12,7 +12,7 @@ from .models import Product, Payment, Invoice
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
-from .functions import calc_weeks,exchange_rate_calc
+from .functions import calc_weeks
 from users.models import UserProfile
 logger = logging.getLogger(__name__)
 from django.conf import settings

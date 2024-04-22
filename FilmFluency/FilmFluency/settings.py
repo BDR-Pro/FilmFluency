@@ -87,7 +87,6 @@ TEMPLATES = [
 
 
 import os
-TMDB_API_KEY = os.environ.get('TMDB_API_KEY')
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 #S3 BUCKET
@@ -107,7 +106,9 @@ EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
+# TMDB
 
+TMDB_API_KEY = os.environ.get('TMDB_API_KEY')
 
 #rdis
 RD_PASS = os.environ.get('RD_PASS')
@@ -115,8 +116,7 @@ RD_PASS = os.environ.get('RD_PASS')
 
 # Create a list of these variables
 config_keys = [SECRET_KEY, ACCESS_KEY,RD_PASS, 
-                DB_PASS,TAP_SECRET_KEY, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD,
-         TMDB_API_KEY]
+                DB_PASS,TAP_SECRET_KEY, EMAIL_HOST_USER, TMDB_API_KEY ,EMAIL_HOST_PASSWORD]
 
 # Check if all elements are not None
 is_loaded = all(key is not None for key in config_keys)
@@ -155,7 +155,7 @@ cursor.execute("SELECT 1")
 print("Database pinged successfully")
 
 
-setup = [TMDB_API_KEY, SECRET_KEY, ACCESS_KEY, DB_PASS,RD_PASS]
+setup = [TMDB_API_KEY,SECRET_KEY, ACCESS_KEY, DB_PASS,RD_PASS]
 
 if all(setup):
     print("All environment variables loaded successfully")
