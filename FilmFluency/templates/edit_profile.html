@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+
+{% load custom_filters %}
+
+{% block title %}Edit Profile - Film Fluency{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <h2>Edit Profile</h2>
+            <form id="profileForm" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                {% csrf_token %}
+
+                {% if form.profile_picture.value %}
+                <div class="mb-3 text-center">
+                    <img src="{{ form.profile_picture.value.url }}" id="profilePicPreview" class="img-thumbnail" style="cursor: pointer; max-height: 200px;" alt="Profile Picture" onclick="document.getElementById('id_profile_picture').click();">
+                    {{ form.profile_picture|add_class:'form-control-file d-none' }}
+                </div>
+                {% endif %}
+
+                <div class="mb-3">
+                    <label for="{{ form.country.id_for_label }}" class="form-label">{{ form.country.label }}</label>
+                    <select class="form-control" id="{{ form.country.id_for_label }}" name="{{ form.country.html_name }}">
+                        <optgroup label="Middle East">
+                            {% for country in middle_east_countries %}
+                            <option value="{{ country.code }}" {% if country.code == profile.country %}selected{% endif %}>
+                                {{ country.name }}
+                            </option>
+                            {% endfor %}
+                        </optgroup>
+                        <optgroup label="Other Countries">
+                            {% for country in other_countries %}
+                            <option value="{{ country.code }}" {% if country.code == profile.country %}selected{% endif %}>
+                                {{ country.name }}
+                            </option>
+                            {% endfor %}
+                        </optgroup>
+                    </select>
+                </div>
+
+                {% for field in form %}
+                {% if field.name != 'profile_picture' and field.name != 'country' %}
+                <div class="mb-3">
+                    <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                    {{ field|add_class:'form-control' }}
+                    {% if field.help_text %}
+                    <small class="form-text text-muted">{{ field.help_text }}</small>
+                    {% endif %}
+                    {% for error in field.errors %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {% endfor %}
+
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </form>
+            <div id="alertPlaceholder"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Load image preview
+    var loadFile = function(event) {
+        var output = document.getElementById('profilePicPreview');
+        output.src = URL.createObjectURL(event.target.files[0]);
+        output.onload = function() {
+            URL.revokeObjectURL(output.src); // Free up memory
+        }
+    };
+
+    document.getElementById('id_profile_picture').addEventListener('change', loadFile);
+
+    // Handle form submission with AJAX
+    document.getElementById('profileForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const formData = new FormData(this);
+        fetch(this.action, {
+            method: 'POST',
+            body: formData,
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.success) {
+                showBootstrapAlert('success', data.message);
+            } else {
+                showBootstrapAlert('danger', 'Failed to update profile: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showBootstrapAlert('danger', 'An error occurred. Please try again.');
+        });
+    });
+
+    function showBootstrapAlert(type, message) {
+        const alertPlaceholder = document.getElementById('alertPlaceholder');
+        alertPlaceholder.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>`;
+    }
+
+    // Bootstrap form validation
+    (function() {
+        'use strict';
+        window.addEventListener('load', function() {
+            var forms = document.getElementsByClassName('needs-validation');
+            Array.prototype.forEach.call(forms, function(form) {
+                form.addEventListener('submit', function(event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+    })();
+</script>
+{% endblock %}

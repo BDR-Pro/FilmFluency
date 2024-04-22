@@ -61,6 +61,8 @@ class Product(models.Model):
     weeks = models.DateTimeField()
     description = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
-
+    image = models.ImageField(upload_to='products/', null=True, blank=True)
+    featured = models.BooleanField(default=False)
+    
     def __str__(self):
         return f"{self.name} - {self.price} {self.currency}"

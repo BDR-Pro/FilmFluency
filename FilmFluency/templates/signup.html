@@ -1,30 +1,97 @@
 {% extends 'base.html' %}
 
-{% block title %}Sign Up - Film Fluency{% endblock %}
-
+{% block title %}Sign Up{% endblock %}
 {% block content %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
 <div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <h2>Sign Up</h2>
-            <form action="{% url 'users:signup' %}" method="post">
-                {% csrf_token %}
-                <div class="mb-3">
-                    <label for="signUpEmail" class="form-label">Email address</label>
-                    <input type="email" class="form-control" id="signUpEmail" name="email" required>
-                    <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
-                </div>
-                <div class="mb-3">
-                    <label for="signUpPassword" class="form-label">Password</label>
-                    <input type="password" class="form-control" id="signUpPassword" name="password" required>
-                </div>
-                <div class="mb-3">
-                    <label for="signUpConfirmPassword" class="form-label">Confirm Password</label>
-                    <input type="password" class="form-control" id="signUpConfirmPassword" name="confirm_password" required>
-                </div>
-                <button type="submit" class="btn btn-success">Sign Up</button>
-            </form>
+    <h2>Sign Up</h2>
+    <form method="post" class="needs-validation" novalidate>
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="mb-3">
+            <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+            <input type="{{ field.field.widget.input_type }}" class="form-control {% if field.errors %}is-invalid{% endif %}"
+                   id="{{ field.id_for_label }}" name="{{ field.name }}"
+                   placeholder="Enter {{ field.label }}" {% if field.field.required %}required{% endif %}
+                   {% if field.name == 'email' %}pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"{% endif %}
+                   {% if field.name == 'password1' %}onkeyup="checkPasswordStrength();"{% endif %}>
+            <div class="invalid-feedback">
+                {% for error in field.errors %}
+                {{ error }}
+                {% endfor %}
+            </div>
+            {% if field.help_text %}
+            <div class="form-text">{{ field.help_text }}</div>
+            {% endif %}
         </div>
-    </div>
+        {% endfor %}
+        <div class="mb-3" id="passwordStrength" style="display: none;">
+            <p class="form-text">Password Strength: <span id="passwordStrengthValue"></span></p>
+        </div>
+        <button type="submit" class="btn btn-primary">Sign up</button>
+    </form>
 </div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Bootstrap Bundle with Popper -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
+{% endblock %}
+{% block extra_js %}
+<script>
+    function checkPasswordStrength() {
+        var passwordInput = document.querySelector('[name="password1"]');
+        var passwordValue = passwordInput.value;
+        var strengthText = document.getElementById('passwordStrengthValue');
+        var strengthIndicator = document.getElementById('passwordStrength');
+    
+        var strongRegex = new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})');
+        var mediumRegex = new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{6,})');
+    
+        if(strongRegex.test(passwordValue)) {
+            strengthText.innerHTML = 'Strong';
+            strengthText.style.color = 'green';
+            strengthIndicator.style.display = 'block';
+        } else if(mediumRegex.test(passwordValue)) {
+            strengthText.innerHTML = 'Medium';
+            strengthText.style.color = 'orange';
+            strengthIndicator.style.display = 'block';
+        } else {
+            strengthText.innerHTML = 'Weak';
+            strengthText.style.color = 'red';
+            strengthIndicator.style.display = 'block';
+        }
+    }
+    
+    // JavaScript for disabling form submissions if there are invalid fields
+    (function () {
+      'use strict'
+      var forms = document.querySelectorAll('.needs-validation')
+    
+      Array.prototype.slice.call(forms)
+        .forEach(function (form) {
+          form.addEventListener('submit', function (event) {
+            if (!form.checkValidity()) {
+              event.preventDefault()
+              event.stopPropagation()
+            }
+    
+            form.classList.add('was-validated')
+          }, false)
+        })
+    })();
+    </script>
+
+
 {% endblock %}

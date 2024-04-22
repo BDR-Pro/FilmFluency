@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Film Fluency{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Dashboard</h1>
+
+    <!-- Alerts for various stats -->
+    <div class="row mb-3">
+        <div class="col-lg-3 mb-3">
+            <div class="card bg-success text-white h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Total Users</h5>
+                    <p class="card-text">{{ number_of_users }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 mb-3">
+            <div class="card bg-info text-white h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Top Video</h5>
+                    <p class="card-text">{{ top_video.movie.title }} - Bookmarks: {{ top_video.num_bookmarks }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 mb-3">
+            <div class="card bg-warning text-white h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Most Polyglot User</h5>
+                    <p class="card-text">{{ most_polyglot_user.user.username }} - Languages: {{ most_polyglot_user.num_lang }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 mb-3">
+            <div class="card bg-danger text-white h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Highest Progress User</h5>
+                    <p class="card-text">{{ highest_progress_user.user.username }} - Points: {{ highest_progress_user.points }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tables for displaying lists -->
+    <div class="row">
+        <div class="col-lg-6 mb-3">
+            <h3>Recent Payments</h3>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">User</th>
+                        <th scope="col">Amount</th>
+                        <th scope="col">Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payment in payments %}
+                    <tr>
+                        <th scope="row">{{ forloop.counter }}</th>
+                        <td>{{ payment.user.username }}</td>
+                        <td>${{ payment.invoice.amount }} {{ payment.invoice.currency }}</td>
+                        <td>{{ payment.created_at|date:"Y-m-d H:i" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="col-lg-6 mb-3">
+            <h3>Recent Contact Messages</h3>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Message</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for message in contact_messages %}
+                    <tr>
+                        <th scope="row">{{ forloop.counter }}</th>
+                        <td>{{ message.name }}</td>
+                        <td>{{ message.email }}</td>
+                        <td>{{ message.message|truncatewords:10 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Progress bars and other metrics -->
+    <div class="row">
+        <div class="col-md-12">
+            <h3>User Progress</h3>
+            <div class="progress">
+                <div class="progress-bar" role="progressbar" style="width: {{ average_progress }}%" aria-valuenow="{{ average_progress }}" aria-valuemin="0" aria-valuemax="100">{{ average_progress }}%</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -12,70 +12,35 @@ from .models import Product, Payment, Invoice
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
-from .functions import calc_weeks, get_currency_by_ip,exchange_rate_calc
-
+from .functions import calc_weeks,exchange_rate_calc
+from users.models import UserProfile
 logger = logging.getLogger(__name__)
-from paypalrestsdk import Payment
 from django.conf import settings
 from django.http import JsonResponse
-import paypalrestsdk
 from django.contrib.auth.models import User
 
 TAP_SECRET_KEY = settings.TAP_SECRET_KEY
 
-"""
-paypalrestsdk.configure({
-    "mode": settings.PAYPAL_MODE,  # 'sandbox' or 'live'
-    "client_id": settings.PAYPAL_CLIENT_ID,
-    "client_secret": settings.PAYPAL_CLIENT_SECRET
-})
-"""
-def create_product(request):
-    iuser:User = request.user
-    if not iuser.is_staff or not iuser.is_superuser:
-        return HttpResponse("You are not authorized", status=401)
+def turn_amount_to_crypto(amount):
+    """Converts an amount in USD to equivalent amounts in major cryptocurrencies."""
+    # Including Bitcoin, Ethereum, Ripple, Monero, and Litecoin
+    api = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,ripple,monero,litecoin&vs_currencies=usd"
+    response = requests.get(api)
+    data = response.json()
+    btc = data['bitcoin']['usd']
+    eth = data['ethereum']['usd']
+    xmr = data['monero']['usd']
     
-    if request.method == 'POST':
-        name = request.POST.get('name')
-        
-        price = request.POST.get('price')
-        product = Product.objects.create(name=name, price=price)
-        product.save()
-        return HttpResponse(f"Product {name} created successfully with price {price}")
-    else:
-        return render(request, 'create_product.html')
-    
-def paypal_payment(request):
-    if request.method != 'POST':
-        return JsonResponse({'error': 'Method not allowed'}, status=405)
+    # Calculating how much of each cryptocurrency you can buy with the given USD amount
+    return {
+        'BTC': amount / btc,
+        'ETH': amount / eth,
+        'XMR': amount / xmr,
+    }
 
-    try:
-        product = Product.objects.get(name='Subscription')
-        payment = paypalrestsdk.Payment({
-            "intent": "sale",
-            "payer": {"payment_method": "paypal"},
-            "transactions": [{
-                "amount": {
-                    "total": str(product.price),
-                    "currency": request.POST.get('currency', 'USD')
-                },
-                "description": f"Payment for {product.name} for {request.user.username}"
-            }],
-            "redirect_urls": {
-                "return_url": request.build_absolute_uri('/payments/success/'),
-                "cancel_url": request.build_absolute_uri('/payments/cancelled/')
-            }
-        })
-
-        if payment.create():
-            logger.info("Payment [%s] created successfully", payment.id)
-            return JsonResponse({'approval_url': payment['links'][1]['href']})
-        else:
-            logger.error("Failed to create payment: %s", payment.error)
-            return JsonResponse({'error': 'Failed to initiate PayPal payment'}, status=500)
-    except Exception as e:
-        logger.exception("An unexpected error occurred during PayPal payment creation")
-        return JsonResponse({'error': str(e)}, status=500)
+def products(request):
+    products = Product.objects.all()
+    return render(request, 'product.html', {'products': products})
 
 # Redirects based on payment choice
 def payment_home(request):
@@ -86,65 +51,20 @@ def payment_home(request):
         if payment_method == 'crypto':
             return redirect('crypto_payment', amount=amount)
         
-        elif payment_method == 'moysar':
-            return redirect('initiate_payment')
-        
-        elif payment_method == 'paypal':
-            return redirect('paypal_payment')
+        elif payment_method == 'tap':
+            return redirect('tap_payment')
     else:
-        return render(request, 'payment_home.html')
+        return render(request, 'payment.html')
 
 
     
 
 def crypto_payment(request):
-    # Configuration for the CoinGate API
-    api_url = "https://api.coingate.com/v2/orders"
-    api_key = settings.COINGATE_API_KEY
-    coin=request.get('coin', 'BTC')
-    product = request.get('product', 'Subscription')
-    price = Product.objects.get(name=product).price
-    type_of_subscription = request.get('subscription', 'monthly')
-    payment = Payment.objects.create(user=request.user, payment_method='crypto', is_completed=False, invoice=Invoice(amount=price, currency='USD'))
-    payment.save()
-    try:
-        amount = float(price)
-        if amount <= 0:
-            raise ValueError("Amount must be greater than zero.")
-    except ValueError as e:
-        logger.error(f"Invalid payment amount: {amount}. Error: {str(e)}")
-        return HttpResponse(f"Invalid payment amount: {amount}", status=400)
+    product = request.POST.get('product')
+    amount = Product.objects.get(name=product).price
+    amount = turn_amount_to_crypto(amount)
+    return render(request, 'crypto_payment.html', {'amount': amount})
 
-    # Prepare the payload with the necessary details
-    payload = {
-        "order_id": str(payment.invoice_uuid),
-        "price_amount": amount,
-        "price_currency": "USD",
-        "receive_currency": coin,
-        "callback_url": request.build_absolute_uri('/payments/callback/'),  # URL to receive callbacks
-        "cancel_url": request.build_absolute_uri('/payment/cancelled/'),  # URL for payment cancellation
-        "success_url": request.build_absolute_uri('/payment/success/'),  # URL for successful payment
-        "title": f"Payment for Subscription of FilmFluency {type_of_subscription}",
-        "description": "Providing a entertaining and educational experience for learning languages.",
-    }
-
-    # Headers for the request
-    headers = {
-        'Authorization': f'Token {api_key}',
-        'Content-Type': 'application/json'
-    }
-
-    # Making a POST request to the CoinGate API
-    response = requests.post(api_url, json=payload, headers=headers)
-    if response.status_code == 200:
-        data = response.json()
-        # Redirect the user to CoinGate payment page
-        return HttpResponseRedirect(data['payment_url'])
-    else:
-        error_message = response.json().get('error', 'Failed to initiate crypto payment')
-        logger.error(f"Crypto payment initiation failed: {error_message}")
-        return HttpResponse(f"Failed to initiate crypto payment: {error_message}", status=400)
-    
 @require_http_methods(["POST"])
 @csrf_exempt
 def tap_payment(request):
@@ -199,23 +119,19 @@ def success(request):
     invoice.subscreibed_at = timezone.now()
     invoice.expires_at = timezone.now() + timezone.timedelta(weeks=calc_weeks(invoice.amount, payment.product.name))   
     invoice.save()
+    profile = UserProfile.objects.get(user=request.user)
+    profile.paid_user = True
     return render(request, 'success.html')
 
-
-def callback(request):
-    # CoinGate payment callback logic
-    pass
 
 
 def product(request):
 
     product = Product.objects.all()
-    ip = request.META.get('REMOTE_ADDR')
-    preferred_currency = get_currency_by_ip(ip)
     
     for i in product:
-        i.price = i.price * exchange_rate_calc(preferred_currency)
-    return render(request, 'product.html', {'products': product, 'preferred_currency': preferred_currency})
+        i.price = i.price * 3.75
+    return render(request, 'product.html', {'products': product})
     
     
 # Redirects based on payment choice

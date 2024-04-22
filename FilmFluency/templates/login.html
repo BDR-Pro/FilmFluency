@@ -7,19 +7,50 @@
     <div class="row justify-content-center">
         <div class="col-md-6">
             <h2>Login</h2>
-            <form action="{% url 'users:login' %}" method="post">
+            <form action="{% url 'users:login' %}" method="post" class="needs-validation" novalidate>
                 {% csrf_token %}
                 <div class="mb-3">
-                    <label for="loginEmail" class="form-label">Email address</label>
-                    <input type="email" class="form-control" id="loginEmail" name="email" required>
+                    <label for="username" class="form-label">Username</label>
+                    <input type="text" class="form-control" id="username" name="username" placeholder="Enter your username" required>
+                    <div class="invalid-feedback">
+                        Please enter your username.
+                    </div>
                 </div>
                 <div class="mb-3">
-                    <label for="loginPassword" class="form-label">Password</label>
-                    <input type="password" class="form-control" id="loginPassword" name="password" required>
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
+                    <div class="invalid-feedback">
+                        Please enter your password.
+                    </div>
                 </div>
+                {% if error %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+                {% endif %}
                 <button type="submit" class="btn btn-primary">Login</button>
             </form>
         </div>
     </div>
 </div>
+
+<script>
+// Example starter JavaScript for disabling form submissions if there are invalid fields
+(function () {
+  'use strict'
+  var forms = document.querySelectorAll('.needs-validation')
+
+  Array.prototype.slice.call(forms)
+    .forEach(function (form) {
+      form.addEventListener('submit', function (event) {
+        if (!form.checkValidity()) {
+          event.preventDefault()
+          event.stopPropagation()
+        }
+
+        form.classList.add('was-validated')
+      }, false)
+    })
+})();
+</script>
 {% endblock %}

@@ -1,10 +1,13 @@
 from django.urls import path
-from .views import create_product, paypal_payment, tap_payment
+from .views import  crypto_payment, tap_payment , payment_home, products
 app_name = 'payment'
 
 
 urlpatterns = [
-    path('create-product/', create_product, name='create-product'),
-    path('paypal-payment/', paypal_payment, name='paypal-payment'),
+
     path('tap-payment/', tap_payment, name='tap-payment'),
+    path('subscribe/', payment_home, name='subscribe'),
+    path('products/', products, name='products'),
+    path('crypto-payment/', crypto_payment, name='crypto-payment'),
+    
 ]

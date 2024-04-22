@@ -46,7 +46,7 @@
 <body>
     <div class="container mt-5">
         <div class="cover-picture" style="{% if user.userprofile.cover_picture %}background-image: url('{{ user.userprofile.cover_picture.url }}');{% else %}background-color: #d3d3d3;{% endif %}"></div>
-        <img src="{{ user.UserProfile.profile_picture.url|default_if_none:'https://api.dicebear.com/8.x/adventurer/svg?seed=felix' }}" alt="Profile Picture" class="profile-picture mx-auto d-block">
+        <img src="https://api.dicebear.com/8.x/adventurer/svg?seed={{ user.UserProfile.profile_picture.url|default_if_none:'https://api.dicebear.com/8.x/adventurer/svg?seed=felix' }}" alt="Profile Picture" class="profile-picture mx-auto d-block">
         <h1 class="text-center mt-2">{{ user.UserProfile.nickname }}</h1>
         <p class="text-center text-muted">{{ user.UserProfile.bio }}</p>
 

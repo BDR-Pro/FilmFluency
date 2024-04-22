@@ -4,8 +4,6 @@ import re
 from learning.models import Movie  
 from imdb import IMDb
 import random
-from datetime import datetime
-from pathlib import Path
 from api.upload_to_s3 import upload_to_s3
 from django.conf import settings
 
@@ -215,7 +213,14 @@ def update_movies():
         'languages': {
             'fr': 'French',
             'de': 'German',
-            'es': 'Spanish'
+            'es': 'Spanish',
+            'it': 'Italian',
+            'pt': 'Portuguese',
+            'ru': 'Russian',
+            'ja': 'Japanese',
+            'zh': 'Chinese',
+            'ko': 'Korean',
+            
         }
     }
 

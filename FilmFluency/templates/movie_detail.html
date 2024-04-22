@@ -3,53 +3,41 @@
 {% block title %}{{ movie.original_title }} - Movie Details{% endblock %}
 
 {% block content %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
 <style>
     body {
         font-family: 'Arial', sans-serif;
         background-color: #f8f9fa;
     }
-    h1 {
-        font-weight: 300;
-    }
     .btn {
         font-weight: bold;
         border: none;
-        color: #333; /* Dark grey text */
         transition: background-color 0.2s, border-color 0.2s;
-        padding: 0.375rem 0.75rem; /* Smaller padding */
-        font-size: 0.9rem; /* Smaller text */
-        border-radius: 0.25rem; /* Slight rounding */
-        margin-right: 0.5rem; /* Space between buttons */
-    }
-    .btn:hover {
-        color: #000; /* Darker text on hover */
-        background-color: #e2e6ea; /* Very light grey background */
-    }
-    .btn-primary {
-        background-color: #e2e6ea; /* Light grey background */
-    }
-    .btn-info {
-        background-color: #dbeafe; /* Very light blue */
-    }
-    .btn-success {
-        background-color: #d1e7dd; /* Very light green */
-    }
-    .btn-danger {
-        background-color: #f8d7da; /* Very light red */
-    }
-    .badge {
-        font-size: 1rem;
-    }
-    .bi {
+        padding: 0.375rem 0.75rem;
+        font-size: 0.9rem;
+        border-radius: 0.25rem;
         margin-right: 0.5rem;
     }
+    .btn:hover {
+        color: #000;
+        background-color: #e2e6ea;
+    }
+    .btn-primary { background-color: #e2e6ea; }
+    .btn-info { background-color: #dbeafe; }
+    .btn-success { background-color: #d1e7dd; }
+    .btn-danger { background-color: #f8d7da; }
+    .bi { margin-right: 0.5rem; }
 </style>
 
 <div class="container mt-5">
     <div class="row g-4 align-items-center">
         <div class="col-md-5 col-lg-4">
             <img src="{{ movie.poster }}" alt="{{ movie.title }} Poster" class="img-fluid rounded shadow-sm">
-            {% if movie.original_title != movie.title %} <p class="text-muted mt-2">Original Title: {{ movie.original_title }}</p> {% endif %}
+            {% if movie.original_title != movie.title %} 
+                <p class="text-muted mt-2">Original Title: {{ movie.original_title }}</p> 
+            {% endif %}
         </div>
         <div class="col-md-7 col-lg-8">
             <h1 class="display-5">{{ movie.title }}</h1>
@@ -67,25 +55,95 @@
                 <i class="bi bi-eye-fill"></i> Views: {{ views }}
             </p>
             {% if movie.does_it_have_videos %}
-            <a href="{% url 'learning:videos_by_movie' movie.random_slug %}" class="btn btn-primary">
+            <a href="{% url 'learning:videos_by_movie' movie.random_slug %}" class="btn btn-primary {% if not request.user.is_authenticated %}disabled{% endif %}">
                 <i class="bi bi-play-fill"></i> View Related Videos
             </a>
             {% else %}
-            <a href="#" class="btn btn-primary disabled" aria-disabled="true">
+            <button class="btn btn-primary disabled" aria-disabled="true">
                 <i class="bi bi-play-fill"></i> Videos will be added soon
-            </a>
+            </button>
             {% endif %}
-            <a href="{% url 'learning:unique_movies' %}" class="btn btn-info">
-                <i class="bi bi-bell"></i> Notify Me
-            </a>
-            <a href="{% url 'users:add_to_favorites' movie.random_slug %}" class="btn btn-success">
-                <i class="bi bi-heart-fill"></i> Add to Favorites
-            </a>
-            <a href="{% url 'users:report_movie' movie.random_slug %}" class="btn btn-danger">
-                <i class="bi bi-exclamation-triangle-fill"></i> Report
-            </a>
+            
+            <button id="notify-btn" class="btn btn-info {% if not request.user.is_authenticated %}disabled{% endif %} {% if notifed %}btn-warning{% endif %}">
+                <i class="bi bi-bell"></i> {% if notifed %}Unnotify{% else %}Notify Me{% endif %}
+            </button>
+            
+            <button id="favorite-btn" class="btn btn-success {% if not request.user.is_authenticated %}disabled{% endif %} {% if is_favorite %}btn-danger{% endif %}">
+                <i class="bi bi-arrow-through-heart-fill"></i> {% if is_favorite %}Remove from Favorites{% else %}Add to Favorites{% endif %}
+            </button>
+            
+            <button id="report-btn" class="btn btn-danger {% if not request.user.is_authenticated %}disabled{% endif %} {% if reported %}btn-dark{% endif %}">
+                <i class="bi bi-exclamation-triangle-fill"></i> {% if reported %}Reported{% else %}Report{% endif %}
+            </button>
         </div>
     </div>
 </div>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"></script>
+{% endblock %}
+
+{% block extra_js %}
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const notifyBtn = document.getElementById('notify-btn');
+        const favoriteBtn = document.getElementById('favorite-btn');
+        const reportBtn = document.getElementById('report-btn');
+
+        // Initially check if the movie is favorited or notified and adjust the button state
+        {% if movie.is_favorited %}
+        favoriteBtn.classList.add('btn-danger');
+        favoriteBtn.innerText = 'Remove from Favorites';
+        {% endif %}
+
+        {% if movie.is_notified %}
+        notifyBtn.classList.add('btn-warning');
+        notifyBtn.innerText = 'Unnotify';
+        {% endif %}
+
+        notifyBtn.addEventListener('click', function() {
+            if (this.classList.contains('disabled')) return;
+            fetch(`{% url 'users:notify_me'%}?movie={{movie.random_slug}}`, { method: 'GET' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    this.classList.toggle('btn-warning'); // Toggle the notification state
+                    this.innerText = this.classList.contains('btn-warning') ? 'Unnotify' : 'Notify Me';
+                } else {
+                    alert('Failed to notify: ' + data.message);
+                }
+            });
+        });
+        <!-- Add the favorite button event listener -->
+        favoriteBtn.addEventListener('click', function() {
+            if (this.classList.contains('disabled')) return;
+            fetch(`{% url 'users:favorite'%}?movie={{movie.random_slug}}`, { method: 'GET' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    this.classList.toggle('btn-danger'); // Toggle the favorite state
+                    this.innerText = this.classList.contains('btn-danger') ? 'Remove from Favorites' : 'Add to Favorites';
+                } else {
+                    alert('Failed to favorite: ' + data.message);
+                }
+            });
+        });
+        reportBtn.addEventListener('click', function() {
+            if (this.classList.contains('disabled')) return;
+            const reason = prompt('Please enter your reason for reporting this movie:');
+            if (!reason) return; // If no reason is provided, do not proceed
+
+            fetch(`{% url 'users:report' %}?type=movie&slug={{movie.random_slug}}&report=${reason}`, { method: 'GET' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    this.classList.add('btn-dark'); // Change color to indicate reported
+                    this.innerText = 'Reported';
+                } else {
+                    alert('Failed to report: ' + data.message);
+                }
+            });
+        });
+    });
+</script>
+
 {% endblock %}

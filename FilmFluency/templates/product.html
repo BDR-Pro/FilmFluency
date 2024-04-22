@@ -44,54 +44,18 @@
 <body>
     <div class="container mt-5">
         <div class="row row-cols-1 row-cols-md-3 g-4">
-            <div class="col">
-                <div class="card h-100" onclick="toggleDetails(this)">
-                    <img src="https://i.ibb.co/NCh4gTX/film-app-logo.jpg" class="card-img-top" alt="Product Image">
-                    <div class="card-body">
-                        <h5 class="card-title">Product Name 1</h5>
-                        <p class="card-text">Short description...</p>
-                    </div>
-                    <div class="details">
-                        <ul class="list-group list-group-flush">
-                            <li class="list-group-item">Price: $99.00</li>
-                            <li class="list-group-item">Details: More detailed information about the product.</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            <div class="col">
-                <div class="card h-100 featured" onclick="toggleDetails(this)">
-                    <img src="https://i.ibb.co/NCh4gTX/film-app-logo.jpg" class="card-img-top" alt="Product Image">
-                    <div class="card-body">
-                        <h5 class="card-title">Product Name 2</h5>
-                        <p class="card-text">Short description...</p>
-                    </div>
-                    <div class="details">
-                        <ul class="list-group list-group-flush">
-                            <li class="list-group-item">Price: $89.00</li>
-                            <li class="list-group-item">Details: More detailed information about the product.</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            <div class="col">
-                <div class="card h-100" onclick="toggleDetails(this)">
-                    <img src="https://i.ibb.co/NCh4gTX/film-app-logo.jpg" class="card-img-top" alt="Product Image">
-                    <div class="card-body">
-                        <h5 class="card-title">Product Name 3</h5>
-                        <p class="card-text">Short description...</p>
-                    </div>
-                    <div class="details">
-                        <ul class="list-group list-group-flush">
-                            <li class="list-group-item">Price: $105.00</li>
-                            <li class="list-group-item">Details: More detailed information about the product.</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+            {% for product in products %}
+                <div class="col">
+                    <div class="card h-100 {% if product.featured %}featured{% endif %}" onclick="toggleDetails(this)">
+                        <img src="{{ product.image }}" class="card-img-top" alt="Product Image">
+                        <div class="card-body">
+                            <h5 class="card-title text-truncate">{{ product.name }}</h5>
+                            <p class="card-text text-truncate">{{ product.description }}</p>
+                        </div>
+                        
 
+
+     
     <script>
         function toggleDetails(cardElement) {
             const details = cardElement.querySelector('.details');

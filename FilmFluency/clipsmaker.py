@@ -20,7 +20,7 @@ from cleanre import clean_files
 from download_movie import main as download
 from ffempeg import get_video_and_subtitle
 from learning.transcript import populate_and_transcribe
-from tmdb_scraper import fill_movie_db, populateDBwithTopMovies
+from tmdb_scraper import populateDBwithTopMovies
 from thumbnail import main as get_thumbnail
 from learning.find_word_translate import find_hardest_words , find_not_translated , fill_languages
 from learning.getAllMovies import foo

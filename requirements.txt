@@ -5,11 +5,14 @@ bs4==0.0.2
 certifi==2024.2.2
 Django==4.2.11
 decorator
+django-jazzmin
 fastapi==0.110.1
 ffmpy==0.3.2
 filelock==3.13.4
 fonttools==4.51.0
 fsspec==2024.3.1
+django-countries
+django-redis
 boto3==1.21.1
 pirate-get==0.4.2
 gradio==4.26.0

@@ -68,6 +68,9 @@ class Movie(models.Model):
         
     def get_desc(self):
         return self.description[:50]
+    
+    def get_bookmarked_videos(self):
+        return self.videos.filter(bookmarked_users__isnull=False)
 
 class TrendingMovies(models.Model):
     movie = models.OneToOneField(Movie, on_delete=models.CASCADE, primary_key=True)
@@ -84,6 +87,7 @@ class Video(BaseMedia):
     complexity = models.FloatField()
     length = models.FloatField()
     random_slug = models.SlugField(max_length=50, unique=True, default=random_slug_generator)
+    bookmarked_users = models.ManyToManyField(User, related_name='bookmarked_videos', blank=True)
 
     def __str__(self):
         # This function should only be defined once.
@@ -135,6 +139,10 @@ class Video(BaseMedia):
             return format_transcript(content) 
         except FileNotFoundError:
             return "No translation available."
+        
+        
+    def getAllbookmarks(self):
+        return self.bookmarked_users.all()
 
 class Language(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -189,6 +197,7 @@ class Comment(models.Model):
 class Notification(models.Model):
     recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
     title = models.CharField(max_length=200)
+    movie = models.ForeignKey(Movie, on_delete=models.CASCADE, related_name='notifications', null=True, blank=True)
     message = models.TextField()
     read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)

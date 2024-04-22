@@ -7,12 +7,18 @@
 <style>
     .ff-card-custom {
         box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        transition: all 0.2s ease-in-out;
+        transition: all 0.3s ease-in-out;
+        overflow: hidden; /* Hide any content that goes beyond the bounds of the card */
+        position: relative; /* Position relative to ensure z-index is applied correctly */
+        z-index: 1; /* Set a default stack order */
     }
+    
     .ff-card-custom:hover {
-        transform: scale(1.05);
-        box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        transform: scale(1.1); /* Increase the scale to make the card grow */
+        z-index: 10; /* Increase z-index to make sure the card is above other content */
+        box-shadow: 0 8px 16px rgba(0,0,0,0.2); /* Enhance shadow for lifted effect */
     }
+    
     .ff-btn-custom {
         background-color: #007bffa0;
         border-color: #007bff;

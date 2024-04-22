@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.db.models import F
-from learning.models import Video, TrendingMovies, Movie
+from learning.models import Video, TrendingMovies, Movie, Notification
 from users.models import UserProgress
 from django.db.models import Max
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
@@ -8,6 +8,13 @@ from django.shortcuts import render
 from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
 from learning.views import get_unique_country_flag
+from django.contrib.contenttypes.models import ContentType
+from users.models import Report , UserProgress
+from django.db.models import Count, Avg, Model
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from contact.models import ContactMessage
+from payment.models import Payment
 
 
 def get_latest_updated_movies():
@@ -61,13 +68,33 @@ def video_detail(request, random_slug):
     else:
         return redirect('payment:payment')
 
+def movie_content_type():
+    return ContentType.objects.get_for_model(Movie)
+
 def get_movie_by_slug(request,random_slug):
     """ Return a specific movie by its unique slug. """
     movie = get_object_or_404(Movie, random_slug=random_slug)  
     isittrendy = TrendingMovies.objects.get_or_create(movie=movie)
+    
     views=isittrendy[0].views
+    views += 1
+    isittrendy[0].views = views
+    isittrendy[0].save()
+    
     does_it_have_videos = Video.objects.filter(movie=movie).count() > 0
-    return render(request, 'movie_detail.html', {'movie': movie, 'views': views, 'does_it_have_videos': does_it_have_videos})
+    if request.user.is_authenticated:
+        user_progress = UserProgress.objects.get(user=request.user)
+        user_progress.watched_movies.add(movie)
+        user_progress.save()
+        reported = Report.objects.filter(user=request.user, content_type = movie_content_type(), object_id = movie.id).exists()
+        notifed = Notification.objects.filter(recipient=request.user, movie=movie).exists()
+        is_favorite = UserProgress.objects.get(user=request.user).favourite_movies.filter(random_slug=random_slug).exists()
+    else:
+        reported = False
+        notifed = False
+        is_favorite = False
+    return render(request, 'movie_detail.html', {'movie': movie, 'views': views, 'does_it_have_videos': does_it_have_videos ,
+                                                 'reported': reported, 'notifed': notifed, 'is_favorite': is_favorite})
 
 def get_trending_movies():
     return Movie.objects.filter(trendingmovies__isnull=False).order_by('-trendingmovies__views')
@@ -181,3 +208,75 @@ def search_movies(request):
     if not movies:
         return render(request, 'movies.html', {'no_res': True})
     return render(request, 'movies.html', {'movies': movies, 'query': query})
+
+@login_required
+def dashboard_view(request):
+    # Fetch data
+    if not request.user.is_superuser:
+        return redirect('web:home')
+    contact_messages = ContactMessage.objects.all().order_by('-created_at')[:5]
+    movies = Movie.objects.all().order_by('-date_added')[:5]
+    payments = Payment.objects.filter(is_completed=True).order_by('-created_at')[:5]
+    reports = Report.objects.filter(closed=False).order_by('-date')
+    notifications = Notification.objects.all().order_by('-created_at')[:5]
+
+    # Detailed aggregations and annotations
+    highest_viewed_movie = Movie.objects.annotate(num_views=Count('watched_by')).order_by('-num_views').first()
+    most_bookmarked_movie = Movie.objects.annotate(num_bookmarks=Count('favourite_of')).order_by('-num_bookmarks').first()
+    highest_rated_movie = Movie.objects.order_by('-rating').first()
+
+    # User Progress Aggregates
+    average_progress = UserProgress.objects.aggregate(average_score=Avg('points'))['average_score']
+    highest_progress = UserProgress.objects.order_by('-points').first()
+    highest_lang = UserProgress.objects.annotate(num_lang=Count('known_languages')).order_by('-num_lang').first()
+
+    # Overall Counts
+    number_of_users = UserProgress.objects.count()
+    number_of_movies_for_user = UserProgress.objects.annotate(num_movies=Count('watched_movies')).aggregate(average_movies=Avg('num_movies'))['average_movies']
+    number_of_videos_for_user = UserProgress.objects.annotate(num_videos=Count('videos_watched')).aggregate(average_videos=Avg('num_videos'))['average_videos']
+    number_of_fav_movies = UserProgress.objects.annotate(num_fav_movies=Count('favourite_movies')).aggregate(average_fav_movies=Avg('num_fav_movies'))['average_fav_movies']
+
+    # Videos and Movies
+    number_of_videos_per_movie = Movie.objects.annotate(num_videos=Count('videos')).aggregate(average_videos=Avg('num_videos'))['average_videos']
+    top_videos = Video.objects.annotate(
+        bookmark_count=Count('bookmarked_users')
+    ).select_related('movie').order_by('-bookmark_count')[:5]
+    
+    highest_movie_videos = Movie.objects.annotate(num_videos=Count('videos')).order_by('-num_videos').first()
+    highest_movie_favorite = Movie.objects.annotate(num_favorites=Count('favourite_of')).order_by('-num_favorites').first()
+    highest_movie_watched = Movie.objects.annotate(num_watched=Count('watched_by')).order_by('-num_watched').first()
+    highest_movie_popularity = Movie.objects.order_by('-popularity').all()[:5]
+    
+    #Languages
+    movies_per_country = Movie.objects.values('country_flag').annotate(num_movies=Count('country_flag')).order_by('-num_movies')
+    languages = UserProgress.objects.values('known_languages').annotate(num_users=Count('known_languages')).order_by('-num_users')
+        
+
+    context = {
+        'contact_messages': contact_messages,
+        'movies': movies,
+        'payments': payments,
+        'reports': reports,
+        'notifications': notifications,
+        'highest_viewed_movie': highest_viewed_movie,
+        'most_bookmarked_movie': most_bookmarked_movie,
+        'highest_rated_movie': highest_rated_movie,
+        'average_progress': average_progress,
+        'top_video': top_videos,
+        'number_of_users': number_of_users,
+        'number_of_movies_for_user': number_of_movies_for_user,
+        'number_of_videos_for_user': number_of_videos_for_user,
+        'number_of_fav_movies': number_of_fav_movies,
+        'number_of_videos_per_movie': number_of_videos_per_movie,
+        'highest_progress_user': highest_progress,
+        'most_polyglot_user': highest_lang,
+        'highest_movie_videos': highest_movie_videos,
+        'highest_movie_favorite': highest_movie_favorite,
+        'highest_movie_watched': highest_movie_watched,
+        'highest_movie_popularity': highest_movie_popularity,
+        'movies_per_country': movies_per_country,
+        'languages': languages
+        
+    }
+    
+    return render(request, 'dashboard.html', context)

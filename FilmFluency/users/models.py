@@ -2,53 +2,55 @@ from django.db import models
 from django.contrib.auth.models import User
 from learning.models import Video, Movie
 import random
+from django_countries.fields import CountryField
 
 def upload_to(instance, filename):
     # This function generates a path like: 'profile_pictures/user_123/myphoto.jpg'
     return f'{instance._meta.app_label}/{instance._meta.model_name}/{instance.user.id}/{filename}'
 
-def dice_beer():
-   """Generate a random profile picture using the DiceBear API."""
-   seeds = ['Simon', 'Felix', 'Nala', 'Midnight','Luna', 'Bella', 'Charlie', 'Lucy', 'Cooper', 'Daisy', 'Max', 'Bailey', 'Sadie', 'Molly', 'Buddy', 'Duke', 'Rocky', 'Lola', 'Stella', 'Harley', 'Zoe', 'Ginger', 'Bear', 'Toby', 'Roxy', 'Maggie', 'Sophie', 'Chloe', 'Penny', 'Riley', 'Gracie', 'Lily', 'Mia', 'Jake', 'Leo', 'Milo', 'Murphy', 'Oscar', 'Piper', 'Ruby', 'Scout', 'Shadow', 'Sunny', 'Teddy', 'Willow', 'Winston', 'Zara', 'Zeus', 'Ziggy', 'Zara', 'Zoe']
-   return f'https://api.dicebear.com/8.x/adventurer/svg?seed={random.choice(seeds)}'
-
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     nickname = models.CharField(max_length=255)
-    profile_picture = models.ImageField(upload_to=upload_to, default=dice_beer())
-    cover_picture = models.ImageField(upload_to=upload_to, default="https://www.worldatlas.com/r/w1200/upload/56/c5/7c/shutterstock-520792630.jpg")
+    profile_picture = models.ImageField(upload_to=upload_to)
+    cover_picture = models.ImageField(upload_to=upload_to)
     bio = models.TextField(null=True, blank=True)
-    location = models.CharField(max_length=255, null=True, blank=True)
+    country = CountryField(blank_label='(select country)', null=True, blank=True)
     language = models.ForeignKey('learning.Language', on_delete=models.SET_NULL, null=True, blank=True)
     favourite_languages = models.ManyToManyField('learning.Language', related_name='favourite_of')
     friends = models.ManyToManyField('self', symmetrical=True)
+    posts = models.ManyToManyField('learning.Post', related_name='posted_by')
+    comments = models.ManyToManyField('learning.Comment', related_name='commented_by')
+    dislikes = models.ManyToManyField('learning.Post', related_name='disliked_by')
+    likes = models.ManyToManyField('learning.Post', related_name='liked_by')
+    bookmarks = models.ManyToManyField('learning.Post', related_name='bookmarked_by')
+    last_login = models.DateTimeField(auto_now=True)
+    joined_date = models.DateTimeField(auto_now_add=True)
+    paid_user = models.BooleanField(default=False)
+    reports = models.ManyToManyField('users.Report', related_name='reported_by')
    
     def __str__(self):
         return self.nickname
 
     def get_friends(self):
         return self.friends.all()
+    
+    def get_avatar(self):
+        return self.profile_picture.url
+    
+    def get_cover(self):
+        return self.cover_picture.url
 
 class UserProgress(models.Model):
     
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     user_level = models.IntegerField(default=1)
     points = models.IntegerField(default=0)
-    paid_user = models.BooleanField(default=False)
     highest_score = models.IntegerField(default=0)
-    joined_date = models.DateTimeField(auto_now_add=True)
-    last_login = models.DateTimeField(auto_now=True)
     watched_movies = models.ManyToManyField(Movie, related_name='watched_by')
     favourite_movies = models.ManyToManyField(Movie, related_name='favourite_of')
     known_languages = models.ManyToManyField('learning.Language', related_name='known_by')
     community = models.ManyToManyField('learning.Community', related_name='community_of')
     videos_watched = models.ManyToManyField(Video, related_name='watched_by')
-    posts = models.ManyToManyField('learning.Post', related_name='posted_by')
-    comments = models.ManyToManyField('learning.Comment', related_name='commented_by')
-    likes = models.ManyToManyField('learning.Post', related_name='liked_by')
-    dislikes = models.ManyToManyField('learning.Post', related_name='disliked_by')
-    bookmarks = models.ManyToManyField('learning.Post', related_name='bookmarked_by')
-    notifications = models.ManyToManyField('learning.Notification', related_name='notified_to')
 
     def next_level_points(self):
         """Calculate points needed for the next level, with a difficulty multiplier."""
@@ -134,10 +136,22 @@ class LeaderboardEntry(models.Model):
     def getTopUserRank(user):
         return LeaderboardEntry.objects.filter(score__gt=user.score).count() + 1  
 
+
+
+
+from django.db import models
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.auth.models import User
+
 class Report(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    video = models.OneToOneField(Video, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE,default=1)
+    object_id = models.PositiveIntegerField(default=1)
+    content_object = GenericForeignKey('content_type', 'object_id')
     report = models.TextField()
     date = models.DateTimeField(auto_now_add=True)
+    closed = models.BooleanField(default=False)
+
     def __str__(self):
         return self.report
