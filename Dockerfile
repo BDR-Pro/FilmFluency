@@ -8,7 +8,6 @@ WORKDIR /usr/src/app
 RUN apt-get update && apt-get install -y \
     libpq-dev \
     gcc \
-    ffmpeg \
     python3-dev \
     musl-dev \
     git
@@ -16,7 +15,11 @@ RUN apt-get update && apt-get install -y \
 # Upgrade pip
 RUN pip install --upgrade pip
 
+# Clone the specific Git repository
 RUN git clone https://github.com/BDR-Pro/FilmFluency.git .
+
+# Copy the current directory contents into the container at /usr/src/app
+COPY . /usr/src/app
 
 # Install any needed packages specified in requirements.txt
 RUN pip install -r requirements.txt
@@ -27,9 +30,5 @@ EXPOSE 8000
 # Define environment variable
 ENV NAME World
 
-# Run clipsmaker.py if the RUN_CLIPMAKER variable is set to "yes",
-# otherwise run the Django development server
-CMD if [ "$RUN_CLIPMAKER" = "yes" ]; \
-    then python FilmFluency/clipsmaker.py; \
-    else python FilmFluency/manage.py runserver 0.0.0.0:8000; \
-    fi
+# Define the command to run your Django application using Gunicorn
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "FilmFluency.wsgi:application"]
