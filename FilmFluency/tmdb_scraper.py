@@ -111,6 +111,7 @@ def fill_movie_db(title):
                 description=movie_data.get('overview', ''),
                 type=movie_data.get('media_type', 'movie'),
                 release_date=movie_data.get('release_date'),
+                genre=movie_data.get('genre_ids', []),
                 rating=movie_data.get('vote_average', 0),
                 backdrop_path=backdrop_url,
                 poster=poster_url,
@@ -179,12 +180,14 @@ def fetch_movies(category, genre_id=None, language=None):
             fill_movie_db(movie['title'])
 
 
+import random
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 def update_movies():
     print("Updating movies...")
     print("Fetching top movies...")
-    print("Number of Movies",Movie.objects.all().count())
- 
+    print("Number of Movies", Movie.objects.all().count())
+    
     movie_types = {
         'top_rated': None,
         'latest': None,
@@ -209,7 +212,6 @@ def update_movies():
             '37': 'Top Western',
             '53': 'Top Thriller',
         },
-
         'languages': {
             'fr': 'French',
             'de': 'German',
@@ -220,25 +222,45 @@ def update_movies():
             'ja': 'Japanese',
             'zh': 'Chinese',
             'ko': 'Korean',
-            
         }
     }
-
-    # Fetch by genre
+    
+    tasks = []
+    
+    # Create tasks for fetching movies by genre
     for key, genre_description in movie_types.get('genres', {}).items():
-        if check_existing_movies('genre', key, 10):
-            print(f"Skipping {genre_description} movies, already populated.")
-            continue
-        print(f"Fetching {genre_description} movies...")
-        fetch_movies('top_rated', genre_id=key)
-
-    # Fetch by language
+        tasks.append(('genre', key, genre_description))
+    
+    # Create tasks for fetching movies by language
     for lang_code, lang_description in movie_types.get('languages', {}).items():
-        if check_existing_movies('language', lang_code, 10):
-            print(f"Skipping {lang_description} movies, already populated.")
-            continue
-        print(f"Fetching {lang_description} movies...")
-        fetch_movies('popular', language=lang_code)
+        tasks.append(('language', lang_code, lang_description))
+    
+    # Shuffle tasks to randomize order
+    random.shuffle(tasks)
+    
+    # Execute tasks concurrently
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        futures = []
+        for task in tasks:
+            category, identifier, description = task
+            if check_existing_movies(category, identifier, 10):
+                print(f"Skipping {description} movies, already populated.")
+            else:
+                print(f"Fetching {description} movies...")
+                # Schedule the task
+                if category == 'genre':
+                    future = executor.submit(fetch_movies, 'top_rated', genre_id=identifier)
+                else:
+                    future = executor.submit(fetch_movies, 'popular', language=identifier)
+                futures.append(future)
+
+        # Wait for all futures to complete
+        for future in as_completed(futures):
+            # Here, you could handle results or exceptions if needed
+            result = future.result()
+            print(f"Task completed: {result}")
+
+
         
     # Record the time of this call
 
