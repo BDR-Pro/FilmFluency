@@ -4,7 +4,6 @@ from moviepy.editor import VideoFileClip
 from .models import Video, Movie
 from gradio_client import Client
 from api.upload_to_s3 import upload_to_s3
-from tmdb_scraper import fill_movie_db as tmdb_scarpper
 
 def get_complexity(video_path):
     return float(os.path.basename(video_path).split("_")[0])
@@ -57,7 +56,7 @@ def ai_model(audio_url):
     result = client.predict(audio_url, "transcribe")
     return result.get('prediction')
 
-
+"""
 def populate_and_transcribe():
     print("Populating database and transcribing audio.")
     base_dir = get_video_directory()
@@ -86,4 +85,8 @@ def populate_and_transcribe():
                 video.transcribe_audio()
 
                 print(f"Processed {video_instance.video.path} for database insertion.")
+"""
 
+def populate_and_transcribe():
+    pass
+#TODO: Implement this function
