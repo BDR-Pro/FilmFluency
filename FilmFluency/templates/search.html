@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container h-100">
+    <div class="row h-100 justify-content-center align-items-center">
+        <div class="col-12 text-center">
+            <img src="https://filmfluency.fra1.cdn.digitaloceanspaces.com/film_app_logo_.svg" alt="Website Logo" class="logo mb-4">
+            <form id="search-form" class="form-inline d-flex justify-content-center mt-2" action="{% url 'web:search_movies' %}" method="get">
+                <div class="input-group input-group-lg w-75">
+                    <input class="form-control" type="text" placeholder="Search..." aria-label="Search" id="search-input" name="query">
+                    <button class="btn btn-secondary" type="submit">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
+            </form>
+            <ul id="suggestions" class="list-group mt-2" style="display: none;"></ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+
+    document.getElementById('search-input').addEventListener('input', function() {
+        const input = this.value;
+        if (input.length > 2) {
+            const suggestionsURL = '{% url "api:search_suggestions" %}';
+            fetch(suggestionsURL + `?q=${input}`)
+            .then(response => response.json())
+            .then(data => {
+                const suggestionsList = document.getElementById('suggestions');
+                suggestionsList.innerHTML = '';
+                suggestionsList.style.display = 'block';
+                data.forEach(item => {
+                    const listItem = document.createElement('li');
+                    listItem.classList.add('list-group-item');
+                    listItem.innerHTML = `<strong>${item.title}</strong> (${item.release_date}) - <em>${item.rating}</em> - ${item.genre} - ${item.original_language}`;
+                    listItem.onclick = function() {
+                        
+                        window.location.href = '{% url "web:movie_detail" "PLACEHOLDER" %}'.replace('PLACEHOLDER', item.random_slug);
+
+                    };
+                    suggestionsList.appendChild(listItem);
+                });
+            });
+        }
+    });
+    
+    document.getElementById('search-form').addEventListener('submit', function(event) {
+        document.getElementById('suggestions').style.display = 'none';
+    });
+    
+
+</script>
+{% endblock %}
+
+{% block styles %}
+<style>
+    .logo {
+        width: 200px;
+        height: auto;
+    }
+
+    #search-form .input-group {
+        width: 100%;
+    }
+
+    #search-input {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    #search-form .btn {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+    }
+
+    #suggestions {
+        width: 75%;
+        margin: auto;
+    }
+
+    #suggestions .list-group-item {
+        cursor: pointer;
+        user-select: none; /* Prevent text selection */
+        transition: background-color 0.3s ease; /* Smooth transition for background color */
+    }
+
+    #suggestions .list-group-item:hover {
+        background-color: #f0f0f0; /* Darker shade on hover, adjust color as needed */
+    }
+
+    #suggestions {
+        width: 75%;
+        margin: auto;
+    }
+</style>
+{% endblock %}

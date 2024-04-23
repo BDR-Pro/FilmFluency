@@ -132,7 +132,7 @@ import os
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'defaultdb',  # Database name
+        'NAME': 'django',  # Database name
         'USER': 'doadmin',  # Database user
         'PASSWORD': DB_PASS,  # Database password
         'HOST': 'dbaas-db-6762329-do-user-16336582-0.c.db.ondigitalocean.com',  # Database host

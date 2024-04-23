@@ -7,6 +7,7 @@ Django==4.2.11
 decorator
 django-jazzmin
 fastapi==0.110.1
+pycountry
 ffmpy==0.3.2
 filelock==3.13.4
 fonttools==4.51.0

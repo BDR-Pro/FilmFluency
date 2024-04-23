@@ -1,170 +1,101 @@
-import requests
 import os
 import csv
-import re
-from learning.models import Movie  
-import random
-from api.upload_to_s3 import upload_to_s3
-from django.conf import settings
-import random
-from django.db.models import Count
-from django.utils import timezone
+import requests
+import json
 import logging
+from datetime import datetime
+from django.utils import timezone
+from learning.models import Movie, Country, Language
+from django.db.models import ObjectDoesNotExist
+import pycountry
 
+logging.basicConfig(level=logging.INFO)
+
+# Environment Variables
 TMDB_API_KEY = os.getenv("TMDB_API_KEY")
-TMDB_BASE_URL = "https://api.themoviedb.org/3"
+TMDB_BASE_URL = "https://api.themoviedb.org/3/movie/"
 
 
 
-def normalize_title(title):
-    """Normalize movie titles extracted from encoded strings."""
-    # Remove resolution and everything after it
-    title = re.sub(r'\d{3,4}p.*$', '', title) 
-    # Attempt to extract a title and a year
-    match = re.search(r"([\w\s]+)(\d{4})", title)
-    if match:
-        movie_title = match.group(1).strip()  # Trim whitespace
-        year = match.group(2)
-        return f"{movie_title} ({year})"
-    return title  # Return the original if no match found
 
-def get_country_flag(original_language):
-    # Mapping from language codes to country flags using ISO 3166-1 alpha-2 codes
-    language_to_country = {
-        'en': 'US',  # English
-        'es': 'ES',  # Spanish
-        'fr': 'FR',  # French
-        'de': 'DE',  # German
-        'it': 'IT',  # Italian
-        'pt': 'PT',  # Portuguese
-        'ru': 'RU',  # Russian
-        'ja': 'JP',  # Japanese
-        'zh': 'CN',  # Chinese
-        'ko': 'KR',  # Korean
-        'sv': 'SE',  # Swedish
-        'da': 'DK',  # Danish
-        'pl': 'PL',  # Polish
-        'nl': 'NL',  # Dutch
-        'hi': 'IN',  # Hindi
-        'ar': 'SA',  # Arabic
-        'he': 'IL',  # Hebrew
-        'th': 'TH',  # Thai
-        'cs': 'CZ',  # Czech
-        'tr': 'TR',  # Turkish
-        'fi': 'FI',  # Finnish
-        'hu': 'HU',  # Hungarian
-        'no': 'NO',  # Norwegian
-        'el': 'GR'   # Greek
-    }
-    return language_to_country.get(original_language, 'ZZ')
+def get_genre(tmdb_id):
+    """ Retrieve the genre of a movie from the TMDB API. """
+    response = requests.get(f"{TMDB_BASE_URL}{tmdb_id}", params={'api_key': TMDB_API_KEY})
+    if response.status_code == 200:
+        data = response.json()
+        genre = data.get('genres')[0].get('name')
+        return genre
+    return None
 
-
-def get_poster_url(poster_path):
-    """Construct full URL for movie poster."""
-    if poster_path:
-        return f"https://image.tmdb.org/t/p/original{poster_path}"
+def find_language_name(iso_639_1):
+    """ Retrieve the English name of a language from its ISO 639-1 code using TMDB API. """
+    response = requests.get(f"https://api.themoviedb.org/3/configuration/languages?api_key={TMDB_API_KEY}")
+    if response.status_code == 200:
+        languages = response.json()
+        for language in languages:
+            if language['iso_639_1'] == iso_639_1:
+                return language['english_name']
     return None
 
 
-def normalize_title(title):
-    """Normalize movie titles to remove year and resolution details."""
-    if "(" in title:
-        title = title.split("(")[0].strip()
-    return title
 
-def read_and_process_csv(file_path):
-    """Read CSV file and process each row."""
+def normalize_title(title):
+    """ Normalize movie titles by removing unnecessary parts. """
+    return title.split('[')[0].strip()
+
+def get_poster_url(tmdb_id):
+    """ Retrieve the full URL for a movie poster. """
+    response = requests.get(f"{TMDB_BASE_URL}{tmdb_id}", params={'api_key': TMDB_API_KEY})
+    if response.status_code == 200:
+        data = response.json()
+        poster_path = data.get('poster_path')
+        return f"https://image.tmdb.org/t/p/original{poster_path}" if poster_path else None
+    return None
+
+def read_and_process_csv(file_path, using='default'):
+    """ Read and process movie data from CSV file. """
     movies = []
     with open(file_path, newline='', encoding='utf-8') as csvfile:
         reader = csv.DictReader(csvfile)
+        total_rows = sum(1 for row in csv.reader(open(file_path)))
+        current_row = 0
+        csvfile.seek(0)  # Reset CSV file position after counting
+        next(reader)  # Skip header
         for row in reader:
+            
+            current_row += 1
+            percentage_complete = (current_row / total_rows) * 100
+            logging.info(f"Processing row {current_row}/{total_rows} ({percentage_complete:.2f}%)")
+            logging.info(f"Processing Movie: {row['title']}")
             try:
-                # Create a movie instance for each row
-                movie = Movie(
-                    title=normalize_title(row.get('title', '')),
-                    genre=row.get('genres', 'Unknown'),
-                    description=row.get('overview', ''),
-                    release_date=row.get('release_date'),
-                    rating=float(row.get('vote_average', 0)),
-                    poster=get_poster_url(row.get('poster_path')),
-                    tmdb_id=int(row.get('id', 0)),
-                    original_title=row.get('original_title', ''),
-                    original_language=row.get('original_language', 'en'),
-                    country_flag=get_country_flag(row.get('original_language')),
-                    popularity=float(row.get('popularity', 0)),
-                    vote_count=int(row.get('vote_count', 0)),
-                    budget=int(row.get('budget', 0)),
-                    revenue=int(row.get('revenue', 0)),
-                    runtime=int(row.get('runtime', 0)),
-                    homepage=row.get('homepage'),
+                Movie.objects.create(
+                    title=normalize_title(row['title']),
+                    description=row['overview'],
+                    release_date=datetime.strptime(row['release_date'], '%Y-%m-%d').date() if row['release_date'] else None,
+                    rating=float(row['vote_average']),
+                    poster=get_poster_url(row['id']),
+                    tmdb_id=int(row['id']),
+                    genre=get_genre(row['id']),
+                    original_title=row['original_title'],
+                    original_language=row['original_language'],
+                    popularity=float(row['popularity']),
+                    vote_count=int(row['vote_count']),
+                    budget=int(row['budget']),
+                    revenue=int(row['revenue']),
+                    runtime=int(row['runtime']),
+                    homepage=row['homepage'],
                     date_added=timezone.now(),
-                    status=row.get('status', 'Unknown'),
-                    tagline=row.get('tagline', ''),
-                    production_companies=row.get('production_companies', ''),
-                    production_countries=row.get('production_countries', ''),
-                    spoken_languages=row.get('spoken_languages', ''),
-                    keywords=row.get('keywords', '')
                 )
-                movies.append(movie)
+                
+                
             except Exception as e:
-                # Log an error message
                 logging.error(f"Error processing row: {e}")
     return movies
 
-    
 
-
-def bulk_insert_movies(movies):
-    """Insert list of Movie instances into the database."""
-    Movie.objects.bulk_create(movies, ignore_conflicts=True)
-
-def read_and_process_csv_credits(file_path):
-    """Read CSV file and process each row."""
-    movies = []
-    with open(file_path, newline='', encoding='utf-8') as csvfile:
-        reader = csv.DictReader(csvfile)
-        for row in reader:
-            # Create a movie instance for each row movie_id,title,cast,crew
-            movie = Movie.objects.get(tmdb_id=int(row['movie_id']))
-            movie.cast = row['cast']
-            movie.crew = row['crew']
-            movies.append(movie)
-    return movies
-
-def import_movies_from_csv():
-    """Main function to import movies from a CSV file."""
-    print("Starting the import process...")
-    file_path = 'tmdb_csv'
-    file_path = os.path.join(file_path, 'tmdb_5000_movies.csv')
-    movies = read_and_process_csv(file_path)
-    print(f"Importing {len(movies)} movies into the database...")
-    bulk_insert_movies(movies)
-    print("Import process completed successfully.")
-    #do it for the credits file
-    file_path = 'tmdb_csv'
-    file_path = os.path.join(file_path, 'tmdb_5000_credits.csv')
-    movies = read_and_process_csv_credits(file_path)
-    print(f"Importing {len(movies)} movies into the database...")
-    
-
-# Call the function to start the import process
-
-        
-    
-  
-def update_movies():
-    print("Updating movies...")
-    print("Fetching top movies...")
-    print("delete dubplicate movies...")
-    print("Number of Movies", Movie.objects.all().count())
-    #counter to count the number of movies fetched
-    import_movies_from_csv()
-
-        
-    # Record the time of this call
 
 def populateDBwithTopMovies():
-    print("Populating database with top movies...")
-    update_movies()
-
-
+    """ Populate the database with movie data from a CSV file. """
+    print(f"{len(Movie.objects.all())=}")
+    file_path = os.path.join('tmdb_csv', 'tmdb_5000_movies.csv')
+    movies = read_and_process_csv(file_path)

@@ -21,22 +21,41 @@ from django.contrib.auth.models import User
 
 TAP_SECRET_KEY = settings.TAP_SECRET_KEY
 
+def get_icon_url(name):
+    """Get the icon URL for a cryptocurrency."""
+    list_of_cryptos = {
+        'btc': 'https://upload.wikimedia.org/wikipedia/commons/4/46/Bitcoin.svg',
+        'eth': 'https://upload.wikimedia.org/wikipedia/commons/0/05/Ethereum_logo_2014.svg',
+        'xmr': 'https://cryptologos.cc/logos/monero-xmr-logo.png'
+    }
+    return list_of_cryptos.get(name.lower())
+
+def get_crypto(amount):
+    """Get QR code URL, name, icon URL, and amount converted for each cryptocurrency."""
+    cryptos = turn_amount_to_crypto(amount)
+    for crypto in cryptos:
+        crypto['icon_url'] = get_icon_url(crypto['name'])
+        # Assuming 'address' contains the necessary wallet address or it needs to be set before this function
+        crypto['qr_code_url'] = f"https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={crypto['address']}"
+        print(crypto)
+    return cryptos
+        
 def turn_amount_to_crypto(amount):
     """Converts an amount in USD to equivalent amounts in major cryptocurrencies."""
-    # Including Bitcoin, Ethereum, Ripple, Monero, and Litecoin
-    api = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,ripple,monero,litecoin&vs_currencies=usd"
+    # Using Bitcoin, Ethereum, and Monero for this example
+    amount = float(amount)
+    api = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,monero&vs_currencies=usd"
     response = requests.get(api)
-    data = response.json()
-    btc = data['bitcoin']['usd']
-    eth = data['ethereum']['usd']
-    xmr = data['monero']['usd']
-    
-    # Calculating how much of each cryptocurrency you can buy with the given USD amount
-    return {
-        'BTC': amount / btc,
-        'ETH': amount / eth,
-        'XMR': amount / xmr,
-    }
+    if response.status_code == 200:
+        data = response.json()
+        return [
+            {'name': 'BTC', 'amount': amount / float(data['bitcoin']['usd']), 'address': 'bc1qsgx0zpm802sw4ple68n0zpzp8ye84q3wyza0w8'},
+            {'name': 'ETH', 'amount': amount / float(data['ethereum']['usd']), 'address': '0x7205d8e291DFb053422930146a4a488ce4c84eF2'},
+            {'name': 'XMR', 'amount': amount / float(data['monero']['usd']), 'address': '47pGkqgeATm8u7Bzacz2xjNm6PgQUnaQm3WzWYPDKVjfHN2MXCojkpuUzxoNWvfmjcLVLGdqGf2Q2LmqxNesm9TcTfUrGf1'}
+        ]
+    else:
+        print("Failed to fetch cryptocurrency data")
+        return []
 
 def products(request):
     products = Product.objects.all()
@@ -60,10 +79,14 @@ def payment_home(request):
     
 
 def crypto_payment(request):
-    product = request.POST.get('product')
-    amount = Product.objects.get(name=product).price
-    amount = turn_amount_to_crypto(amount)
-    return render(request, 'crypto_payment.html', {'amount': amount})
+    amount="14"
+    #product = request.POST.get('product')
+    #amount = Product.objects.get(name=product).price
+
+    crypto = get_crypto(amount)
+    return render(request, 'crypto_payment.html', {'cryptos':crypto})
+
+
 
 @require_http_methods(["POST"])
 @csrf_exempt
@@ -146,7 +169,7 @@ def cart(request):
             
         
         for i in product:
-            i.price = i.price * exchange_rate_calc(currency)
+            i.price = i.price * 3.75
             
         return render(request, 'payment.html', {'products': product, 'currency': currency, 'quantity': quantity})
     

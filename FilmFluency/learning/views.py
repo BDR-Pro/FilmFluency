@@ -71,17 +71,18 @@ def get_videos_by_length(request, max_length):
     return render(request, 'videos.html', {'videos': videos})
 
 def get_unique_movies(request):
-    order_by = request.GET.get('orderby', 'vote_average')  # Default sorting by 'vote_average'
-    valid_orderings = ['vote_average', 'release_date', 'date_added']
+    order_by = request.GET.get('orderby', 'rating')  # Default sorting by 'vote_average'
+    valid_orderings = ['rating', 'release_date', 'date_added']
     
     if order_by not in valid_orderings:
-        order_by = 'vote_average'
+        order_by = 'rating'
     
     country = request.GET.get('country', '')
     if country:
-        movies = Movie.objects.filter(country_flag=country).distinct().order_by('-' + order_by)
+        movies = Movie.objects.filter(country_flag=country).distinct().order_by('-' + order_by)        
     else:
-        movies = Movie.objects.distinct().order_by('-' + order_by)  # Note the '-' for descending order
+        movies = Movie.objects.all().order_by('-' + order_by)        
+    
         
     paginator = Paginator(movies, 6)  # Show 6 movies per page
 

@@ -203,7 +203,9 @@ def random_movie(request):
 
 
 def search_movies(request):
-    query = request.GET.get('query')
+    query = request.GET.get('query', '')
+    if not query:
+        return render(request, 'search.html')
     movies = Movie.objects.filter(title__icontains=query)
     if not movies:
         return render(request, 'movies.html', {'no_res': True})

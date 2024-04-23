@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+    .crypto-card {
+        cursor: pointer;
+        transition: transform 0.3s ease-in-out;
+        border: 1px solid rgba(0, 0, 0, 0.125);
+        margin-bottom: 20px; /* Space between cards */
+        height: 100%; /* Full height to make cards equal */
+    }
+    .crypto-card:hover {
+        transform: scale(1.03);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
+    }
+    .crypto-icon {
+        width: 100px; /* Slightly larger icons for bigger cards */
+        height: 100px;
+        margin-top: 20px;
+    }
+    .payment-details {
+        display: none; /* Hidden by default */
+        padding-top: 20px;
+    }
+    .qr-code {
+        width: 200px; /* Larger QR codes for bigger cards */
+        height: 200px;
+        margin-bottom: 20px;
+    }
+    .btn-primary, .btn-success {
+        color: #fff; /* Ensures text is white for all buttons */
+    }
+    .container {
+        max-width: 1200px; /* Increase max-width for larger view */
+    }
+</style>
+
+<div class="container mt-5">
+    <div class="row row-cols-1 row-cols-md-3 g-4"> <!-- Grid for three columns on medium screens and up -->
+        {% for crypto in cryptos %}
+        <div class="col">
+            <div class="card h-100 crypto-card">
+                <div class="card-body text-center">
+                    <img src="{{ crypto.icon_url }}" alt="{{ crypto.name }}" class="crypto-icon mx-auto">
+                    <h5 class="card-title mt-3">{{ crypto.name }}</h5>
+                    <div class="payment-details">
+                        <img src="{{ crypto.qr_code_url }}" alt="{{ crypto.name }} QR Code" class="qr-code img-fluid">
+                        <p>Wallet: {{ crypto.address }}</p>
+                        <p>Amount: {{ crypto.amount }}</p>
+                        <button class="btn btn-success paid-btn" data-crypto="{{ crypto.name }}">I Paid</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.crypto-card').forEach(card => {
+        card.addEventListener('click', function() {
+            const paymentDetails = this.querySelector('.payment-details');
+            paymentDetails.style.display = paymentDetails.style.display === 'block' ? 'none' : 'block';
+        });
+    });
+
+    document.querySelectorAll('.paid-btn').forEach(button => {
+        button.addEventListener('click', function(event) {
+            event.stopPropagation(); // Stop the card click event
+            const cryptoType = this.dataset.crypto;
+            const walletInput = prompt('Please enter your wallet address for ' + cryptoType + ':');
+            if (walletInput) {
+                alert('Thank you! Your account will be activated within 4 hours, and a confirmation will be emailed to you.');
+                // Implement backend call here
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -78,6 +78,8 @@
             width: 100%;
         }
     </style>
+{% block styles %}
+{% endblock %}
 </head>
 <body>
     <div class="vertical-nav bg-dark" id="sidebar">
@@ -159,6 +161,21 @@
                     </a>
                 </li>
             {% endif %}
+
+            <li class="nav-item">
+                <a href="{% url 'web:random' %}" class="nav-link text-white">
+                    <i class="bi bi-shuffle"></i>
+                    <span>Random</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="{% url 'web:search_movies' %}" class="nav-link text-white">
+                    <i class="bi bi-search"></i>
+                    <span>Search</span>
+                </a>
+            </li>
+            
 
         </ul>
     </div>
