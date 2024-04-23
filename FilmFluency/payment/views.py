@@ -36,7 +36,7 @@ def get_crypto(amount):
     for crypto in cryptos:
         crypto['icon_url'] = get_icon_url(crypto['name'])
         # Assuming 'address' contains the necessary wallet address or it needs to be set before this function
-        crypto['qr_code_url'] = f"https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={crypto['address']}"
+        crypto['qr_code_url'] = get_qr_code_url(crypto['name'].lower())
         print(crypto)
     return cryptos
         
@@ -175,3 +175,10 @@ def cart(request):
     
     else:
         return render(request, 'payment.html')
+    
+    
+    
+    
+def get_qr_code_url(crypto):
+    """Get the QR code URL for a cryptocurrency."""
+    return f"https://filmfluency.fra1.cdn.digitaloceanspaces.com/qr/{crypto}.png"

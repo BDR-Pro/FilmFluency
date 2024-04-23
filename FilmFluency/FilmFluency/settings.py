@@ -252,7 +252,7 @@ JAZZMIN_SETTINGS = {
     "site_brand": "Library",
 
     # Logo to use for your site, must be present in static files, used for brand on top left
-    "site_logo": "https://filmfluency.fra1.cdn.digitaloceanspaces.com/film_logo_.svg",
+    "site_logo": "https://filmfluency.fra1.cdn.digitaloceanspaces.com/icons/film_logo_.svg",
 
     # Logo to use for your site, must be present in static files, used for login form logo (defaults to site_logo)
     "login_logo": None,
