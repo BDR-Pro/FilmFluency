@@ -13,4 +13,3 @@ admin.site.register(Community)
 admin.site.register(Translation)
 admin.site.register(Language)
 admin.site.register(TrendingMovies)
-

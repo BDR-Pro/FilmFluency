@@ -7,6 +7,7 @@ from django.utils import timezone
 from urllib.parse import quote
 from django.contrib.auth.models import User 
 import re
+from  django.urls import reverse
 from learning.func import language_to_country
 
 def format_transcript(text):
@@ -85,15 +86,13 @@ class Movie(models.Model):
     date_added = models.DateTimeField(auto_now_add=True)
     country_flag = models.CharField(max_length=2, blank=True, null=True)  
     
+    
+    class Meta:
+        ordering = ['date_added']
+        
     def __str__(self):
         """String representation of the Movie object json compatible"""
-        { 
-         "title": self.title,
-         "genre": self.genre, "release_date": self.release_date, 
-         "rating": self.rating, "poster": self.poster,
-         "original_language": self.original_language, 
-         "random_slug": self.random_slug,
-        }
+        return self.title
 
     def save(self, *args, **kwargs):
         if not self.random_slug:
@@ -135,7 +134,14 @@ class Movie(models.Model):
         return language_to_country(self.original_language).lower() if language_to_country(self.original_language) else 'us'   
 
 
-
+    def get_absolute_url(self):
+        return reverse("web:movie_detail", kwargs={"random_slug": self.random_slug})
+    
+    
+    def last_updated(self):
+        """Return the most recent date either the instance was added or the most recent video was added."""
+        latest_video = self.videos.latest('date_added') if self.videos.exists() else None
+        return latest_video.date_added if latest_video else self.date_added
 
 #################################################################
 

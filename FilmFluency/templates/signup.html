@@ -1,19 +1,15 @@
 {% extends 'base.html' %}
 
 {% block title %}Sign Up{% endblock %}
-{% block content %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
+{% block content %}
 <div class="container mt-5">
     <h2>Sign Up</h2>
+    {% if error %}
+    <div class="alert alert-danger" role="alert">
+        {{ error }}
+    </div>
+    {% endif %}
     <form method="post" class="needs-validation" novalidate>
         {% csrf_token %}
         {% for field in form %}
@@ -22,8 +18,8 @@
             <input type="{{ field.field.widget.input_type }}" class="form-control {% if field.errors %}is-invalid{% endif %}"
                    id="{{ field.id_for_label }}" name="{{ field.name }}"
                    placeholder="Enter {{ field.label }}" {% if field.field.required %}required{% endif %}
-                   {% if field.name == 'email' %}pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"{% endif %}
-                   {% if field.name == 'password1' %}onkeyup="checkPasswordStrength();"{% endif %}>
+                   {% if field.name == 'email' %}oninput="validateEmail(this)"{% endif %}
+                   {% if field.name == 'password1' %}onkeyup="checkPasswordStrength();" {% endif %}>
             <div class="invalid-feedback">
                 {% for error in field.errors %}
                 {{ error }}
@@ -40,16 +36,22 @@
         <button type="submit" class="btn btn-primary">Sign up</button>
     </form>
 </div>
-
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<!-- Bootstrap Bundle with Popper -->
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
-
-</body>
-</html>
 {% endblock %}
+
 {% block extra_js %}
 <script>
+    function validateEmail(input) {
+        const re = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/;
+        const feedbackElement = input.nextElementSibling;
+        if (re.test(input.value)) {
+            input.classList.remove('is-invalid');
+            feedbackElement.style.display = 'none';
+        } else {
+            input.classList.add('is-invalid');
+            feedbackElement.style.display = 'block';
+        }
+    }
+
     function checkPasswordStrength() {
         var passwordInput = document.querySelector('[name="password1"]');
         var passwordValue = passwordInput.value;
@@ -73,7 +75,7 @@
             strengthIndicator.style.display = 'block';
         }
     }
-    
+
     // JavaScript for disabling form submissions if there are invalid fields
     (function () {
       'use strict'
@@ -91,7 +93,5 @@
           }, false)
         })
     })();
-    </script>
-
-
+</script>
 {% endblock %}

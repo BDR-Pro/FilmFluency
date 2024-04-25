@@ -1,39 +1,49 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.forms import UserCreationForm
 from .models import UserProgress, LeaderboardEntry, UserProfile
 from learning.models import Notification    
 from django.contrib.auth.decorators import login_required
 from learning.models import Movie , Video
 from users.models import Report
-import requests
-from django.conf import settings
 from learning.models import Language
 from django.http import JsonResponse
-from django_countries import countries
 from django.shortcuts import get_object_or_404
-from .forms import UserProfileForm
+from .forms import SignUpForm
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.auth.models import User
+from .func import regex_email
+from django_countries import countries
+
 
 def signup_view(request):
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        form = SignUpForm(request.POST)
         if form.is_valid():
-            form.save()
+            user = form.save()
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password1')
-            user = authenticate(username=username, password=password)
-            user = form.save()
+            email = form.cleaned_data.get('email')  # Access email data
+
+            if not regex_email(email):
+                return render(request, 'signup.html', {'form': form, 'error': 'Invalid email address (Do not use disposable emails)'})
+            # Authenticate and log the user in
+            user = authenticate(username=username, password=password, email=email)
+            
             login(request, user)
-            UserProgress.objects.create(user=user)  # Initialize progress tracking
-            UserProfile.objects.create(user=user) # Initialize user profile
+
+            # Initialize user-related data
+            UserProgress.objects.create(user=user)
+            UserProfile.objects.create(user=user)
+
+            # Redirect to 'next' if provided
+            if request.GET.get('next'):
+                return redirect(request.GET.get('next'))
+            
             return redirect('users:profile')  # Redirect to profile page after signup
-    
         else:
             print(form.errors)
-    
     else:
-        form = UserCreationForm()
+        form = SignUpForm()
     return render(request, 'signup.html', {'form': form})
 
 def login_view(request):
@@ -46,7 +56,15 @@ def login_view(request):
             return redirect('web:home')
         else:
             return render(request, 'login.html', {'error': 'Invalid credentials'})
-    return render(request, 'login.html')
+        
+    if request.user.is_authenticated:
+        return redirect('web:home')
+    
+    if request.method == 'GET':
+        context = {
+        'next': request.GET.get('next', '{% url "users:profile" %}')
+    }
+    return render(request, 'login.html', context)
 
 @login_required(login_url='users:login')
 def logout_view(request):
@@ -54,14 +72,21 @@ def logout_view(request):
     return redirect('web:home')
 
 
-
+from django.db import models
 @login_required(login_url='users:login')
 def profile(request):
     # Get or create UserProgress object for the logged-in user
     user_progress, created = UserProgress.objects.get_or_create(user=request.user)
-    user_progress, created = UserProfile.objects.get_or_create(user=request.user)
+    user_profile, created = UserProfile.objects.get_or_create(user=request.user)
 
+    highest_complexity = Video.objects.order_by('-complexity').first()
+    user_complexity_avg_complexity = user_progress.videos_watched.aggregate(models.Avg('complexity'))['complexity__avg']
     
+    try:
+        percntage_complexity = (user_complexity_avg_complexity / highest_complexity) * 100
+    except:
+        percntage_complexity = 0
+        
     # If created, you can set default values or perform other initialization logic here
     if created:
         # For example, initializing some fields if necessary
@@ -71,7 +96,9 @@ def profile(request):
 
     return render(request, 'profile.html', {
         'user': request.user,
-        'progress': user_progress
+        'user_profile': user_profile,
+        'user_progress': user_progress,
+        'percntage_complexity': percntage_complexity,
     })
 
 def leaderboard(request):
@@ -81,33 +108,29 @@ def leaderboard(request):
 
 @login_required(login_url='users:login')
 def edit_profile(request):
-    middle_east_country_codes = {
-        'SA', 'AE', 'KW', 'QA', 'OM', 'BH', 'IR', 
-        'IQ', 'IL', 'JO', 'LB', 'SY', 'YE'
-    }
-
-    # Prepare a list of Middle Eastern countries
-    middle_east_countries = [
-        {'code': code, 'name': name} for code, name in countries if code in middle_east_country_codes
-    ]
-
-    # Prepare a list of other countries by excluding Middle Eastern countries
-    other_countries = [
-        {'code': code, 'name': name} for code, name in countries if code not in middle_east_country_codes
-    ]
     user_profile, _ = UserProfile.objects.get_or_create(user=request.user)
-    langs = Language.objects.all()
+
     if request.method == 'POST':
-        form = UserProfileForm(request.POST, request.FILES, instance=user_profile)
-        if form.is_valid():
-            form.save()
-            return JsonResponse({'success': True, 'message': 'Profile updated successfully.'}, safe=False)
-        else:
-            return JsonResponse({'success': False, 'message': 'Invalid form data', 'errors': form.errors}, status=400)
-    else:
-        form = UserProfileForm(instance=user_profile)
-    return render(request, 'edit_profile.html', {'form': form, 'profile': user_profile, 'languages': langs, 'middle_east_countries': middle_east_countries,
-        'other_countries': other_countries })
+        # Manual handling of the form data
+        user_profile.bio = request.POST.get('bio', user_profile.bio)
+        user_profile.country = request.POST.get('country', user_profile.country)
+        if 'profile_picture' in request.FILES:
+            user_profile.profile_picture = request.FILES['profile_picture']
+        user_profile.save()
+        return JsonResponse({'success': True, 'message': 'Profile updated successfully.'})
+
+    middle_east_codes = {'SA', 'AE', 'KW', 'QA', 'OM', 'BH', 'IR', 'IQ', 'IL', 'JO', 'LB', 'SY', 'YE'}
+    middle_east_countries = [(code, name) for code, name in countries if code in middle_east_codes]
+    other_countries = [(code, name) for code, name in countries if code not in middle_east_codes]
+
+    context = {
+        'user_profile': user_profile,
+        'middle_east_countries': middle_east_countries,
+        'other_countries': other_countries
+    }
+    return render(request, 'edit_profile.html', context)
+
+
 
 @login_required(login_url='users:login')
 def notify_me(request):
@@ -170,3 +193,14 @@ def report_item(request):
         return JsonResponse({'success': True, 'message': 'Report submitted successfully'})
     return JsonResponse({'message': 'Failed'}, status=400)
 
+
+
+
+def password_reset(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        user = User.objects.get(email=email)
+        user.set_password('new_password')
+        user.save()
+        return render(request, 'password_reset.html') 
+    return render(request, 'password_reset.html')

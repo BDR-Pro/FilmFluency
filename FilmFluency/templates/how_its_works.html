@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+
+{% block title %}How FilmFluency Works{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.0.0/css/flag-icons.min.css"/>
+
+<div class="container mt-5">
+    <header class="text-center">
+        <h1>Welcome to FilmFluency</h1>
+        <p>Learn languages through movies and interactive transcripts!</p>
+    </header>
+
+    <section id="language-selection" class="text-center my-5">
+        <h2>Select a Language</h2>
+        <p><em>Choose a language to get started:</em></p>
+        <div class="d-flex justify-content-center">
+            <div class="flag-container mx-3" data-lang="en" style="cursor: pointer;">
+                <span class="fi fi-us fi-4x"></span>
+                <p>English</p>
+            </div>
+            <div class="flag-container mx-3" data-lang="es" style="cursor: pointer;">
+                <span class="fi fi-es fi-4x"></span>
+                <p>Spanish</p>
+            </div>
+            <div class="flag-container mx-3" data-lang="fr" style="cursor: pointer;">
+                <span class="fi fi-fr fi-4x"></span>
+                <p>French</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="movie-selection" class="text-center my-5" style="display: none;">
+        <h2>Choose a Movie</h2>
+        <div class="d-flex flex-wrap justify-content-center" id="movie-list">
+            <!-- Movies will be dynamically inserted here -->
+        </div>
+    </section>
+
+    <section id="video-watching" class="text-center my-5" style="display: none;">
+        <h2>Watch the Video</h2>
+        <div id="video-player">
+            <!-- Placeholder for video player -->
+        </div>
+    </section>
+
+    <section id="transcript-reading" class="text-center my-5" style="display: none;">
+        <h2>Read the Transcript</h2>
+        <div id="transcript">
+            <!-- Placeholder for interactive transcript -->
+        </div>
+    </section>
+
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .movie {
+        background: #eee;
+        padding: 20px;
+        margin: 10px;
+        width: 300px;
+        border-radius: 15px;
+        transition: transform 0.3s;
+    }
+    .movie:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+    <!-- Add cursor pointer to the flag container and make thr flag biiger and curvey angles and even bigger on hovver -->
+    .flag-container {
+        cursor: pointer;
+        border-radius: 15px;
+        padding: 20px;
+        margin: 10px;
+        background: #eee;
+        transition: transform 0.3s;
+        size: 100px;
+
+    }
+    .flag-container:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 20px rgba(0,0,0,0.1);
+
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const flags = document.querySelectorAll('.flag-container');
+
+    flags.forEach(flag => {
+        flag.addEventListener('click', function() {
+            const language = this.getAttribute('data-lang');
+            console.log(`You selected: ${language}`);  // Debug: alert which language was selected
+            // Here, you would call a function to update the rest of the page based on the selection
+            showMovieSelection(language);
+        });
+    });
+});
+
+function showMovieSelection(language) {
+    const movies = {
+        'en': [
+            { title: 'Movie Ted 2', img: 'https://image.tmdb.org/t/p/original/qMOt0uy1x49OBW0jzodgRM9waW0.jpg', alt: 'Movie Ted 2' },
+            { title: 'Movie The Dark Knight', img: 'https://image.tmdb.org/t/p/original/qJ2tW6WMUDux911r6m7haRef0WH.jpg', alt: 'Movie The Dark Knight' }
+        ],
+        'es': [
+            { title: 'The Holy Girl', img: 'https://image.tmdb.org/t/p/original/srA4HPJe0YpDTZ4L4Nj5psD7v48.jpg', alt: 'The Holy Girl' },
+            { title: 'The Amazing Catfish', img: 'https://image.tmdb.org/t/p/original/zZ9wdeh2jXZJYUxngOapEUsCVYh.jpg', alt: 'The Amazing Catfish' }
+        ],
+        'fr': [
+            { title: 'Pierrot le Fou', img: 'https://image.tmdb.org/t/p/original/i124H6iQB4CawrgFW9aZaZs7OBO.jpg', alt: 'Pierrot le Fou' },
+            { title: 'The Country Doctor', img: 'https://image.tmdb.org/t/p/original/ymytgiRmoGC5L87IqWf2Z4tdumF.jpg', alt: 'The Country Doctor' }
+        ]
+    };
+
+    // Update the UI to show movies for the selected language
+    const movieList = document.getElementById('movie-selection');
+    movieList.style.display = 'block'; // Make the movie selection visible
+
+    // select by id
+    text = document.getElementById('language-selection');
+    text.style.display = 'none'; // Hide the language selection
+
+    const movieListContainer = document.getElementById('movie-list');
+    movieListContainer.innerHTML = ''; // Clear previous entries 
+
+    movies[language].forEach(movie => {
+        const movieElement = document.createElement('div');
+        movieElement.classList.add('movie', 'card');
+        movieElement.innerHTML = `
+            <div class="card-body">
+                <h5 class="card-title">${movie.title}</h5>
+                <img src="${movie.img}" alt="${movie.alt}" class="card-img-top">
+            </div>
+        `;
+        movieListContainer.appendChild(movieElement);
+    });
+}
+</script>
+{% endblock %}

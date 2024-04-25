@@ -1,8 +1,8 @@
-import os
 import boto3
-import uuid
 from django.conf import settings
+import random
 from botocore.client import Config
+from boto3.s3.transfer import S3Transfer
 
 def client_s3():
     try:
@@ -12,11 +12,13 @@ def client_s3():
         SECRET_KEY = settings.SECRET_KEY
         ACCESS_KEY = settings.ACCESS_KEY
         # Create a session using DigitalOcean Spaces or AWS credentials
+        print("Creating session...s3")
+        
         session = boto3.session.Session()
         s3_client = session.client(
             's3',
             region_name='fra1',  # Adjust region if necessary
-            endpoint_url='https://filmfluency.fra1.digitaloceanspaces.com',  # Adjust endpoint URL if necessary
+            endpoint_url='https://fra1.digitaloceanspaces.com',  # Adjust endpoint URL if necessary
             aws_access_key_id=ACCESS_KEY,  # Use dedicated settings for AWS access key
             aws_secret_access_key=SECRET_KEY,  # Use dedicated settings for AWS secret key
             config=Config(signature_version='s3v4')
@@ -33,16 +35,17 @@ def client_s3():
     return s3_client
 
 
-def upload_to_s3(movie, video_name, filetype="mp4"):
+def upload_to_s3(file_name):
+    print("Uploading file to S3...")
+    bucket = 'filmfluency'
     client = client_s3()
-    file_path = os.path.join("MovieToClips", "cut_videos", movie, video_name)
-    bucket_name = 'filmfluency'
-    file_key = f"{movie}/{uuid.uuid4()}.{filetype}"
-    client.upload_file(file_path, bucket_name, file_key,  ExtraArgs={'ACL': 'public-read'})
-    os.remove(file_path)
-    print(f"File {file_key} uploaded to {bucket_name} successfully.")
-    return file_key
-    
+    transfer = S3Transfer(client)
+    try:
+        transfer.upload_file(file_name, bucket, file_name, extra_args={'ACL': 'public-read'})
+        print("File uploaded successfully")
+    except Exception as e:
+        print(f"Error uploading file: {str(e)}")
+
     
 def serve_secure_media(file_key):
     client = client_s3()
@@ -53,3 +56,20 @@ def serve_secure_media(file_key):
                                         ExpiresIn=3600)
     return url
 
+
+def get_random_file(folder_path="avatars/"):
+    # Setup S3 client
+    s3_client = client_s3()
+    response = s3_client.list_objects_v2(Bucket="filmfluency", Prefix=folder_path)
+
+    # Extract file names
+    files = [file['Key'] for file in response.get('Contents', []) if '/' not in file['Key'][len(folder_path):]]
+
+    # Choose a random file
+    if files:
+        random_file = random.choice(files)
+        print("Randomly selected file:", random_file)
+        return random_file
+    else:
+        print("No files found in the specified folder.")
+        return None

@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 from django.conf import settings
 from django.http import JsonResponse
 from django.contrib.auth.models import User
-
+from django.contrib.auth.decorators import login_required
 TAP_SECRET_KEY = settings.TAP_SECRET_KEY
 
 def get_icon_url(name):
@@ -62,18 +62,27 @@ def products(request):
     return render(request, 'product.html', {'products': products})
 
 # Redirects based on payment choice
+@login_required(login_url='users:login')
 def payment_home(request):
+    if request.method == 'GET':
+        product = request.GET.get('product')
+        product = Product.objects.get(id=product)
+        subscription = Product.objects.all()
+        return render(request, 'payment.html', {'product': product, 'subscriptions': subscription})
     if request.method == 'POST':
-        amount = request.POST.get('amount')
-        payment_method = request.POST.get('payment_method')
-
-        if payment_method == 'crypto':
-            return redirect('crypto_payment', amount=amount)
+        product = request.POST.get('subscriptionType')
+        currency = request.POST.get('isGift')
+        quantity = request.POST.get('quantity')
+        payment_type = request.POST.get('paymentType')
         
-        elif payment_method == 'tap':
-            return redirect('tap_payment')
-    else:
-        return render(request, 'payment.html')
+        new_payment = Payment.objects.create(user=request.user, product=product, currency=currency, is_completed=False, payment_method=payment_type, quantity=quantity)
+        
+        if payment_type == 'crypto':
+            return redirect('payment:crypto-payment', payment_id=new_payment.id)
+        if payment_type == 'tap':
+            return redirect('payment:tap-payment', payment_id=new_payment.id)
+        
+    return render(request, 'payment.html')
 
 
     
@@ -182,3 +191,6 @@ def cart(request):
 def get_qr_code_url(crypto):
     """Get the QR code URL for a cryptocurrency."""
     return f"https://filmfluency.fra1.cdn.digitaloceanspaces.com/qr/{crypto}.png"
+
+def how_its_works(request):
+    return render(request, 'how_its_works.html')

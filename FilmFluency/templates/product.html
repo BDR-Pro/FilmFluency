@@ -1,72 +1,105 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Product Catalog</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-    <style>
-        .card {
-            cursor: pointer;
-            transition: transform 0.3s ease;
-        }
-        .card:hover {
-            transform: scale(1.05);
-        }
-        .details {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.5s ease-out;
-        }
-        .featured {
-            transform: scale(1.1);
-            background-color: #f8f9fa; /* Light grey background to stand out */
-            border-color: #ffc107; /* Gold border for the best price */
-        }
-        .featured .card-body {
-            position: relative;
-        }
-        .featured .card-body::before {
-            content: 'Best Price';
-            color: #fff;
-            background-color: #dc3545; /* Bootstrap danger color for visibility */
-            font-size: 14px;
-            font-weight: bold;
-            padding: 5px 10px;
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            border-radius: 5px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container mt-5">
-        <div class="row row-cols-1 row-cols-md-3 g-4">
-            {% for product in products %}
-                <div class="col">
-                    <div class="card h-100 {% if product.featured %}featured{% endif %}" onclick="toggleDetails(this)">
-                        <img src="{{ product.image }}" class="card-img-top" alt="Product Image">
-                        <div class="card-body">
-                            <h5 class="card-title text-truncate">{{ product.name }}</h5>
-                            <p class="card-text text-truncate">{{ product.description }}</p>
+{% extends 'base.html' %}
+
+{% block title %}
+    Products
+{% endblock %}
+
+{% block content %} 
+<div class="container mt-5">
+    <div class="row row-cols-1 row-cols-md-3 g-4 justify-content-center">
+        {% for product in products %}
+        <a href="{% url 'payment:subscribe' %}?product={{product.id}}" class="col btn custom-btn">
+            <div class="col">
+                <div class="card h-100 {% if product.featured %}featured{% endif %}" onclick="toggleDetails(this)">
+                    <img src="{{ product.image }}" class="card-img-top" alt="{{ product.name }}">
+                    <div class="card-body">
+                        <h5 class="card-title text-truncate">{{ product.name }}</h5>
+                        <p class="card-text">{{ product.price }}</p>
+                        {% if product.featured %}
+                            <span class="badge bg-warning text-dark">Best Price</span>
+                        {% endif %}
+                        <div class="details">
+                            <p class="card-text">{{ product.description }}</p>
+                            <p class="card-text">Duration: {{ product.days }} day(s)</p>
                         </div>
-                        
+                    </div>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+
+<a href="{% url 'payment:how-its-works' %}" 
+
+<div class="d-grid gap-2">
+    <button class="btn btn-outline-info" type="button">How it Works</button>
+
+</div>
+</a>
+
+{% endblock %}
 
 
-     
-    <script>
-        function toggleDetails(cardElement) {
-            const details = cardElement.querySelector('.details');
-            if (details.style.maxHeight) {
-                details.style.maxHeight = null;
-            } else {
-                details.style.maxHeight = details.scrollHeight + "px";
-            }
+{% block extra_css %}
+<style>
+    .card {
+        cursor: pointer;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        margin-bottom: 2rem; /* Extra space at the bottom */
+    }
+    .card:hover, .card:focus {
+        transform: scale(1.03); /* Slight scale on hover and focus for all cards */
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Shadow for depth */
+    }
+    .featured {
+        transform: scale(1.1) !important; /* Larger scale for featured card */
+        z-index: 1;
+        position: relative; /* To ensure z-index is applied correctly */
+        box-shadow: 0 6px 12px rgba(0,0,0,0.1); /* Stronger shadow for featured card */
+    }
+    .featured:hover, .featured:focus {
+        box-shadow: 0 8px 16px rgba(0,0,0,0.2); /* Even stronger shadow on hover/focus for featured */
+    }
+    .featured .card-body::before {
+        content: 'Best Price';
+        color: #fff;
+        background-color: #dc3545;
+        font-size: 14px;
+        font-weight: bold;
+        padding: 5px 10px;
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        border-radius: 5px;
+    }
+    .details {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.5s ease-out;
+    }
+    .card:hover .details,
+    .card:focus .details,
+    .card:active .details {  /* Ensure it works on click for all cards */
+        max-height: 500px; /* Large enough max-height to show all content */
+    }
+    .custom-btn {
+        text-decoration: none;
+        color: inherit;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function toggleDetails(cardElement) {
+        const details = cardElement.querySelector('.details');
+        // Allow all cards to toggle details, including featured
+        if (details.style.maxHeight) {
+            details.style.maxHeight = null;
+        } else {
+            details.style.maxHeight = details.scrollHeight + "px";
         }
-    </script>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
-</body>
-</html>
+    }
+</script>
+{% endblock %}

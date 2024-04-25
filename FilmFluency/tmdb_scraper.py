@@ -5,10 +5,7 @@ import json
 import logging
 from datetime import datetime
 from django.utils import timezone
-from learning.models import Movie, Country, Language
-from django.db.models import ObjectDoesNotExist
-import pycountry
-
+from learning.models import Movie
 logging.basicConfig(level=logging.INFO)
 
 # Environment Variables

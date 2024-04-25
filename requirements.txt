@@ -7,6 +7,9 @@ Django==4.2.11
 decorator
 django-jazzmin
 fastapi==0.110.1
+django-storages[boto3]
+boto3
+django-storages
 pycountry
 ffmpy==0.3.2
 filelock==3.13.4

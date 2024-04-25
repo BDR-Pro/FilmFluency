@@ -29,6 +29,12 @@
                 </div>
                 {% endif %}
                 <button type="submit" class="btn btn-primary">Login</button>
+                <!-- if ?next add it to the query-->
+                <a href="{% url 'users:password_reset' %}" class="btn btn-link">Forgot Password?</a>
+                <br>
+                <br>
+                Don't have an account?
+                <a href="{% url 'users:signup'%}?next={{ next }}" class="btn btn-link">Register</a>
             </form>
         </div>
     </div>

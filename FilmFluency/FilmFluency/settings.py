@@ -41,10 +41,11 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'django.contrib.staticfiles',
     'rest_framework',
-    'users.templatetags.custom_filters',
     'corsheaders',
     'users',
+    'django.contrib.sitemaps',
     'storages',
     'learning',
     'web',
@@ -64,6 +65,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+        
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True 
@@ -221,7 +223,18 @@ import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+]
+# Define the static files settings
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
+# Additional places for collecting static files, aside from app 'static' directories
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
@@ -233,29 +246,33 @@ STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 AWS_ACCESS_KEY_ID = ACCESS_KEY
 AWS_SECRET_ACCESS_KEY = SECRET_KEY
 AWS_STORAGE_BUCKET_NAME = 'filmfluency'
-AWS_S3_ENDPOINT_URL = "https://filmfluency.fra1.cdn.digitaloceanspaces.com"
+AWS_S3_ENDPOINT_URL = "https://fra1.digitaloceanspaces.com"
+CDN_DOMAIN = "https://filmfluency.fra1.cdn.digitaloceanspaces.com"
 AWS_S3_OBJECT_PARAMETERS = {
     'CacheControl': 'max-age=86400',
+    'ACL': 'public-read'
 }
 AWS_LOCATION = 'static'
 
-
+# Static files configuration
+STATIC_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.{CDN_DOMAIN}/{AWS_LOCATION}/'
+STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     
 JAZZMIN_SETTINGS = {
     # title of the window (Will default to current_admin_site.site_title if absent or None)
-    "site_title": "Library Admin",
+    "site_title": "Club Admin",
 
     # Title on the login screen (19 chars max) (defaults to current_admin_site.site_header if absent or None)
-    "site_header": "Library",
+    "site_header": "FilmFluency",
 
     # Title on the brand (19 chars max) (defaults to current_admin_site.site_header if absent or None)
-    "site_brand": "Library",
+    "site_brand": "FilmFluency",
 
     # Logo to use for your site, must be present in static files, used for brand on top left
-    "site_logo": "https://filmfluency.fra1.cdn.digitaloceanspaces.com/icons/film_logo_.svg",
+    "site_logo": "https://filmfluency.fra1.cdn.digitaloceanspaces.com/static/favicon.ico",
 
     # Logo to use for your site, must be present in static files, used for login form logo (defaults to site_logo)
-    "login_logo": None,
+    "login_logo": "https://filmfluency.fra1.cdn.digitaloceanspaces.com/static/favicon.ico",
 
     # Logo to use for login form in dark themes (defaults to login_logo)
     "login_logo_dark": None,
@@ -267,10 +284,10 @@ JAZZMIN_SETTINGS = {
     "site_icon": None,
 
     # Welcome text on the login screen
-    "welcome_sign": "Welcome to the library",
+    "welcome_sign": "Welcome to the admin panel",
 
     # Copyright on the footer
-    "copyright": "Acme Library Ltd",
+    "copyright": "FilmFluency",
 
     # List of model admins to search from the search bar, search bar omitted if excluded
     # If you want to use a single search field you dont need to use a list, you can use a simple string 
@@ -331,12 +348,6 @@ JAZZMIN_SETTINGS = {
     "custom_links": {
     "learning": [
         {
-            "name": "Browse Movie Videos", 
-            "url": "learning:videos_by_movie",  # Assuming you have a named URL in the 'learning' app for browsing movies
-            "icon": "fas fa-film",
-            "permissions": ["learning.videos_by_movie"]
-        },
-        {
             "name": "My Unique_Movies",
             "url": "learning:unique_movies",  # Named URL for accessing user-specific courses or learning modules
             "icon": "fas fa-graduation-cap",
@@ -364,12 +375,6 @@ JAZZMIN_SETTINGS = {
             "url": "payment:products",  # URL for viewing different subscription plans
             "icon": "fas fa-credit-card",
             "permissions": ["payment.products"]
-        },
-        {
-            "name": "My Payments",
-            "url": "payment:payment_home",  # URL for users to view their payment history
-            "icon": "fas fa-history",
-            "permissions": ["payment.payment_home"]
         }
     ]
 },
@@ -418,3 +423,6 @@ JAZZMIN_SETTINGS = {
     # Add a language dropdown into the admin
     "language_chooser": False,
 }
+
+SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_HTTPONLY = True
