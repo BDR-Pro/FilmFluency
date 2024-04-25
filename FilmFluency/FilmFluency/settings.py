@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('django')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['filmfluency.com', 'www.filmfluency.com', 'localhost']
 
@@ -116,17 +116,6 @@ TMDB_API_KEY = os.environ.get('TMDB_API_KEY')
 RD_PASS = os.environ.get('RD_PASS')
 
 
-# Create a list of these variables
-config_keys = [SECRET_KEY, ACCESS_KEY,RD_PASS, 
-                DB_PASS,TAP_SECRET_KEY, EMAIL_HOST_USER, TMDB_API_KEY ,EMAIL_HOST_PASSWORD]
-
-# Check if all elements are not None
-is_loaded = all(key is not None for key in config_keys)
-
-if not is_loaded and not DEBUG:
-    raise ValueError("Some configuration variables are not set. Please check your environment variables.")
-
-# Database
 
 import os
 
@@ -157,16 +146,14 @@ cursor.execute("SELECT 1")
 print("Database pinged successfully")
 
 
-setup = [TMDB_API_KEY,SECRET_KEY, ACCESS_KEY, DB_PASS,RD_PASS]
+print("SECRET_KEY: ", SECRET_KEY)
+print("ACCESS_KEY: ", ACCESS_KEY)
+print("DB_PASS: ", DB_PASS)
+print("EMAIL_HOST_USER: ", EMAIL_HOST_USER)
+print("EMAIL_HOST_PASSWORD: ", EMAIL_HOST_PASSWORD)
+print("TMDB_API_KEY: ", TMDB_API_KEY)
+print("RD_PASS: ", RD_PASS)
 
-if all(setup):
-    print("All environment variables loaded successfully")
-elif DEBUG:
-    print("Some environment variables are not set. Please check your environment variables.\n")
-    print("TMDB_API_KEY: ", TMDB_API_KEY)
-    print("SECRET_KEY: ", SECRET_KEY)
-    print("ACCESS_KEY: ", ACCESS_KEY)
-    print("DB_PASS: ", DB_PASS)
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
