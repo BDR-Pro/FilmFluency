@@ -139,13 +139,15 @@ def home(request):
         movies = movies.filter(country_flag=country_flag)  # Assuming Movie model has 'country_flag' attribute
     
     message = f"{user_choice.replace('_', ' ').title()} Movies"
-    
+    flags = get_unique_country_flag()
+    #remove any duplicates from the list of flags
+    flags = list(dict.fromkeys(flags))
     # Render response with initial movie data
     response = render(request, 'index.html', {
         'movies': movies[:5],  # Limit to 5 movies for simplicity
         'message': message,
         'current_source': user_choice,
-        'unique_country_flag': get_unique_country_flag(),
+        'unique_country_flag': flags,
         'current_country': country_flag
     })
     if not 'reset_preferences' in request.GET:
