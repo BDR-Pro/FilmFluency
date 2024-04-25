@@ -15,9 +15,11 @@ RUN apt-get update && apt-get install -y \
 # Upgrade pip
 RUN pip install --upgrade pip
 
-# Clone the specific Git repository
-RUN git clone https://github.com/BDR-Pro/FilmFluency.git .
+RUN pip install gunicorn 
 
+RUN pip install --upgrade setuptools
+
+# Clone the specific Git repository
 # Copy the current directory contents into the container at /usr/src/app
 COPY . /usr/src/app
 
