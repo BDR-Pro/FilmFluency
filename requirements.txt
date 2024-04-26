@@ -27,7 +27,6 @@ Jinja2
 jsonschema
 jsonschema-specifications
 kiwisolver
-lxml
 MarkupSafe
 dj-database-url
 numpy
