@@ -10,7 +10,9 @@ RUN apt-get update && apt-get install -y \
     gcc \
     python3-dev \
     musl-dev \
-    git
+    git \
+    build-essential \
+    clang 
 
 # Upgrade pip
 RUN pip install --upgrade pip
@@ -31,6 +33,9 @@ EXPOSE 8000
 
 # Define environment variable
 ENV NAME World
+
+#cd into the Django project directory
+WORKDIR /usr/src/app/FilmFluency
 
 # Define the command to run your Django application using Gunicorn
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "FilmFluency.wsgi:application"]
