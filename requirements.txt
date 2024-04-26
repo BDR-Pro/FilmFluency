@@ -1,3 +1,4 @@
+numpy
 djangorestframework
 beautifulsoup4
 django-cors-headers
@@ -29,7 +30,6 @@ jsonschema-specifications
 kiwisolver
 MarkupSafe
 dj-database-url
-numpy
 pandas
 pillow
 proglog

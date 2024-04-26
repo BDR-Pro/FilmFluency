@@ -12,7 +12,8 @@ RUN apt-get update && apt-get install -y \
     musl-dev \
     git \
     build-essential \
-    clang 
+    clang \
+    rm -rf /var/lib/apt/lists/*
 
 # Upgrade pip
 RUN pip install --upgrade pip
