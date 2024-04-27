@@ -72,16 +72,22 @@ def get_videos_by_length(request, max_length):
 
 def get_unique_movies(request):
     order_by = request.GET.get('orderby', 'rating')  # Default sorting by 'vote_average'
-    valid_orderings = ['rating', 'release_date', 'date_added']
-    
+    valid_orderings = ['rating', 'release_date']
+    mode = request.GET.get('video_mode', '')
     if order_by not in valid_orderings:
         order_by = 'rating'
     
     country = request.GET.get('country', '')
     if country:
-        movies = Movie.objects.filter(country_flag=country).distinct().order_by('-' + order_by)        
+        movies = Movie.objects.filter(country_flag=country).distinct().order_by('-' + order_by)    
+    
+    if mode == 'true':
+        movies = Movie.objects.filter(videos__isnull=False).distinct().order_by('-' + order_by)
+            
     else:
-        movies = Movie.objects.all().order_by('-' + order_by)        
+        movies = Movie.objects.all().order_by('-' + order_by)     
+        
+     
     
         
     paginator = Paginator(movies, 6)  # Show 6 movies per page
@@ -95,11 +101,21 @@ def get_unique_movies(request):
     except EmptyPage:
         # If page is out of range (e.g. 9999), deliver last page of results.
         movies = paginator.page(paginator.num_pages)
+        
+    print(f"{mode=}")
+    return render(request, 'movies.html', {'movies': movies , 'order_by':order_by , 
+                                           'unique_country_flag':list(dict.fromkeys(get_unique_country_flag())), 
+                                           'country':country,
+                                           'video_mode':mode,
+                                           
+                                           
+                                           })
 
-    
-    return render(request, 'movies.html', {'movies': movies , 'order_by':order_by , 'unique_country_flag':get_unique_country_flag(), 'country':country})
 
 
 def get_unique_country_flag():
     return Movie.objects.values_list('country_flag',flat =True ).distinct()
+
+
+
 

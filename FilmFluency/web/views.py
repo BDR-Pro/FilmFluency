@@ -99,8 +99,10 @@ def get_movie_by_slug(request,random_slug):
 def get_trending_movies():
     return Movie.objects.filter(trendingmovies__isnull=False).order_by('-trendingmovies__views')
 
-def get_latest_updated_movies():
-    return Movie.objects.order_by('-date_added')
+def get_latest_updated_movies_with_videos_only():
+    return Movie.objects.filter(videos__isnull=False).annotate(
+        latest_video_date=Max('videos__date_added')
+    ).order_by('-latest_video_date')
 
 def get_latest_movies():
     return Movie.objects.order_by('-release_date')
@@ -129,7 +131,7 @@ def home(request):
     # Map source names to function calls
     movie_sources = {
         'trending': get_trending_movies,
-        'latest_updated': get_latest_updated_movies,
+        'latest_updated': get_latest_updated_movies_with_videos_only,
         'latest': get_latest_movies
     }
     

@@ -64,17 +64,21 @@
     {% endif %}
     <div class="mb-3 d-flex justify-content-start align-items-center">
         <span class="me-2">Sort by:</span>  
-        <a href="{% url 'learning:unique_movies' %}?orderby=vote_average{% if country %}&country={{ country }}{% endif %}" class="btn btn-outline-secondary btn-sm me-1 {% if order_by == 'vote_average' %}active{% endif %}">Rating</a>
-        <a href="{% url 'learning:unique_movies' %}?orderby=release_date{% if country %}&country={{ country }}{% endif %}" class="btn btn-outline-secondary btn-sm me-1 {% if order_by == 'release_date' %}active{% endif %}">Release Date</a>
-        <a href="{% url 'learning:unique_movies' %}?orderby=rating{% if country %}&country={{ country }}{% endif %}" class="btn btn-outline-secondary btn-sm {% if order_by == 'date_added' %}active{% endif %}">Date Added</a>
-         
-        {% for flag in unique_country_flag %}
-        <a href="{% url 'learning:unique_movies' %}?country={{ flag }}&orderby={{ order_by }}" class="btn flag-button btn-outline-secondary btn-sm me-1 {% if country == flag %}active{% endif %}">
-            <span class="flag-icon-custom fi fi-{{ flag|lower }}"></span>
-        </a>
-    {% endfor %}
-    
+        <a href="{% url 'learning:unique_movies' %}?orderby=vote_average{% if country %}&country={{ country }}{% endif %}{% if video_mode  %}&video_mode=true{% endif %}" class="btn btn-outline-secondary btn-sm me-1 {% if order_by == 'vote_average' %}active{% endif %}">Rating</a>
+        <a href="{% url 'learning:unique_movies' %}?orderby=release_date{% if country %}&country={{ country }}{% endif %}{% if video_mode  %}&video_mode=true{% endif %}" class="btn btn-outline-secondary btn-sm me-1 {% if order_by == 'release_date' %}active{% endif %}">Release Date</a>
+        <a href="{% url 'learning:unique_movies' %}?orderby=rating{% if country %}&country={{ country }}{% endif %}{% if video_mode  %}&video_mode=true{% endif %}" class="btn btn-outline-secondary btn-sm {% if order_by == 'date_added' %}active{% endif %}">Date Added</a>
+        <a href="{% url 'learning:unique_movies' %}{% if order_by %}?orderby={{ order_by }}{% endif %}&video_mode=true{% if country %}&country={{ country }}{% endif %}" class="btn btn-outline-secondary btn-sm {% if video_mode  %}active{% endif %}">Only With Videos Mode</a>
+        {% if video_mode %}
+            <a href="{% url 'learning:unique_movies' %}{% if order_by %}?orderby={{ order_by }}{% endif %}{% if country %}&country={{ country }}{% endif %}" class="btn btn-outline-secondary btn-sm">Exit Video Mode</a>
+        {% endif %}
     </div>
+    
+    {% for flag in unique_country_flag %}
+    <a href="{% url 'learning:unique_movies' %}?country={{ flag }}&orderby={{ order_by }}" class="btn flag-button btn-outline-secondary btn-sm me-1 {% if country == flag %}active{% endif %}">
+        <span class="flag-icon-custom fi fi-{{ flag|lower }}"></span>
+    </a>
+{% endfor %}
+
     <div class="row">
         {% if no_res %}
             <div class="col-12">

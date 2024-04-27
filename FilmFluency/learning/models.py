@@ -85,7 +85,8 @@ class Movie(models.Model):
     homepage = models.URLField(blank=True, null=True)
     date_added = models.DateTimeField(auto_now_add=True)
     country_flag = models.CharField(max_length=2, blank=True, null=True)  
-    
+    transcript_path = models.CharField(max_length=255, blank=True, null=True)
+    subtitle_path = models.CharField(max_length=255, blank=True, null=True)
     
     class Meta:
         ordering = ['date_added']
