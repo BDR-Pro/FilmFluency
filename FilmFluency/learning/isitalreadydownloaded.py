@@ -67,18 +67,22 @@ def convert_to_webp(img):
     """Convert image to webp format using magick"""
     subprocess.run(["magick", img, img.replace("jpg","webp")]) 
     os.remove(img)
-    
-def poster_to_uploads3():
-    movies = Movie.objects.all()
-    for i in movies:
-        if not i.poster.endswith("jpg") or i.poster.endswith("png"):
+
+
+def upload_image_to_s3():
+    allmovies=Movie.objects.all().count()
+    index=0
+    for movie in Movie.objects.all().order_by('trendingmovies__views'):
+        index+=1
+        if movie.poster == None:
             continue
-        image = download_image(i.poster)
-        image_webp = convert_to_webp(image)
-        upload_to_s3(image_webp,f"posters/{i.title}")
-        i.poster = f"/posters/{i.title}"
-        print(i.poster)
-        i.save()
-        delete_image(image)
-        delete_image(image_webp)
-        
+        if not 'tmdb' in movie.poster:
+            continue
+        print(f"Uploading image for {movie.title}")
+        print(f"Processing {index} of {allmovies}")
+        image_path = download_image(movie.poster)
+        convert_to_webp(image_path)
+        uploaded=upload_to_s3(image_path.replace("jpg","webp"),"posters/"+movie.title + ".webp")
+        if uploaded:
+            movie.poster = "/posters/"+movie.title + ".webp"
+            movie.save()

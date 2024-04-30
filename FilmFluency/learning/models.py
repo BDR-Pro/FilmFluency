@@ -171,6 +171,26 @@ class Movie(models.Model):
         if not self.poster:
             return "https://filmfluency.fra1.cdn.digitaloceanspaces.com/posters/placeholder.webp"
         return "https://filmfluency.fra1.cdn.digitaloceanspaces.com"+self.poster if not self.poster.startswith("https") else self.poster
+    
+    def download_transcript(self):
+        """Download the transcript file to the S3 bucket and return the URL path."""
+        Dir = os.path.join(os.getcwd(), "MovieToClips", "transcripts", self.title)
+        os.chdir(Dir)
+        #subliminal download -l en "The Matrix.avi"
+        subprocess.run(["subliminal","download","-l","en",self.title])
+        self.transcript_path = upload_to_s3(get_biggest_file(Dir))
+        
+        
+    def download_translation(self):
+        """Download the translation file to the S3 bucket and return the URL path."""
+        Dir = os.path.join(os.getcwd(), "MovieToClips", "translations", self.title)
+        os.chdir(Dir)
+        #subliminal download -l en "The Matrix.avi"
+        if not self.original_language == "en":
+            subprocess.run(["subliminal","download","-l","en",self.title])
+            self.transcript_path = upload_to_s3(get_biggest_file(Dir))
+        else:
+            self.transcript_path = self.transcript_path
         
 #################################################################
 

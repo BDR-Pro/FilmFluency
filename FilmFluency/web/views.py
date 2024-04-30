@@ -105,7 +105,6 @@ def get_movie_by_slug(request,random_slug):
 def get_trending_movies():
     # Try to get the result from the cache
     movies = cache.get('trending_movies')
-
     # If the result was not in the cache, compute it and store it in the cache
     if movies is None:
         movies = Movie.objects.filter(trendingmovies__isnull=False).order_by('-trendingmovies__views')

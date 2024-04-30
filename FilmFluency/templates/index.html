@@ -3,9 +3,18 @@
 {% block title %}Home -{% endblock %}
 
 {% block content %}
-{% load static %}
+
 <style>
-    /* Style for cards */
+  
+   
+    
+    .responsive-poster {
+        height: auto; /* Adjust height for mobile */
+        width: 100%; /* Full width on small screens */
+    }
+
+
+    
     .ff-card-custom {
         box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         transition: all 0.3s ease-in-out;
@@ -18,7 +27,25 @@
         z-index: 10;
         box-shadow: 0 8px 16px rgba(0,0,0,0.2);
     }
-
+    .visually-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        margin: -1px;
+        padding: 0;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        border: 0;
+    }
+    
+    .responsive-poster {
+        height: 1024px;
+        width: calc(1024px * 0.3); /* This calculates to 307.2px, but it will round to 307px */
+        object-fit: cover; /* Ensures the image covers the defined area without distorting the aspect ratio */
+        display: block; /* To remove any extra space below the image (common with inline-block elements) */
+        margin: 0 auto; /* Optionally centers the image horizontally if within a container */
+      }
+      
     /* Style for custom buttons */
     .ff-btn-custom {
         background-color: #007bffa0;
@@ -81,6 +108,7 @@
 </style>
 
 <div class="container mt-5">
+    <h1 class="visually-hidden">Movie Gallery for Film Fluency</h1> <!-- Invisible H1 for SEO and accessibility -->
     <h2 class="mb-3">{{ message }}</h2>
     
     <div class="btn-group mb-3" role="group" aria-label="Movie Sources">
@@ -97,14 +125,15 @@
         </a>
         {% endfor %}
     </div>
+
     <div class="row">
         {% for movie in movies %}
         <div class="col-md-4 mb-4">
             <div class="card card-custom">
                 <a href="{% url 'web:movie_detail' movie.random_slug %}" style="text-decoration: none; color: inherit;">
-                    <img src="{{ movie.poster }}" class="card-img-top" alt="{{ movie.original_title }}">
+                    <img src="{{ movie.poster }}" alt="{{ movie.original_title }}" class="responsive-poster" type="image/webp">
                     <div class="card-body">
-                        <h5 class="card-title">{{ movie.original_title }}</h5>
+                        <h3 class="card-title">{{ movie.original_title }}</h3>  <!-- Changed from h5 to h3 -->
                         <p class="card-text">{{ movie.get_desc }}</p>
                         <span class="flag-icon-custom fi fi-{{ movie.country_flag |lower }}"></span>
                         <p class="card-text">
@@ -121,4 +150,4 @@
     </div>
 
 </div>
-    {% endblock %}
+{% endblock %}
