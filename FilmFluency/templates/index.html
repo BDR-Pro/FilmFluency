@@ -1,24 +1,25 @@
 {% extends 'base.html' %}
 
-{% block title %}Home - Film Fluency{% endblock %}
+{% block title %}Home -{% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.0.0/css/flag-icons.min.css"/>
+{% load static %}
 <style>
+    /* Style for cards */
     .ff-card-custom {
         box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         transition: all 0.3s ease-in-out;
-        overflow: hidden; /* Hide any content that goes beyond the bounds of the card */
-        position: relative; /* Position relative to ensure z-index is applied correctly */
-        z-index: 1; /* Set a default stack order */
+        overflow: hidden;
+        position: relative;
+        z-index: 1;
     }
-    
     .ff-card-custom:hover {
-        transform: scale(1.1); /* Increase the scale to make the card grow */
-        z-index: 10; /* Increase z-index to make sure the card is above other content */
-        box-shadow: 0 8px 16px rgba(0,0,0,0.2); /* Enhance shadow for lifted effect */
+        transform: scale(1.1);
+        z-index: 10;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.2);
     }
-    
+
+    /* Style for custom buttons */
     .ff-btn-custom {
         background-color: #007bffa0;
         border-color: #007bff;
@@ -30,6 +31,8 @@
         border-color: #004085;
         color: rgb(156, 101, 211);
     }
+
+    /* Style for flag icons */
     .ff-flag-icon-custom {
         width: 32px;
         height: 32px;
@@ -41,40 +44,41 @@
         padding: 5px;
         margin: 0 5px;
     }
+
+    /* Flexbox settings for button groups */
     .ff-btn-group, .ff-d-flex {
         display: flex;
         justify-content: center;
         width: 80%;
         margin: 20px auto;
     }
-    
+
+    /* Styles for main custom button */
     .btn-custom {
-        background-color: #007bffa0; /* Light blue color for normal state */
-        border-color: #007bff; /* Slightly darker border color for contrast */
-        color: white; /* White text for better visibility */
-        padding: 8px 15px; /* Adequate padding for button sizing */
-        border-radius: 4px; /* Rounded corners for a modern look */
+        background-color: #0056b3;
+        border-color: #004095;
+        color: #ffffff;
+        padding: 8px 15px;
+        border-radius: 4px;
     }
-
     .btn-custom:hover {
-        background-color: #0056b3; /* Darker blue on hover for user feedback */
-        border-color: #004085; /* Corresponding darker border on hover */
+        background-color: #0056b3;
+        border-color: #004085;
     }
 
+    /* Additional styles for alignment and display */
     .btn-group {
         display: flex;
         justify-content: center;
-        width: 80%; /* Sets the width of the button groups centrally */
-        margin: 20px auto; /* Centers the button group with top and bottom margin */
+        width: 80%;
+        margin: 20px auto;
     }
-
     .d-flex {
         display: flex;
-        justify-content: center; /* Ensures contents within are centered */
-        align-items: center; /* Aligns items vertically */
+        justify-content: center;
+        align-items: center;
     }
 </style>
-
 
 <div class="container mt-5">
     <h2 class="mb-3">{{ message }}</h2>
@@ -83,18 +87,16 @@
         <a href="?source=trending" class="btn btn-custom {% if current_source == 'trending' %}active{% endif %}">Trending Movies</a>
         <a href="?source=latest_updated" class="btn btn-custom {% if current_source == 'latest_updated' %}active{% endif %}">Latest Updated Movies (With Videos Only)</a>
         <a href="?source=latest" class="btn btn-custom {% if current_source == 'latest' %}active{% endif %}">Latest Movies</a>
-        <a href="?reset_preferences=true" class="btn btn-custom">Reset Preferences</a> <!-- Reset button -->
+        <a href="?reset_preferences=true" class="btn btn-custom">Reset Preferences</a>
     </div>
-    
 
     <div class="d-flex flex-wrap mb-3">
         {% for flag in unique_country_flag %}
-        <a href="?source={{ current_source }}&country={{ flag }}" class="btn flag-button btn-outline-secondary {% if current_country == flag %}active{% endif %}">
+        <a href="?source={{ current_source }}&country={{ flag }}" class="btn flag-button btn-outline-secondary {% if current_country == flag %}active{% endif %}" aria-label={{flag}}>
             <span class="flag-icon-custom fi fi-{{ flag|lower }}"></span>
         </a>
         {% endfor %}
     </div>
-
     <div class="row">
         {% for movie in movies %}
         <div class="col-md-4 mb-4">
@@ -117,5 +119,6 @@
         </div>
         {% endfor %}
     </div>
+
 </div>
-{% endblock %}
+    {% endblock %}

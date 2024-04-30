@@ -3,7 +3,7 @@ from django.conf import settings
 import random
 from botocore.client import Config
 from boto3.s3.transfer import S3Transfer
-
+from botocore.exceptions import ClientError
 def client_s3():
     try:
         print("Connecting to S3...")
@@ -76,3 +76,20 @@ def get_random_file(folder_path="avatars/"):
     else:
         print("No files found in the specified folder.")
         return None
+    
+def download_from_s3(key, extension=""):
+    client = client_s3()
+    bucket_name = 'filmfluency'
+    file_name = key.split('/')[-1]
+    if extension:
+        file_name += extension
+    try:
+        client.download_file(bucket_name, key, file_name)
+        print("Download successful.")
+        return file_name
+    except ClientError as e:
+        print(f"Error downloading file: {e}")
+        if e.response['Error']['Code'] == "404":
+            print("The object does not exist.")
+        else:
+            raise

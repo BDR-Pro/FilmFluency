@@ -15,6 +15,7 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from contact.models import ContactMessage
 from payment.models import Payment
+from django.core.cache import cache
 
 
 def get_latest_updated_movies():
@@ -25,6 +26,8 @@ def get_latest_updated_movies():
             latest_video_date=Max('videos__date_added')
         ).order_by('-latest_video_date')[:5]  # Order by this annotated field in descending order
 
+        for movie in recent_movies:
+            movie.poster = movie.get_poster()
         return recent_movies
     except:
         return None
@@ -93,19 +96,44 @@ def get_movie_by_slug(request,random_slug):
         reported = False
         notifed = False
         is_favorite = False
+        
+    movie.poster = movie.get_poster()
     return render(request, 'movie_detail.html', {'movie': movie, 'views': views, 'does_it_have_videos': does_it_have_videos ,
                                                  'reported': reported, 'notifed': notifed, 'is_favorite': is_favorite})
 
+
 def get_trending_movies():
-    return Movie.objects.filter(trendingmovies__isnull=False).order_by('-trendingmovies__views')
+    # Try to get the result from the cache
+    movies = cache.get('trending_movies')
+
+    # If the result was not in the cache, compute it and store it in the cache
+    if movies is None:
+        movies = Movie.objects.filter(trendingmovies__isnull=False).order_by('-trendingmovies__views')
+        for movie in movies:
+            movie.poster = movie.get_poster()
+        cache.set('trending_movies', movies, 60*60*24)  # Store for 24 hours
+
+    return movies
 
 def get_latest_updated_movies_with_videos_only():
-    return Movie.objects.filter(videos__isnull=False).annotate(
-        latest_video_date=Max('videos__date_added')
-    ).order_by('-latest_video_date')
+    movies = cache.get('latest_updated_movies')
+    if movies is None:
+        movies=Movie.objects.filter(videos__isnull=False).annotate(
+            latest_video_date=Max('videos__date_added')
+        ).order_by('-latest_video_date')
+        for movie in movies:
+            movie.poster = movie.get_poster()
+        cache.set('latest_updated_movies', movies, 60*60*24)  # Store for 24 hours
+    return movies
 
 def get_latest_movies():
-    return Movie.objects.order_by('-release_date')
+    movies = cache.get('latest_movies')
+    if movies is None:
+        movies = Movie.objects.order_by('-release_date')
+        for movie in movies:
+            movie.poster = movie.get_poster()
+        cache.set('latest_movies', movies, 60*60*24)
+    return movies
 
 def home(request):
     """ Render the homepage with introductory information and top trending movies based on user selection or cookie. """
@@ -177,6 +205,7 @@ def video_list(request):
         order_by_param = '-complexity'
     
     # Retrieve videos ordered by the specified field
+    
     all_videos = Video.objects.all().order_by(order_by_param)
     
     # Setup paginator
@@ -286,3 +315,9 @@ def dashboard_view(request):
     }
     
     return render(request, 'dashboard.html', context)
+
+
+def get_posters(request, random_slug):
+    redirect_url = f"https://filmfluency.fra1.cdn.digitaloceanspaces.com/posters/{random_slug}"
+    
+    return redirect(redirect_url)

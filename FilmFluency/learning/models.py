@@ -9,6 +9,19 @@ from django.contrib.auth.models import User
 import re
 from  django.urls import reverse
 from learning.func import language_to_country
+import subprocess
+import os
+from api.upload_to_s3 import upload_to_s3
+
+def get_biggest_file(directory):
+    """Return the path to the biggest file in the given directory."""
+    files = os.listdir(directory)
+    for i in range(len(files)):
+        if os.path.isdir(files[i]):
+            os.chdir(files[i])
+    subdirectory = os.getcwd()         
+    biggest_file = max(files, key=lambda x: os.path.getsize(os.path.join(subdirectory, x)))
+    return os.path.join(directory,subdirectory,biggest_file)
 
 def format_transcript(text):
     """Formats the transcript text to add new lines after each '.', ',', or every 8 words."""
@@ -87,6 +100,7 @@ class Movie(models.Model):
     country_flag = models.CharField(max_length=2, blank=True, null=True)  
     transcript_path = models.CharField(max_length=255, blank=True, null=True)
     subtitle_path = models.CharField(max_length=255, blank=True, null=True)
+    movie_path = models.CharField(max_length=255, blank=True, null=True)
     
     class Meta:
         ordering = ['date_added']
@@ -143,7 +157,21 @@ class Movie(models.Model):
         """Return the most recent date either the instance was added or the most recent video was added."""
         latest_video = self.videos.latest('date_added') if self.videos.exists() else None
         return latest_video.date_added if latest_video else self.date_added
-
+    
+    def download_movie(self):
+        """Download the movie file to the S3 bucket and return the URL path."""
+        Dir = os.path.join(os.getcwd(), "MovieToClips", "movies", self.title)
+        subprocess.run(["pirate-get", self.title,"-0","-S",Dir])
+        self.movie_path = upload_to_s3(get_biggest_file(Dir))
+    
+    def set_slug(self):
+        self.random_slug = slugify(self.title)[:50]
+        
+    def get_poster(self):
+        if not self.poster:
+            return "https://filmfluency.fra1.cdn.digitaloceanspaces.com/posters/placeholder.webp"
+        return "https://filmfluency.fra1.cdn.digitaloceanspaces.com"+self.poster if not self.poster.startswith("https") else self.poster
+        
 #################################################################
 
 

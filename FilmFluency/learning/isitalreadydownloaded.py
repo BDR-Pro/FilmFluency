@@ -4,7 +4,13 @@ import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'FilmFluency.settings')
 django.setup()
 
+from api.upload_to_s3 import upload_to_s3,download_from_s3
+
 from .models import Movie
+import requests
+from io import BytesIO
+from PIL import Image
+import subprocess
 
 def check_if_already_downloaded(movie_title):
     if Movie.objects.filter(title__icontains=movie_title).exists():
@@ -44,3 +50,35 @@ def fix_erorrs():
         movie.transcript_path = None
         movie.subtitle_path = None
         movie.save()
+
+def download_image(url):
+    """Download image from url to harddrive and return the image path"""
+    print(f"Downloading image from \n {url}")
+    response = requests.get(url)
+    image = Image.open(BytesIO(response.content))
+    image_path = "temp.jpg"
+    image.save(image_path)
+    return image_path  
+
+def delete_image(img):
+    os.remove(img)
+    
+def convert_to_webp(img):
+    """Convert image to webp format using magick"""
+    subprocess.run(["magick", img, img.replace("jpg","webp")]) 
+    os.remove(img)
+    
+def poster_to_uploads3():
+    movies = Movie.objects.all()
+    for i in movies:
+        if not i.poster.endswith("jpg") or i.poster.endswith("png"):
+            continue
+        image = download_image(i.poster)
+        image_webp = convert_to_webp(image)
+        upload_to_s3(image_webp,f"posters/{i.title}")
+        i.poster = f"/posters/{i.title}"
+        print(i.poster)
+        i.save()
+        delete_image(image)
+        delete_image(image_webp)
+        

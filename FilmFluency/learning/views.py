@@ -102,6 +102,9 @@ def get_unique_movies(request):
         # If page is out of range (e.g. 9999), deliver last page of results.
         movies = paginator.page(paginator.num_pages)
         
+    for i in movies:
+        i.poster = i.get_poster()
+        
     print(f"{mode=}")
     return render(request, 'movies.html', {'movies': movies , 'order_by':order_by , 
                                            'unique_country_flag':list(dict.fromkeys(get_unique_country_flag())), 
