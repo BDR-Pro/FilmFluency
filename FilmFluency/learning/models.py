@@ -12,6 +12,7 @@ from learning.func import language_to_country
 import subprocess
 import os
 from api.upload_to_s3 import upload_to_s3
+from time import sleep
 
 def get_biggest_file(directory):
     """Return the path to the biggest file in the given directory."""
@@ -160,9 +161,18 @@ class Movie(models.Model):
     
     def download_movie(self):
         """Download the movie file to the S3 bucket and return the URL path."""
-        Dir = os.path.join(os.getcwd(), "MovieToClips", "movies", self.title)
-        subprocess.run(["pirate-get", self.title,"-0","-S",Dir])
-        self.movie_path = upload_to_s3(get_biggest_file(Dir))
+        try:
+            title = self.title.translate(str.maketrans('', '', string.punctuation)).replace(" ","_")
+            Dir = os.path.join(os.getcwd(), "MovieToClips", "movies", title)
+            os.makedirs(Dir, exist_ok=True)
+            subprocess.run(["pirate-get", self.title,"-0","-S",Dir],capture_output=True, text=True)
+            sleep(5)
+            file = get_biggest_file(Dir)
+            key = file.split("/")[-1]
+            key = 'movies/'+key
+            self.movie_path = upload_to_s3(file,key)
+        except Exception as e:
+            print(f"An error occurred while downloading the movie: {str(e)}")
     
     def set_slug(self):
         self.random_slug = slugify(self.title)[:50]
@@ -173,24 +183,41 @@ class Movie(models.Model):
         return "https://filmfluency.fra1.cdn.digitaloceanspaces.com"+self.poster if not self.poster.startswith("https") else self.poster
     
     def download_transcript(self):
-        """Download the transcript file to the S3 bucket and return the URL path."""
-        Dir = os.path.join(os.getcwd(), "MovieToClips", "transcripts", self.title)
-        os.chdir(Dir)
-        #subliminal download -l en "The Matrix.avi"
-        subprocess.run(["subliminal","download","-l","en",self.title])
-        self.transcript_path = upload_to_s3(get_biggest_file(Dir))
-        
+        try:
+            """Download the transcript file to the S3 bucket and return the URL path."""
+            title = self.title.translate(str.maketrans('', '', string.punctuation)).replace(" ","_")
+            Dir = os.path.join(os.getcwd(), "MovieToClips", "transcripts", title)
+            os.makedirs(Dir, exist_ok=True)
+            os.chdir(Dir)
+            #subliminal download -l en "The Matrix.avi"
+            subprocess.run(["subliminal","download","-l","en",self.title])
+            file = get_biggest_file(Dir)
+            key = file.split("/")[-1]
+            key = 'transcripts/'+key
+            self.transcript_path = upload_to_s3(file,key)
+        except Exception as e:
+            print(f"An error occurred while downloading the transcript: {str(e)}")
+            
         
     def download_translation(self):
-        """Download the translation file to the S3 bucket and return the URL path."""
-        Dir = os.path.join(os.getcwd(), "MovieToClips", "translations", self.title)
-        os.chdir(Dir)
-        #subliminal download -l en "The Matrix.avi"
-        if not self.original_language == "en":
-            subprocess.run(["subliminal","download","-l","en",self.title])
-            self.transcript_path = upload_to_s3(get_biggest_file(Dir))
-        else:
-            self.transcript_path = self.transcript_path
+        try:
+            """Download the translation file to the S3 bucket and return the URL path."""
+            title = self.title.translate(str.maketrans('', '', string.punctuation)).replace(" ","_")
+            Dir = os.path.join(os.getcwd(), "MovieToClips", "translations", title)
+            os.makedirs(Dir, exist_ok=True)
+            os.chdir(Dir)
+            #subliminal download -l en "The Matrix.avi"
+    
+            if not self.original_language == "en":
+                subprocess.run(["subliminal","download","-l","en",self.title])
+                file = get_biggest_file(Dir)
+                key = file.split("/")[-1]
+                key = 'translations/'+key
+                self.transcript_path = upload_to_s3(file,key)
+            else:
+                self.transcript_path = self.transcript_path
+        except Exception as e:
+            print(f"An error occurred while downloading the translation: {str(e)}")
         
 #################################################################
 

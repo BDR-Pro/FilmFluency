@@ -69,20 +69,17 @@ def convert_to_webp(img):
     os.remove(img)
 
 
-def upload_image_to_s3():
-    allmovies=Movie.objects.all().count()
-    index=0
-    for movie in Movie.objects.all().order_by('trendingmovies__views'):
-        index+=1
-        if movie.poster == None:
-            continue
-        if not 'tmdb' in movie.poster:
-            continue
-        print(f"Uploading image for {movie.title}")
-        print(f"Processing {index} of {allmovies}")
-        image_path = download_image(movie.poster)
-        convert_to_webp(image_path)
-        uploaded=upload_to_s3(image_path.replace("jpg","webp"),"posters/"+movie.title + ".webp")
-        if uploaded:
-            movie.poster = "/posters/"+movie.title + ".webp"
-            movie.save()
+def download_movies():
+    print("Downloading movies")
+    Movies = Movie.objects.filter(movie_path__isnull=True,rating__gte=7).order_by('rating')
+    print(f"Movies without video: {len(Movies)}")
+    for movie in Movies:
+        print(f"Downloading movie: {movie.title}")
+        #movie.download_movie()
+        print(f"Downloaded movie: {movie.title}")
+        movie.download_transcript()
+        print(f"Downloaded transcript: {movie.title}")
+        movie.download_translation()
+        print(f"Downloaded subtitle: {movie.title}")
+        movie.save()
+        
