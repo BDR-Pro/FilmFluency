@@ -73,7 +73,7 @@ def download_movies():
     print("Downloading movies")
     Movies = Movie.objects.filter(movie_path__isnull=True,rating__gte=7).order_by('rating')
     print(f"Movies without video: {len(Movies)}")
-    for movie in Movies:
+    for index, movie in enumerate(Movies):
         print(f"Downloading movie: {movie.title}")
         #movie.download_movie()
         print(f"Downloaded movie: {movie.title}")
@@ -82,4 +82,5 @@ def download_movies():
         movie.download_translation()
         print(f"Downloaded subtitle: {movie.title}")
         movie.save()
+        print(f"{index/len(Movies)*100}% done")
         

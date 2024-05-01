@@ -165,10 +165,10 @@ class Movie(models.Model):
             title = self.title.translate(str.maketrans('', '', string.punctuation)).replace(" ","_")
             Dir = os.path.join(os.getcwd(), "MovieToClips", "movies", title)
             os.makedirs(Dir, exist_ok=True)
-            subprocess.run(["pirate-get", self.title,"-0","-S",Dir],capture_output=True, text=True)
+            subprocess.run(["pirate-get", title,"-0","-S",Dir],capture_output=True, text=True)
             sleep(5)
             file = get_biggest_file(Dir)
-            key = file.split("/")[-1]
+            key = file.split("\\")[-1]
             key = 'movies/'+key
             self.movie_path = upload_to_s3(file,key)
         except Exception as e:
@@ -190,10 +190,14 @@ class Movie(models.Model):
             os.makedirs(Dir, exist_ok=True)
             os.chdir(Dir)
             #subliminal download -l en "The Matrix.avi"
-            subprocess.run(["subliminal","download","-l","en",self.title])
+            title = self.title.translate(str.maketrans('', '', string.punctuation)).replace(" ","_")
+            subprocess.run(["subliminal","download","-l","en",title])
+            sleep(5)
             file = get_biggest_file(Dir)
-            key = file.split("/")[-1]
+            key = file.split("\\")[-1]
             key = 'transcripts/'+key
+            print(f"Transcript path: {file}")
+            print(f"Transcript key: {key}")
             self.transcript_path = upload_to_s3(file,key)
         except Exception as e:
             print(f"An error occurred while downloading the transcript: {str(e)}")
@@ -209,9 +213,10 @@ class Movie(models.Model):
             #subliminal download -l en "The Matrix.avi"
     
             if not self.original_language == "en":
-                subprocess.run(["subliminal","download","-l","en",self.title])
+                title = self.title.translate(str.maketrans('', '', string.punctuation)).replace(" ","_")
+                subprocess.run(["subliminal","download","-l","en",title])
                 file = get_biggest_file(Dir)
-                key = file.split("/")[-1]
+                key = file.split("\\")[-1]
                 key = 'translations/'+key
                 self.transcript_path = upload_to_s3(file,key)
             else:
