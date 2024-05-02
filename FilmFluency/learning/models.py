@@ -163,6 +163,7 @@ class Movie(models.Model):
         """Download the movie file to the S3 bucket and return the URL path."""
         try:
             title = self.title.translate(str.maketrans('', '', string.punctuation)).replace(" ","_")
+            title = title[:20]
             Dir = os.path.join(os.getcwd(), "MovieToClips", "movies", title)
             os.makedirs(Dir, exist_ok=True)
             subprocess.run(["pirate-get", title,"-0","-S",Dir],capture_output=True, text=True)
@@ -186,6 +187,7 @@ class Movie(models.Model):
         try:
             """Download the transcript file to the S3 bucket and return the URL path."""
             title = self.title.translate(str.maketrans('', '', string.punctuation)).replace(" ","_")
+            title = title[:20]
             Dir = os.path.join(os.getcwd(), "MovieToClips", "transcripts", title)
             os.makedirs(Dir, exist_ok=True)
             os.chdir(Dir)
@@ -207,6 +209,7 @@ class Movie(models.Model):
         try:
             """Download the translation file to the S3 bucket and return the URL path."""
             title = self.title.translate(str.maketrans('', '', string.punctuation)).replace(" ","_")
+            title = title[:20]
             Dir = os.path.join(os.getcwd(), "MovieToClips", "translations", title)
             os.makedirs(Dir, exist_ok=True)
             os.chdir(Dir)
@@ -214,6 +217,7 @@ class Movie(models.Model):
     
             if not self.original_language == "en":
                 title = self.title.translate(str.maketrans('', '', string.punctuation)).replace(" ","_")
+                title = title[:20]
                 subprocess.run(["subliminal","download","-l","en",title])
                 file = get_biggest_file(Dir)
                 key = file.split("\\")[-1]
