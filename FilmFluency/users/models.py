@@ -43,6 +43,7 @@ class UserProfile(models.Model):
     bookmarks = models.ManyToManyField('learning.Post', related_name='bookmarked_by', blank=True)
     last_login = models.DateTimeField(auto_now=True)
     joined_date = models.DateTimeField(auto_now_add=True)
+    card_id = models.CharField(max_length=255, null=True, blank=True)
     paid_user = models.BooleanField(default=False)
     reports = models.ManyToManyField('users.Report', related_name='reported_by', blank=True) 
    
@@ -57,6 +58,7 @@ class UserProfile(models.Model):
     
     def get_cover(self):
         return self.cover_picture.url.split('?')[0]
+ 
 
 class UserProgress(models.Model):
     

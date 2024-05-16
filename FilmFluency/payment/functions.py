@@ -1,13 +1,11 @@
 from .models import Product
-import requests
-from django.conf import settings
 
-def calc_weeks(amount: float, product_name: str) -> float:
+
+def calc_weeks(product_name: str) -> float:
     """
     Calculate the number of weeks coverage based on the amount paid.
 
     Args:
-    amount (float): The amount paid.
     product_name (str): The name of the product to fetch its price and weeks.
 
     Returns:
@@ -15,6 +13,19 @@ def calc_weeks(amount: float, product_name: str) -> float:
     """
     product = Product.objects.get(name=product_name)
     
-    quantity = max(amount / product.price, 1)  # Ensure a minimum of 1
-    
-    return product.weeks * quantity
+    return product.days / 7
+
+
+def send_mail(subject: str, message: str, recipient: str) -> None:
+    """
+    Send an email to the user.
+
+    Args:
+    subject (str): The subject of the email.
+    message (str): The message to send.
+    recipient (str): The email address of the recipient.
+
+    Returns:
+    None
+    """
+    pass

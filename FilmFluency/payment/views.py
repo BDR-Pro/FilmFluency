@@ -1,24 +1,19 @@
-from django.shortcuts import render, redirect
-from django.http import HttpResponse
-from django.shortcuts import render
 from django.conf import settings
-from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
-from django.conf import settings
 import requests
 import logging
-from .models import Product, Payment, Invoice
-from django.views.decorators.http import require_http_methods
-from django.views.decorators.csrf import csrf_exempt
+from .models import Product, Payment, Invoice, code
 from django.utils import timezone
-from .functions import calc_weeks
+from .functions import calc_weeks,send_mail
 from users.models import UserProfile
 logger = logging.getLogger(__name__)
 from django.conf import settings
 from django.http import JsonResponse
-from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
+from users.models import UserProfile
+import random 
+import string
+
 TAP_SECRET_KEY = settings.TAP_SECRET_KEY
 
 def get_icon_url(name):
@@ -89,48 +84,64 @@ def payment_home(request):
 
 def crypto_payment(request):
     amount="14"
-    #product = request.POST.get('product')
-    #amount = Product.objects.get(name=product).price
+    product = request.POST.get('product')
+    amount = Product.objects.get(name=product).price
 
     crypto = get_crypto(amount)
     return render(request, 'crypto_payment.html', {'cryptos':crypto})
 
+def create_token(request):
+    
+    quantity = request.POST.get('quantity')
+    subscriptionType = request.POST.get('subscriptionType')
+    isGift = request.POST.get('isGift')
+    paymentType = request.POST.get('paymentType')
+    product = Product.objects.get(id=subscriptionType)
+    Payment.objects.create(user=request.user, product=product, is_completed=False,
+                           payment_method=paymentType, quantity=quantity, isGift=isGift,
+                            expires_at=timezone.now() + timezone.timedelta(weeks=calc_weeks(product)))
+    if paymentType == 'crypto':
+        redirect('payment:crypto-payment', product=product)
+    if paymentType == 'tap':
+        redirect('payment:tap-payment', product=product)
+    
+    else:
+        return render(request, 'payment.html')
 
-
-@require_http_methods(["POST"])
-@csrf_exempt
 def tap_payment(request):
+    if request.method == 'GET':
+        return render(request, 'tap_payment.html')
+    
     token = request.POST.get('token')
     product = request.POST.get('product')  
     amount = Product.objects.get(name=product).price
-    
+    order = Payment.objects.filter(user=request.user, is_completed=False).first()
     url = "https://api.tap.company/v2/charges"
-    
+
     headers = {
-        'Authorization': 'Bearer {TAP_SECRET_KEY}'.format(TAP_SECRET_KEY='sk_test_XKokBfNWv6FIYuTMg5sLPjhJ'),
+        'Authorization': 'Bearer {TAP_SECRET_KEY}',
         'Content-Type': 'application/json'
     }
-    
+    profile = UserProfile.objects.get(user=request.user)
+    first_name = profile.nickname
+    email = request.user.email
     payload = {
         'amount': amount,
-        'currency': 'KWD',
+        'currency': 'SAR',
         'threeDSecure': True,
-        'save_card': False,
-        'description': 'Charge Description',
-        'statement_descriptor': 'Sample',
-        'metadata': {'udf1': 'test 1', 'udf2': 'test 2'},
-        'reference': {'transaction': 'txn_0001', 'order': 'ord_0001'},
-        'receipt': {'email': False, 'sms': True},
+        'save_card': True,
+        'description': f'FilmFluency Subscription of {product.name} for {first_name}',
+        'statement_descriptor': 'FilmFluency',
+        'metadata': {'udf1': 'subscribe', 'udf2': 'subscribe'},
+        'reference': {'order': order.id},
+        'receipt': {'email': True, 'sms': False},
         'customer': {
-            'first_name': 'FirstName',
-            'middle_name': 'MiddleName',
-            'last_name': 'LastName',
-            'email': 'email@domain.com',
-            'phone': {'country_code': '965', 'number': '50000000'}
+            'first_name': first_name,
+            'email': email,
         },
         'source': {'id': token},
-        'post': {'url': 'http://your_website.com/post_url'},
-        'redirect': {'url': 'http://your_website.com/redirect_url'}
+        'post': {'url': 'http://filmfluency.com/success', 'time': 10, 'method': 'POST'},
+        'redirect': {'url': 'http://filmfluency.com', 'time': 10, 'method': 'GET'},
     }
 
     response = requests.post(url, json=payload, headers=headers)
@@ -146,16 +157,56 @@ def success(request):
     payment = Payment.objects.get(user=request.user, is_completed=False)
     payment.is_completed = True
     payment.save()
-    invoice = payment.invoice
-    invoice.is_paid = True
+    
+    """
+    payment = models.OneToOneField(Payment, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+    """
+    amount = Product.objects.get(name=payment.product).price*payment.quantity
+    invoice = Invoice.objects.create(payment=payment, quantity=payment.quantity, amount=amount)
     invoice.subscreibed_at = timezone.now()
-    invoice.expires_at = timezone.now() + timezone.timedelta(weeks=calc_weeks(invoice.amount, payment.product.name))   
+    invoice.expires_at = timezone.now() + timezone.timedelta(weeks=calc_weeks(payment.product))   
     invoice.save()
     profile = UserProfile.objects.get(user=request.user)
     profile.paid_user = True
+    #catch the request json and get the card id and save it to the user profile
+    profile.card_id = request.POST.get('card_id')
+    profile.save()
+    sub,body=get_subject_and_message(payment.product, profile.nickname,payment.quantity,payment.isGift)
+    send_mail(sub, body, request.user.email)
+    
+    if payment.isGift:
+        genrate_gift_code(payment.quantity, request.user.email, payment.product)
+        
     return render(request, 'success.html')
 
 
+def genrate_gift_code(quantity, email,prouduct):
+    
+    for _ in range(quantity):
+        ac_code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=14))
+        code.objects.create(code=ac_code)
+        days=Product.objects.get(name=prouduct).days
+        send_mail("Gift Subscription Code for filmfluency", f"Your gift subscription code is {ac_code} \n Number of days after activation {days}", email)
+
+def get_subject_and_message(product, nickname, quantity, isGift):
+    if isGift:
+        subject = f"Gift Subscription to {product} from FilmFluency"
+        body = (
+            f"Hi {nickname},\n\n"
+            f"You will receive {quantity} activation code soon for a subscription to {product} from FilmFluency.\n\n"
+            "Enjoy your gift!"
+        )
+    else:
+        subject = f"Subscription to {product} from FilmFluency"
+        body = (
+            f"Hi {nickname},\n\n"
+            f"You have successfully subscribed to {product} from FilmFluency.\n\n"
+            "Enjoy!"
+        )
+    return subject, body
 
 def product(request):
 

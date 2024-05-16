@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.utils import timezone
 import uuid
+from users.models import UserProfile
 
 class Payment(models.Model):
     # Assuming User model is the default auth user model
@@ -11,11 +12,11 @@ class Payment(models.Model):
     is_completed = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     payment_method = models.CharField(max_length=100)
-    is_recurring = models.BooleanField(default=False)
+    is_recurring = models.BooleanField(default=True)
     quantity = models.PositiveIntegerField(default=1)
     subscribed_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
-
+    isGift = models.BooleanField(default=False)
     def __str__(self):
         return f"{self.user.username} - {self.invoice_uuid}"
 
@@ -36,20 +37,31 @@ class Payment(models.Model):
     
     def recurr_payment(self):
         if  self.is_time_to_renew():
-            self.expires_at = timezone.now() + timezone.timedelta(weeks=1)
+            product = self.objects.get(name=self.product)
+            #using profile.card_id to charge the user
+            #charge the user
+            #if the payment is successful
+            card_id = UserProfile.objects.get(user=self.user).card_id
+            charge_user(card_id,self.product.price)
+            self.expires_at = timezone.now() + timezone.timedelta(weeks=product.days/7)
             self.save()
         else:
             return False
     
     def is_time_to_renew(self):
         return timezone.now() >= self.expires_at
-    
+
+def charge_user(card_id,amount):
+    #charge the user using tap payment gateway
+       pass
+   
 class Invoice(models.Model):
     payment = models.OneToOneField(Payment, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
-    currency = models.CharField(max_length=3)
     created_at = models.DateTimeField(auto_now_add=True)
+    subscreibed_at = models.DateTimeField()
+    expires_at = models.DateTimeField()
 
     def __str__(self):
         return f"{self.payment.user.username} - {self.amount} {self.currency}"
@@ -67,3 +79,13 @@ class Product(models.Model):
     
     def __str__(self):
         return f"{self.name} - ${self.price}"
+    
+    
+class code(models.Model):
+    code = models.CharField(max_length=100)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_used = models.BooleanField(default=False)
+    
+    def __str__(self):
+        return f"{self.code} - {self.user.username}"
