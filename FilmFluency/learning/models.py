@@ -270,7 +270,7 @@ class Video(BaseMedia):
     length = models.FloatField()
     random_slug = models.SlugField(max_length=50, unique=True, default=random_slug_generator)
     bookmarked_users = models.ManyToManyField(User, related_name='bookmarked_videos', blank=True)
-
+    thumbnail = models.URLField(blank=True, null=True)
     def __str__(self):
         # This function should only be defined once.
         return f"{self.movie.title} - Video"
@@ -288,40 +288,16 @@ class Video(BaseMedia):
     
     def thumbnail_url(self):
         # Ensures the method returns a URL path for the thumbnail
-        return quote(self.video.url.replace(".mp4", ".jpg"))
+        return quote(self.thumbnail)
 
     def transcript(self):
-        """Returns the contents of the transcript file as a formatted string with added newlines for readability."""
-        transcript_path = self.video.path.replace(".mp4", ".txt")
-        try:
-            with open(transcript_path, 'r', encoding='utf-8') as file:
-                content = "".join(file.readlines())
-                return format_transcript(content)  # Format the transcript text
-        except FileNotFoundError:
-            return "No transcript available."
-        except Exception as e:
-            return f"An error occurred while reading the transcript: {str(e)}"
+        """Read from postgress database"""
+        return self.transcript
         
     def translation(self, language="ar"):
-        """Returns the contents of the translation file as a formatted string with added newlines for readability."""
-        translation_path = Translation.objects.get(video=self.title,tmdb_code=language).translated_text
-        try:
-            with open(translation_path, 'r', encoding='utf-8') as file:
-                content = "".join(file.readlines())
-            return format_transcript(content) 
-        except FileNotFoundError:
-            return "No translation available."
+        """Read from postgress database"""
+        return self.translations.get(language=language).translated_text
         
-    def get_hardest_word(self, language="ar"):
-        """Returns the contents of the translation file as a formatted string with added newlines for readability."""
-        translation_path = Translation.objects.get(video=self.title,tmdb_code=language).translated_text
-        try:
-            with open(translation_path, 'r', encoding='utf-8') as file:
-                content = "".join(file.readlines())
-            return format_transcript(content) 
-        except FileNotFoundError:
-            return "No translation available."
-
         
     def getAllbookmarks(self):
         return self.bookmarked_users.all()
