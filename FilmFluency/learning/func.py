@@ -30,3 +30,15 @@ language_to_country_mapping = {
 def language_to_country(language_code):
     """ Map language code to country code. """
     return language_to_country_mapping.get(language_code, 'US')
+
+
+from .models import Video
+def create_video_obj(video_path, transcript_path, movie, subtitle_path=""):
+    """Create a Video object and save it to the database."""
+    video = Video.objects.create(
+        movie=movie,
+        video=video_path,
+        transcript=transcript_path,
+        subtitle=subtitle_path,
+    )
+    return video

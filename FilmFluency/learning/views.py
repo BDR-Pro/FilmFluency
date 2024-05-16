@@ -74,6 +74,7 @@ def get_unique_movies(request):
     order_by = request.GET.get('orderby', 'rating')  # Default sorting by 'vote_average'
     valid_orderings = ['rating', 'release_date']
     mode = request.GET.get('video_mode', '')
+    transcript = request.GET.get('transcript_mode', '')
     if order_by not in valid_orderings:
         order_by = 'rating'
     
@@ -83,6 +84,9 @@ def get_unique_movies(request):
     
     if mode == 'true':
         movies = Movie.objects.filter(videos__isnull=False).distinct().order_by('-' + order_by)
+    
+    if transcript == 'true':
+        movies = Movie.objects.filter(transcript_path=True).distinct().order_by('-' + order_by)    
             
     else:
         movies = Movie.objects.all().order_by('-' + order_by)     
@@ -105,11 +109,11 @@ def get_unique_movies(request):
     for i in movies:
         i.poster = i.get_poster()
         
-    print(f"{mode=}")
     return render(request, 'movies.html', {'movies': movies , 'order_by':order_by , 
                                            'unique_country_flag':list(dict.fromkeys(get_unique_country_flag())), 
                                            'country':country,
                                            'video_mode':mode,
+                                           'transcript_mode':transcript,
                                            
                                            
                                            })

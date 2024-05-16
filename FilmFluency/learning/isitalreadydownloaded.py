@@ -23,7 +23,8 @@ def movies_without_title():
 def set_title(movie:Movie,srt_file_path):
     movie.title = srt_file_path
     movie.save()
-    
+
+
     
 
 def getAllMoviesWithoutVideo():
@@ -71,8 +72,10 @@ def convert_to_webp(img):
 
 def download_movies():
     print("Downloading movies")
-    Movies = Movie.objects.filter(movie_path__isnull=True,rating__gte=7).order_by('rating')
+    Movies = Movie.objects.filter(transcript_path__isnull=True,rating__gte=7).order_by('rating')
     print(f"Movies without video: {len(Movies)}")
+    length = len(Movies)
+    Movies = reversed(Movies)
     for index, movie in enumerate(Movies):
         print(f"Downloading movie: {movie.title}")
         #movie.download_movie()
@@ -82,5 +85,5 @@ def download_movies():
         movie.download_translation()
         print(f"Downloaded subtitle: {movie.title}")
         movie.save()
-        print(f"{index/len(Movies)*100}% done")
+        print(f"{index/length*100}% done")
         

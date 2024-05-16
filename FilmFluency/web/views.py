@@ -16,6 +16,7 @@ from django.contrib.auth.decorators import login_required
 from contact.models import ContactMessage
 from payment.models import Payment
 from django.core.cache import cache
+from api.views import secure_media_view
 
 
 def get_latest_updated_movies():
@@ -126,11 +127,13 @@ def get_latest_updated_movies_with_videos_only():
     return movies
 
 def get_latest_movies():
-    movies = cache.get('latest_movies')
+    #movies = cache.get('latest_movies')
+    movies = None
     if movies is None:
-        movies = Movie.objects.order_by('-release_date')
+        movies = Movie.objects.filter(transcript_path=True).order_by('-release_date')
         for movie in movies:
             movie.poster = movie.get_poster()
+            
         cache.set('latest_movies', movies, 60*60*24)
     return movies
 
@@ -320,3 +323,11 @@ def get_posters(request, random_slug):
     redirect_url = f"https://filmfluency.fra1.cdn.digitaloceanspaces.com/posters/{random_slug}"
     
     return redirect(redirect_url)
+
+
+def get_transcript_by_moive(request,random_slug):
+    movie = get_object_or_404(Movie, random_slug=random_slug)
+    transcript = movie.get_transcript()
+    transcript = secure_media_view(request, transcript)
+    print(f"{transcript=}")
+    return (transcript)

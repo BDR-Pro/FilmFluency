@@ -164,6 +164,7 @@ class Movie(models.Model):
         try:
             title = self.title.translate(str.maketrans('', '', string.punctuation)).replace(" ","_")
             title = title[:20]
+            os.chdir(os.path.dirname(os.path.realpath(__file__)))
             Dir = os.path.join(os.getcwd(), "MovieToClips", "movies", title)
             os.makedirs(Dir, exist_ok=True)
             subprocess.run(["pirate-get", title,"-0","-S",Dir],capture_output=True, text=True)
@@ -188,10 +189,12 @@ class Movie(models.Model):
             """Download the transcript file to the S3 bucket and return the URL path."""
             title = self.title.translate(str.maketrans('', '', string.punctuation)).replace(" ","_")
             title = title[:20]
+            # change dirctory to the script directory
+            os.chdir(os.path.dirname(os.path.realpath(__file__)))
             Dir = os.path.join(os.getcwd(), "MovieToClips", "transcripts", title)
             os.makedirs(Dir, exist_ok=True)
             os.chdir(Dir)
-            #subliminal download -l en "The Matrix.avi"
+            #subliminal download -l en "The Matrix"
             title = self.title.translate(str.maketrans('', '', string.punctuation)).replace(" ","_")
             subprocess.run(["subliminal","download","-l","en",title])
             sleep(5)
@@ -210,6 +213,7 @@ class Movie(models.Model):
             """Download the translation file to the S3 bucket and return the URL path."""
             title = self.title.translate(str.maketrans('', '', string.punctuation)).replace(" ","_")
             title = title[:20]
+            os.chdir(os.path.dirname(os.path.realpath(__file__)))
             Dir = os.path.join(os.getcwd(), "MovieToClips", "translations", title)
             os.makedirs(Dir, exist_ok=True)
             os.chdir(Dir)
@@ -228,6 +232,24 @@ class Movie(models.Model):
         except Exception as e:
             print(f"An error occurred while downloading the translation: {str(e)}")
         
+    
+    def get_transcript(self):
+        if not self.transcript_path:
+            return False
+        title = self.title
+        title=title.translate(str.maketrans('', '', string.punctuation)).replace(" ","_")
+        title = title + "." + self.original_language + ".srt"
+        
+        return "transcripts/"+f"{title}"
+    
+    
+    def get_translation(self):
+        if not self.transcript_path:
+            return False
+        title=title.translate(str.maketrans('', '', string.punctuation)).replace(" ","_")
+        title = title + ".en" + ".srt"
+        
+        return "translations/"+f"{title}"
 #################################################################
 
 
@@ -243,6 +265,7 @@ class Video(BaseMedia):
     video = models.FileField()
     date_added = models.DateTimeField(default=timezone.now)
     movie = models.ForeignKey('Movie', on_delete=models.CASCADE, related_name='videos')
+    transcript = models.TextField(blank=True, null=True)
     complexity = models.FloatField()
     length = models.FloatField()
     random_slug = models.SlugField(max_length=50, unique=True, default=random_slug_generator)

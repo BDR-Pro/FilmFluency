@@ -68,6 +68,11 @@
         <a href="{% url 'learning:unique_movies' %}?orderby=release_date{% if country %}&country={{ country }}{% endif %}{% if video_mode  %}&video_mode=true{% endif %}" class="btn btn-outline-secondary btn-sm me-1 {% if order_by == 'release_date' %}active{% endif %}">Release Date</a>
         <a href="{% url 'learning:unique_movies' %}?orderby=rating{% if country %}&country={{ country }}{% endif %}{% if video_mode  %}&video_mode=true{% endif %}" class="btn btn-outline-secondary btn-sm {% if order_by == 'date_added' %}active{% endif %}">Date Added</a>
         <a href="{% url 'learning:unique_movies' %}{% if order_by %}?orderby={{ order_by }}{% endif %}&video_mode=true{% if country %}&country={{ country }}{% endif %}" class="btn btn-outline-secondary btn-sm {% if video_mode  %}active{% endif %}">Only With Videos Mode</a>
+        <!-- add transcript mode -->
+        <a href="{% url 'learning:unique_movies' %}{% if order_by %}?orderby={{ order_by }}{% endif %}{% if country %}&country={{ country }}{% endif %}{% if video_mode %}&video_mode=true{% endif %}&transcript_mode=true" class="btn btn-outline-secondary btn-sm {% if transcript_mode  %}active{% endif %}">Only With Transcripts Mode</a>
+        {% if transcript_mode %} 
+            <a href="{% url 'learning:unique_movies' %}{% if order_by %}?orderby={{ order_by }}{% endif %}{% if country %}&country={{ country }}{% endif %}{% if video_mode %}&video_mode=true{% endif %}" class="btn btn-outline-secondary btn-sm">Exit Transcript Mode</a>
+        {% endif %}
         {% if video_mode %}
             <a href="{% url 'learning:unique_movies' %}{% if order_by %}?orderby={{ order_by }}{% endif %}{% if country %}&country={{ country }}{% endif %}" class="btn btn-outline-secondary btn-sm">Exit Video Mode</a>
         {% endif %}
@@ -120,8 +125,9 @@
                 </li>
                 
                 {% if movies.has_next %}
+                
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ movies.next_page_number }}">Next</a>
+                        <a class="page-link" href="?page={{ movies.next_page_number }}{% if country %}&country={{ country }}{% endif %}{% if order_by %}&orderby={{ order_by }}{% endif %}{% if video_mode %}&video_mode=true{% endif %}{% if transcript_mode %}&transcript_mode=true{% endif %}">Next</a>
                     </li>
                 {% endif %}
             </ul>

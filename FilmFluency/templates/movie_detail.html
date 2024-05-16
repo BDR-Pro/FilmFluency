@@ -47,9 +47,13 @@
             <p class="mb-1">
                 <span class="badge bg-warning text-dark"><i class="bi bi-star-fill"></i> {{ movie.rating }}/10</span>
             </p>
+            <p class="mb-1">
+                <i class="bi bi-globe"></i> Language: {{ movie.original_language }}
+            </p>
+         
             <p class="lead">{{ movie.description }}</p>
             <p class="mb-1">
-                <i class="bi bi-graph-up"></i> Popularity: {{ movie.popularity }}
+                <i class="bi bi-graph-up"></i> Popularity: {{ movie.popularity|floatformat:2 }}%
             </p>
             <p class="mb-3">
                 <i class="bi bi-eye-fill"></i> Views: {{ views }}
@@ -64,6 +68,10 @@
             </button>
             {% endif %}
             
+            <!-- Add the download transcript button -->
+            <a href="{{movie.transcript_path}}" class="btn btn-info {% if not request.user.is_authenticated %}disabled{% endif %}">
+                <i class="bi bi-file-earmark-text"></i> Download Transcript 
+            </a>
             <button id="notify-btn" class="btn btn-info {% if not request.user.is_authenticated %}disabled{% endif %} {% if notifed %}btn-warning{% endif %}">
                 <i class="bi bi-bell"></i> {% if notifed %}Unnotify{% else %}Notify Me{% endif %}
             </button>

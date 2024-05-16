@@ -15,6 +15,11 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.0.0/css/flag-icons.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@youraccount">
+    <meta name="twitter:title" content="{%if movie %}{{ movie.title }}{% endif %}--Learn Languages with Film Fluency">
+    <meta name="twitter:description" content="{% if movie %}{{ movie.description }}{% else %}Film Fluency. Learn languages with movies.{% endif %}">
+    <meta name="twitter:image" content="{% if movie %}{{ movie.poster }}{% else %}https://filmfluency.fra1.cdn.digitaloceanspaces.com/static/header.webp{% endif %}">
 
 </head>
 
