@@ -32,14 +32,24 @@ def language_to_country(language_code):
     return language_to_country_mapping.get(language_code, 'US')
 
 
-from .models import Video
+from .models import Video, Movie
 def create_video_obj(video_path, transcript_path, movie,thumbnail, subtitle_path=""):
     """Create a Video object and save it to the database."""
-    video = Video.objects.create(
-        movie=movie,
-        video=video_path,
-        transcript=transcript_path,
-        subtitle=subtitle_path,
-        thumbnail=thumbnail,
-    )
+    #take the first 3 words of the title of the movie and join them and search for the movie
+    movie = movie.split()[:3].join()
+    try:
+        movie = Movie.objects.get(title__icontains=movie)
+        video = Video.objects.create(
+            movie=movie,
+            video=video_path,
+            transcript=transcript_path,
+            subtitle=subtitle_path,
+            thumbnail=thumbnail,
+        )
+    except Movie.DoesNotExist:
+        with open('errors.txt', 'a') as f:
+            f.write(f"Movie {movie} does not exist in the database.\n")
+    except Exception as e:
+        with open('errors.txt', 'a') as f:
+            f.write(f"Error creating video object: {str(e)}\n")
     return video
