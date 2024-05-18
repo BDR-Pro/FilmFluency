@@ -112,9 +112,20 @@ def screenshot_video(video_path):
     )
     return output_path
 
-def video_to_db(video_path, transcript, movie, complexity):
+def video_to_audio(video_path):
+    """Convert the video to audio using ffmpeg."""
+    output_path = f"{uuid.uuid4()}.wav"
+
+    (
+        ffmpeg
+        .input(video_path)
+        .output(output_path, **{'c:a': 'pcm_s16le'})
+        .run()
+    )
+    return output_path
+def video_to_db(video_path, transcript, movie, complexity,thumbnail, audio):
     """Call Django function to save the video to the database."""
-    create_video_obj(video_path, transcript, movie, complexity)
+    create_video_obj(video_path, transcript, movie, complexity,thumbnail, audio)
 
 def video_processing(movie, important_dialogue, srt):
     video_paths = convert_movie_to_video(movie, srt)
@@ -123,7 +134,9 @@ def video_processing(movie, important_dialogue, srt):
         complexity = important_dialogue.get(video_path)
         s3_video_url = upload_to_s3(video_path, f"videos/{movie}/{uuid.uuid4()}.mp4")
         thumbnail =  upload_to_s3(screenshot_video(video_path),f"thumbnail/{movie}.webp")
-        video_to_db(s3_video_url, srt, movie, complexity=complexity,thumbnail=thumbnail)
+        audio = upload_to_s3(video_to_audio(video_path), f"audio/{movie}/{uuid.uuid4()}.wav")
+        video_to_db(s3_video_url, srt, movie,complexity,thumbnail, audio)
+
 
 
 def main():

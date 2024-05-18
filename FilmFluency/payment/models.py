@@ -60,8 +60,8 @@ class Invoice(models.Model):
     quantity = models.PositiveIntegerField(default=1)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
-    subscreibed_at = models.DateTimeField()
-    expires_at = models.DateTimeField()
+    subscreibed_at = models.DateTimeField(default=timezone.now)
+    expires_at = models.DateTimeField(null=True)
 
     def __str__(self):
         return f"{self.payment.user.username} - {self.amount} {self.currency}"

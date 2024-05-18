@@ -262,7 +262,7 @@ class TrendingMovies(models.Model):
 
     
 class Video(BaseMedia):
-    video = models.FileField()
+    video = models.URLField(blank=True, null=True)
     date_added = models.DateTimeField(default=timezone.now)
     movie = models.ForeignKey('Movie', on_delete=models.CASCADE, related_name='videos')
     transcript = models.TextField(blank=True, null=True)
@@ -271,6 +271,7 @@ class Video(BaseMedia):
     random_slug = models.SlugField(max_length=50, unique=True, default=random_slug_generator)
     bookmarked_users = models.ManyToManyField(User, related_name='bookmarked_videos', blank=True)
     thumbnail = models.URLField(blank=True, null=True)
+    audio = models.URLField(blank=True, null=True)
     def __str__(self):
         # This function should only be defined once.
         return f"{self.movie.title} - Video"
@@ -280,11 +281,11 @@ class Video(BaseMedia):
 
     def audio_url(self):
         # Ensures the method returns a URL path for the audio file
-        return quote(self.video.url.replace(".mp4", ".wav"))
+        return quote(self.audio)
 
     def video_url(self):
         # Ensures the method returns a URL path for the video file
-        return quote(self.video.url)
+        return quote(self.video)
     
     def thumbnail_url(self):
         # Ensures the method returns a URL path for the thumbnail

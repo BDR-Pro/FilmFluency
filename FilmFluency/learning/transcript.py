@@ -19,7 +19,7 @@ def get_video_directory():
     print(os.path.exists(video_dir))
     return video_dir
 
-def create_video_obj(video_path, transcript_path, movie,thumbnail, subtitle_path=""):
+def create_video_obj(video_path, transcript_path, movie,thumbnail,audio, subtitle_path=""):
     """Create a Video object and save it to the database."""
     #take the first 3 words of the title of the movie and join them and search for the movie
     movie = movie.split()[:3].join()
@@ -30,6 +30,7 @@ def create_video_obj(video_path, transcript_path, movie,thumbnail, subtitle_path
             video=video_path,
             transcript=transcript_path,
             subtitle=subtitle_path,
+            audio=audio,
             thumbnail=thumbnail,
         )
     except Movie.DoesNotExist:
