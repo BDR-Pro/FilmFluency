@@ -54,7 +54,7 @@ def get_important_dialogue(subtitles):
         
         complexity = get_complexity(text)
 
-        if complexity < 60:  # Flesch Reading Ease score less than 60
+        if complexity < 50:  # Flesch Reading Ease score less than 60
             important_dialogue.append({
                 'complexity': complexity,
                 'start_time': start_time,

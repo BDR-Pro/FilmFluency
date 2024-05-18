@@ -27,6 +27,7 @@ def create_video_obj(video_path, transcript_path, slug ,thumbnail,audio,complexi
             movie=movie,
             video=video_path,
             text=transcript_path,
+            length=get_length_video(video_path),
             complexity=complexity,
             audio=audio,
             thumbnail=thumbnail,
@@ -37,3 +38,7 @@ def create_video_obj(video_path, transcript_path, slug ,thumbnail,audio,complexi
     except Exception as e:
         with open('errors.txt', 'a') as f:
             f.write(f"Error creating video object: {str(e)}\n")
+
+
+def get_length_video(video_path):
+    return VideoFileClip(video_path).duration
