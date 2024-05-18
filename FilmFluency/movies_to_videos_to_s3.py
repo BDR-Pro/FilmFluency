@@ -147,7 +147,11 @@ def screenshot_video(video_path):
             .run()
         )
 
-    return output_path
+    return output_path if file_greater_than_zero(output_path) else None
+
+
+def file_greater_than_zero(file_path): 
+    return os.path.getsize(file_path) > 0
 
 
 def video_to_audio(video_path):
@@ -164,7 +168,7 @@ def video_to_audio(video_path):
 
 def video_to_db(video_path, transcript, movie, complexity, thumbnail, audio):
     """Call Django function to save the video to the database."""
-    create_video_obj(video_path, transcript, movie, complexity, thumbnail, audio)
+    create_video_obj(video_path, transcript, movie, thumbnail, audio, complexity)
 
 def video_processing(movie, important_dialogue, slug):
     video_paths = convert_movie_to_video(movie, important_dialogue)
@@ -175,7 +179,10 @@ def video_processing(movie, important_dialogue, slug):
         dialogue = important_dialogue[idx]
         complexity = dialogue['complexity']
         s3_video_url = upload_to_s3(video_path, f"videos/{movie}/{uuid.uuid4()}.mp4")
-        thumbnail = upload_to_s3(screenshot_video(video_path), f"thumbnail/{movie}/{uuid.uuid4()}.webp")
+        path=screenshot_video(video_path)
+        if path:
+            file_name = path.split('\\')[-1]
+            thumbnail = upload_to_s3(path, f"thumbnail/{movie}/{file_name}")
         audio = upload_to_s3(video_to_audio(video_path), f"audio/{movie}/{uuid.uuid4()}.wav")
         video_to_db(s3_video_url, dialogue['sentence'], slug, complexity, thumbnail, audio)
 

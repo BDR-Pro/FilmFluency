@@ -19,7 +19,7 @@ def get_video_directory():
     print(os.path.exists(video_dir))
     return video_dir
 
-def create_video_obj(video_path, transcript_path, slug ,thumbnail,audio, subtitle_path=""):
+def create_video_obj(video_path, transcript_path, slug ,thumbnail,audio,complexity):
     """Create a Video object and save it to the database."""
     try:
         movie = Movie.objects.get(random_slug=slug)
@@ -27,7 +27,7 @@ def create_video_obj(video_path, transcript_path, slug ,thumbnail,audio, subtitl
             movie=movie,
             video=video_path,
             transcript=transcript_path,
-            subtitle=subtitle_path,
+            complexity=complexity,
             audio=audio,
             thumbnail=thumbnail,
         )
