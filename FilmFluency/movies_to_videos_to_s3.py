@@ -1,3 +1,9 @@
+import os
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'FilmFluency.settings')
+import django
+django.setup()
+
+
 import nltk
 nltk.download('punkt')
 
@@ -8,7 +14,7 @@ import ffmpeg
 import pysrt
 import uuid
 from nltk.tokenize import word_tokenize
-from learning.func import create_video_obj
+from learning.transcript import create_video_obj
 from datetime import datetime, timedelta
 import textstat
 
