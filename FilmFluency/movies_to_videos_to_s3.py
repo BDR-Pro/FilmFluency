@@ -1,30 +1,87 @@
 import os
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'FilmFluency.settings')
 import django
+
+# Django settings
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'FilmFluency.settings')
 django.setup()
 
-
+import csv
+import re
+import argparse
+import uuid
+import ffmpeg
+import textstat
 import nltk
+from datetime import datetime, timedelta
+from api.upload_to_s3 import upload_to_s3
+from learning.transcript import create_video_obj
+
+
+# Download nltk data
 nltk.download('punkt')
 
+def parse_srt(srt_file_path):
+    """Parse the SRT file using regex to extract the subtitles."""
+    with open(srt_file_path, 'r', encoding='utf-8') as file:
+        srt_content = file.read()
 
-import argparse
-from api.upload_to_s3 import upload_to_s3 
-import ffmpeg
-import pysrt
-import uuid
-from nltk.tokenize import word_tokenize
-from learning.transcript import create_video_obj
-from datetime import datetime, timedelta
-import textstat
+    pattern = re.compile(
+        r'(\d+)\n'
+        r'(\d{2}:\d{2}:\d{2},\d{3}) --> (\d{2}:\d{2}:\d{2},\d{3})\n'
+        r'((?:.*\n)+?)\n',
+        re.MULTILINE
+    )
 
+    subtitles = []
+    for match in pattern.finditer(srt_content):
+        index = int(match.group(1))
+        start_time = match.group(2).replace(',', '.')
+        end_time = match.group(3).replace(',', '.')
+        text = match.group(4).replace('\n', ' ').strip()
+        subtitles.append((index, start_time, end_time, text))
+
+    return subtitles
+
+def get_important_dialogue(subtitles):
+    """Get important dialogue based on the complexity of the sentence and the length of the sentence."""
+    important_dialogue = []
+
+    for index, start_time, end_time, text in subtitles:
+        words = nltk.word_tokenize(text)
+        
+        if len(words) < 5:
+            continue
+        
+        complexity = get_complexity(text)
+
+        if complexity < 60:  # Flesch Reading Ease score less than 60
+            important_dialogue.append({
+                'complexity': complexity,
+                'start_time': start_time,
+                'end_time': end_time,
+                'sentence': text
+            })
+
+    return important_dialogue
+
+def save_to_csv(srt_file_path, important_dialogue):
+    """Save important dialogue to a CSV file with the same path and name as the SRT file."""
+    csv_file_path = srt_file_path.replace('.srt', '.csv')
+    with open(csv_file_path, 'w', newline='', encoding='utf-8') as csvfile:
+        fieldnames = ['complexity', 'start_time', 'end_time', 'sentence']
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+        writer.writeheader()
+        for dialogue in important_dialogue:
+            writer.writerow(dialogue)
+
+def get_complexity(sentence):
+    return textstat.flesch_reading_ease(sentence)
 
 def add_seconds(start_time, end_time):
-    if type(start_time) not in [str] or type(end_time) not in [str]:
-        return start_time, end_time
     try:
-        start_dt = datetime.strptime(start_time, "%H:%M:%S")
-        end_dt = datetime.strptime(end_time, "%H:%M:%S")
+        start_dt = datetime.strptime(start_time, "%H:%M:%S,%f")
+        end_dt = datetime.strptime(end_time, "%H:%M:%S,%f")
     except ValueError:
         return start_time, end_time
         
@@ -36,43 +93,13 @@ def add_seconds(start_time, end_time):
     
     return new_start_time, new_end_time
 
-def get_complexity(sentence):
-    return  textstat.flesch_reading_ease(sentence) 
-
-def get_important_dialogue(srt_file_path):
-    """Get important dialogue based on the complexity of the sentence and the length of the sentence."""
-    subs = pysrt.open(srt_file_path)
-    important_dialogue = {}
-
-    for sub in subs:
-        
-        words = word_tokenize(sub.text)
-        
-        if len(words) < 5:
-            continue
-        
-        complexity = get_complexity(sub.text)
-
-        if complexity > 10:
-            important_dialogue[sub] = complexity
-
-    return important_dialogue
-
-def overwrite_srt_file(srt_file_path, important_dialogue):
-    """Overwrite the subtitle file with important dialogue."""
-    subs = pysrt.SubRipFile()
-    for dialogue in important_dialogue.keys():
-        subs.append(dialogue)
-    subs.save(srt_file_path, encoding='utf-8')
-
-def convert_movie_to_video(movie, srt_file_path):
-    """Convert the movie to videos based on the srt file and save them to the hard drive."""
-    subs = pysrt.open(srt_file_path)
+def convert_movie_to_video(movie, important_dialogue):
+    """Convert the movie to videos based on the important dialogue and save them to the hard drive."""
     video_paths = []
 
-    for sub in subs:
-        start_time = sub.start.to_time()
-        end_time = sub.end.to_time()
+    for dialogue in important_dialogue:
+        start_time = dialogue['start_time']
+        end_time = dialogue['end_time']
         output_path = f"{uuid.uuid4()}.mp4"
         
         (
@@ -89,7 +116,7 @@ def cut_video(video_path, start_time, end_time):
     """Cut the video based on start time and end time using ffmpeg."""
     output_path = f"{uuid.uuid4()}.mp4"
     
-    start_time , end_time = add_seconds(start_time,end_time)
+    start_time , end_time = add_seconds(start_time, end_time)
     
     (
         ffmpeg
@@ -123,21 +150,23 @@ def video_to_audio(video_path):
         .run()
     )
     return output_path
-def video_to_db(video_path, transcript, movie, complexity,thumbnail, audio):
+
+def video_to_db(video_path, transcript, movie, complexity, thumbnail, audio):
     """Call Django function to save the video to the database."""
-    create_video_obj(video_path, transcript, movie, complexity,thumbnail, audio)
+    create_video_obj(video_path, transcript, movie, complexity, thumbnail, audio)
 
-def video_processing(movie, important_dialogue, srt):
-    video_paths = convert_movie_to_video(movie, srt)
-
-    for video_path in video_paths:
-        complexity = important_dialogue.get(video_path)
+def video_processing(movie, important_dialogue):
+    video_paths = convert_movie_to_video(movie, important_dialogue)
+    movie = movie.split('\\')[-1]
+    movie = movie.replace('.mp4', '')
+    movie = " ".join(movie.split()[:3])
+    for idx, video_path in enumerate(video_paths):
+        dialogue = important_dialogue[idx]
+        complexity = dialogue['complexity']
         s3_video_url = upload_to_s3(video_path, f"videos/{movie}/{uuid.uuid4()}.mp4")
-        thumbnail =  upload_to_s3(screenshot_video(video_path),f"thumbnail/{movie}.webp")
+        thumbnail = upload_to_s3(screenshot_video(video_path), f"thumbnail/{movie}.webp")
         audio = upload_to_s3(video_to_audio(video_path), f"audio/{movie}/{uuid.uuid4()}.wav")
-        video_to_db(s3_video_url, srt, movie,complexity,thumbnail, audio)
-
-
+        video_to_db(s3_video_url, dialogue['sentence'], movie, complexity, thumbnail, audio)
 
 def main():
     parser = argparse.ArgumentParser(description='This is a script to convert movies to videos and upload them to S3')
@@ -145,10 +174,11 @@ def main():
     parser.add_argument('--srt', type=str, help='The path to the transcript file', required=True)
     args = parser.parse_args()
 
-    important_dialogue = get_important_dialogue(args.srt)
-    overwrite_srt_file(args.srt, important_dialogue)
+    subtitles = parse_srt(args.srt)
+    important_dialogue = get_important_dialogue(subtitles)
+    save_to_csv(args.srt, important_dialogue)
 
-    video_processing(args.movie, important_dialogue, args.srt)
+    video_processing(args.movie, important_dialogue)
 
 if __name__ == '__main__':
     main()

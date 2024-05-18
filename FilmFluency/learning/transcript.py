@@ -21,8 +21,7 @@ def get_video_directory():
 
 def create_video_obj(video_path, transcript_path, movie,thumbnail,audio, subtitle_path=""):
     """Create a Video object and save it to the database."""
-    #take the first 3 words of the title of the movie and join them and search for the movie
-    movie = movie.split()[:3].join()
+    movie = " ".join(movie.split()[:3])
     try:
         movie = Movie.objects.get(title__icontains=movie)
         video = Video.objects.create(
