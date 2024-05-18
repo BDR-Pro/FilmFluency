@@ -19,11 +19,10 @@ def get_video_directory():
     print(os.path.exists(video_dir))
     return video_dir
 
-def create_video_obj(video_path, transcript_path, movie,thumbnail,audio, subtitle_path=""):
+def create_video_obj(video_path, transcript_path, slug ,thumbnail,audio, subtitle_path=""):
     """Create a Video object and save it to the database."""
-    movie = " ".join(movie.split()[:3])
     try:
-        movie = Movie.objects.get(title__icontains=movie)
+        movie = Movie.objects.get(random_slug=slug)
         video = Video.objects.create(
             movie=movie,
             video=video_path,
@@ -38,4 +37,3 @@ def create_video_obj(video_path, transcript_path, movie,thumbnail,audio, subtitl
     except Exception as e:
         with open('errors.txt', 'a') as f:
             f.write(f"Error creating video object: {str(e)}\n")
-    return video

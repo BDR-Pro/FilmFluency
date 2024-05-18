@@ -127,17 +127,28 @@ def cut_video(video_path, start_time, end_time):
     return output_path
 
 def screenshot_video(video_path):
-    """Take a screenshot of the video at a 2s and convert it to a webp format."""
+    """Take a screenshot of the video at a 2s and convert it to a jpg format."""
     output_path = f"{uuid.uuid4()}.jpg"
 
-    (
-        ffmpeg
-        .input(video_path, ss=2)
-        .output(output_path, vframes=1, format='webp')
-        .run()
-        
-    )
+    try:
+        (
+            ffmpeg
+            .input(video_path, ss=2)
+            .output(output_path, vframes=1, format='webp')
+            .run()
+        )
+    except ffmpeg.Error as e:
+        print(f"WebP format failed, using JPG format instead. Error: {e}")
+        output_path = f"{uuid.uuid4()}.jpg"
+        (
+            ffmpeg
+            .input(video_path, ss=2)
+            .output(output_path, vframes=1, format='mjpeg')
+            .run()
+        )
+
     return output_path
+
 
 def video_to_audio(video_path):
     """Convert the video to audio using ffmpeg."""
@@ -155,7 +166,7 @@ def video_to_db(video_path, transcript, movie, complexity, thumbnail, audio):
     """Call Django function to save the video to the database."""
     create_video_obj(video_path, transcript, movie, complexity, thumbnail, audio)
 
-def video_processing(movie, important_dialogue):
+def video_processing(movie, important_dialogue, slug):
     video_paths = convert_movie_to_video(movie, important_dialogue)
     movie = movie.split('\\')[-1]
     movie = movie.replace('.mp4', '')
@@ -164,21 +175,23 @@ def video_processing(movie, important_dialogue):
         dialogue = important_dialogue[idx]
         complexity = dialogue['complexity']
         s3_video_url = upload_to_s3(video_path, f"videos/{movie}/{uuid.uuid4()}.mp4")
-        thumbnail = upload_to_s3(screenshot_video(video_path), f"thumbnail/{movie}.webp")
+        thumbnail = upload_to_s3(screenshot_video(video_path), f"thumbnail/{movie}/{uuid.uuid4()}.webp")
         audio = upload_to_s3(video_to_audio(video_path), f"audio/{movie}/{uuid.uuid4()}.wav")
-        video_to_db(s3_video_url, dialogue['sentence'], movie, complexity, thumbnail, audio)
+        video_to_db(s3_video_url, dialogue['sentence'], slug, complexity, thumbnail, audio)
 
 def main():
     parser = argparse.ArgumentParser(description='This is a script to convert movies to videos and upload them to S3')
     parser.add_argument('--movie', type=str, help='The name of the movie to convert to a video', required=True)
     parser.add_argument('--srt', type=str, help='The path to the transcript file', required=True)
+    parser.add_argument('--Slug', type=str, help='The Slug of The Movie in DB', required=True)
+    
     args = parser.parse_args()
 
     subtitles = parse_srt(args.srt)
     important_dialogue = get_important_dialogue(subtitles)
     save_to_csv(args.srt, important_dialogue)
 
-    video_processing(args.movie, important_dialogue)
+    video_processing(args.movie, important_dialogue, args.Slug)
 
 if __name__ == '__main__':
     main()
