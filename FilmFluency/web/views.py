@@ -185,8 +185,22 @@ def home(request):
     if not 'reset_preferences' in request.GET:
 
         # Set/update cookie for user's movie source preference and country
-        response.set_cookie('preferred_movies', user_choice, max_age=30*24*60*60)  # Expires in 30 days
-        response.set_cookie('country', country_flag, max_age=30*24*60*60)  # Expires in 30 days
+        response.set_cookie(
+            'preferred_movies', 
+            user_choice, 
+            max_age=30*24*60*60,  # Expires in 30 days
+            httponly=True, 
+            secure=True
+        )
+        
+        # Set 'country' cookie with HttpOnly and Secure flags
+        response.set_cookie(
+            'country', 
+            country_flag, 
+            max_age=30*24*60*60,  # Expires in 30 days
+            httponly=True, 
+            secure=True
+        )
         
     return response
 

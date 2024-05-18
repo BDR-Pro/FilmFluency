@@ -1,4 +1,4 @@
-numpy
+numpy>=1.22.2
 djangorestframework
 beautifulsoup4
 django-cors-headers
@@ -7,7 +7,7 @@ certifi
 Django
 decorator
 django-jazzmin
-fastapi
+fastapi>=0.109.1
 django-storages[boto3]
 boto3
 django-storages
@@ -15,7 +15,7 @@ pycountry
 ffmpy
 filelock
 requests[socks]
-fonttools
+fonttools>=4.43.0
 fsspec
 django-countries
 django-redis
@@ -32,7 +32,7 @@ kiwisolver
 MarkupSafe
 dj-database-url
 pandas
-pillow
+pillow>=10.3.0
 proglog
 psycopg
 pydantic

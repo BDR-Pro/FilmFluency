@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from learning.models import Movie , Video
 from users.models import Report
 from learning.models import Language
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from .forms import SignUpForm
@@ -35,9 +36,9 @@ def signup_view(request):
             UserProgress.objects.create(user=user)
             UserProfile.objects.create(user=user)
 
-            # Redirect to 'next' if provided
-            if request.GET.get('next'):
-                return redirect(request.GET.get('next'))
+            next_url = request.GET.get('next')
+            if next_url and url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}, require_https=request.is_secure()):
+                return redirect(next_url)
             
             return redirect('users:profile')  # Redirect to profile page after signup
         else:
