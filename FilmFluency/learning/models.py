@@ -287,7 +287,7 @@ class Video(models.Model):
         s3_url = "https://filmfluency.fra1.cdn.digitaloceanspaces.com/"
 
         return s3_url + quote(self.video)
-    
+     
     def thumbnail_url(self):
         # Ensures the method returns a URL path for the thumbnail
         s3_url = "https://filmfluency.fra1.cdn.digitaloceanspaces.com/"
