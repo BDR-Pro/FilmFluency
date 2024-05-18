@@ -26,7 +26,7 @@ def create_video_obj(video_path, transcript_path, slug ,thumbnail,audio,complexi
         video = Video.objects.create(
             movie=movie,
             video=video_path,
-            transcript=transcript_path,
+            text=transcript_path,
             complexity=complexity,
             audio=audio,
             thumbnail=thumbnail,

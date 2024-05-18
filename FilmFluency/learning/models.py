@@ -261,43 +261,47 @@ class TrendingMovies(models.Model):
         return self.movie.title  # Use movie title for string representation
 
     
-class Video(BaseMedia):
+class Video(models.Model):
     video = models.URLField(blank=True, null=True)
     date_added = models.DateTimeField(default=timezone.now)
     movie = models.ForeignKey('Movie', on_delete=models.CASCADE, related_name='videos')
-    transcript = models.TextField(blank=True, null=True)
     complexity = models.FloatField()
     length = models.FloatField()
     random_slug = models.SlugField(max_length=50, unique=True, default=random_slug_generator)
     bookmarked_users = models.ManyToManyField(User, related_name='bookmarked_videos', blank=True)
-    thumbnail = models.URLField(blank=True, null=True)
+    thumbnail = models.CharField(max_length=255, blank=True, null=True)
     audio = models.URLField(blank=True, null=True)
+    text = models.TextField(blank=True, null=True)
+    
     def __str__(self):
         # This function should only be defined once.
         return f"{self.movie.title} - Video"
 
-    def video_path(self):
-        return self.video.path
-
     def audio_url(self):
         # Ensures the method returns a URL path for the audio file
-        return quote(self.audio)
+        s3_url = "https://filmfluency.fra1.cdn.digitaloceanspaces.com/"
+        return s3_url + quote(self.audio)
 
     def video_url(self):
         # Ensures the method returns a URL path for the video file
-        return quote(self.video)
+        s3_url = "https://filmfluency.fra1.cdn.digitaloceanspaces.com/"
+
+        return s3_url + quote(self.video)
     
     def thumbnail_url(self):
         # Ensures the method returns a URL path for the thumbnail
-        return quote(self.thumbnail)
+        s3_url = "https://filmfluency.fra1.cdn.digitaloceanspaces.com/"
+        
+        return s3_url + quote(self.thumbnail.url)
 
     def transcript(self):
         """Read from postgress database"""
-        return self.transcript
+        return self.text
         
     def translation(self, language="ar"):
         """Read from postgress database"""
-        return self.translations.get(language=language).translated_text
+        # TODO: Implement the translation method
+        pass
         
         
     def getAllbookmarks(self):
