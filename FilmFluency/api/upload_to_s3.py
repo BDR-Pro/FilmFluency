@@ -2,6 +2,8 @@ import boto3
 from django.conf import settings
 import random
 from botocore.client import Config
+from urllib.parse import unquote
+
 from boto3.s3.transfer import S3Transfer
 from botocore.exceptions import ClientError
 def client_s3():
@@ -49,14 +51,30 @@ def upload_to_s3(file_name,key=""):
         print(f"Error uploading file: {str(e)}")
         return False
 
-    
+
+def hex_decode(encoded_string):
+    # Convert the hexadecimal representation back to the original string
+    decoded_string = bytes.fromhex(encoded_string).decode('utf-8')
+    return decoded_string
+
+
 def serve_secure_media(file_key):
     client = client_s3()
     bucket_name = 'filmfluency'
+    unquoted_file_key = hex_decode(unquote(file_key))
+    print(f"Unqouted file key: {unquoted_file_key}")
+    # IF the file does not exist, return None
+    try:
+        client.head_object(Bucket=bucket_name, Key=unquoted_file_key)
+    except ClientError as e:
+        print(f"Error getting file: {e}")
+        return None
+    
     url = client.generate_presigned_url('get_object',
                                         Params={'Bucket': bucket_name,
-                                                'Key': file_key},
+                                                'Key': unquoted_file_key},
                                         ExpiresIn=3600)
+    
     return url
 
 

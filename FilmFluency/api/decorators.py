@@ -1,5 +1,6 @@
 from functools import wraps
 from django.http import HttpResponse
+from users.models import UserProfile
 
 def check_paid_user(view_func):
     @wraps(view_func)
@@ -8,7 +9,8 @@ def check_paid_user(view_func):
             return view_func(request, *args, **kwargs)
         if not request.user.is_authenticated:
             return HttpResponse("Unauthorized", status=401)
-        if not request.user.UserProfile.is_paid:
+        profile = UserProfile.objects.get(user=request.user) 
+        if not profile.paid_user:
             return HttpResponse("Unauthorized", status=401)
         return view_func(request, *args, **kwargs)
     return _wrapped_view

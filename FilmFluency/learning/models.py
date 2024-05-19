@@ -6,6 +6,7 @@ from django.db import models
 from django.utils import timezone
 from urllib.parse import quote
 from django.contrib.auth.models import User 
+from urllib.parse import quote
 import re
 from  django.urls import reverse
 from learning.func import language_to_country
@@ -278,15 +279,12 @@ class Video(models.Model):
         return f"{self.movie.title} - Video"
 
     def audio_url(self):
-        # Ensures the method returns a URL path for the audio file
-        s3_url = "https://filmfluency.fra1.cdn.digitaloceanspaces.com/"
-        return s3_url + quote(self.audio)
+        # Ensures the method returns a URL path for the audio file in base64 format
+        return hex_encode(quote(self.audio))
 
     def video_url(self):
         # Ensures the method returns a URL path for the video file
-        s3_url = "https://filmfluency.fra1.cdn.digitaloceanspaces.com/"
-
-        return s3_url + quote(self.video)
+        return hex_encode(quote(self.video))
      
     def thumbnail_url(self):
         # Ensures the method returns a URL path for the thumbnail
@@ -362,3 +360,9 @@ class Notification(models.Model):
         return f"Notification for {self.recipient.username}"
 
 
+
+
+def hex_encode(input_string):
+    # Convert each character to its hexadecimal representation
+    encoded_string = ''.join(format(ord(char), '02x') for char in input_string)
+    return encoded_string

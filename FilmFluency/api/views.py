@@ -5,6 +5,7 @@ from learning.models import Movie
 
 @check_paid_user
 def secure_media_view(request, file_key):
+    print(f"{file_key=}")
     url = serve_secure_media(file_key)
     return JsonResponse({'url': url})
 
