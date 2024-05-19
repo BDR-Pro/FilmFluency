@@ -15,12 +15,13 @@ import nltk
 from datetime import datetime, timedelta
 from api.upload_to_s3 import upload_to_s3
 from learning.transcript import create_video_obj
-
+from moviepy.editor import VideoFileClip
 # Download nltk data
 nltk.download('punkt')
 
 
-
+def get_length(video_path):
+    return VideoFileClip(video_path).duration
 
 
 def parse_srt(srt_file_path):
@@ -196,12 +197,13 @@ def video_processing(movie, important_dialogue, slug):
             continue
         video_s3=f"videos/{movie}/{uuid.uuid4()}.mp4"
         upload_to_s3(video_path, video_s3)
+        length = get_length(video_path)
         path=screenshot_video(video_path)
         if path:
             file_name = path.split('\\')[-1]
             thumbnail = upload_to_s3(path, f"thumbnail/{movie}/{file_name}")
         audio = upload_to_s3(video_to_audio(video_path), f"audio/{movie}/{uuid.uuid4()}.wav")
-        video_to_db(video_s3, dialogue['sentence'], slug, complexity, thumbnail, audio)
+        video_to_db(video_s3, dialogue['sentence'], slug, complexity, thumbnail, audio, length)
 
 def main():
     parser = argparse.ArgumentParser(description='This is a script to convert movies to videos and upload them to S3')
