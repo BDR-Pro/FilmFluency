@@ -224,25 +224,32 @@
         const subscriptionType = document.getElementById('subscriptionType').value;
         const isGift = document.getElementById('giftCheckbox').checked;
         const paymentType = document.querySelector('.payment-method .card.active').getAttribute('data-payment-type');
-        ///alert(`Payment details:\nQuantity: ${quantity}\nSubscription Type: ${subscriptionType}\nGift: ${isGift ? 'Yes' : 'No'}\nPayment Type: ${paymentType}`);
-        //send it as a POST request to the server
-        fetch('/payment/create-token/', {
-            method: 'POST',
+    
+        const params = {
+            quantity: quantity,
+            subscriptionType: subscriptionType,
+            isGift: isGift,
+            paymentType: paymentType
+        };
+    
+        // Convert the parameters object to a JSON string and then to a Base64 encoded string
+        const base64Params = btoa(JSON.stringify(params));
+    
+        // Send it as a GET request to the server with the Base64 encoded string
+        fetch(`/payment/create-token/?params=${encodeURIComponent(base64Params)}`, {
+            method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRFToken': '{{ csrf_token }}'
-            },
-            body: JSON.stringify({
-                quantity: quantity,
-                subscriptionType: subscriptionType,
-                isGift: isGift,
-                paymentType: paymentType
-            })
+            }
         })
-        //wait to redirect to the payment page
-        
-
-
+        .then(response => response.json())
+        .then(data => {
+            // Handle the response from the server
+            console.log(data);
+            // Redirect to the payment page if needed
+        })
+        .catch(error => console.error('Error:', error));
     }
 </script>
 {% endblock %}

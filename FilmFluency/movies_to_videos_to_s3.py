@@ -14,7 +14,7 @@ import textstat
 import nltk
 from datetime import datetime, timedelta
 from api.upload_to_s3 import upload_to_s3
-from learning.transcript import create_video_obj
+from learning.transcript import create_video_obj , does_movie_exist
 from moviepy.editor import VideoFileClip
 # Download nltk data
 nltk.download('punkt')
@@ -26,8 +26,14 @@ def get_length(video_path):
 
 def parse_srt(srt_file_path):
     """Parse the SRT file using regex to extract the subtitles."""
-    with open(srt_file_path, 'r', encoding='utf-8') as file:
-        srt_content = file.read()
+    encodings = ['utf-8', 'latin-1', 'utf-16', 'utf-32', 'utf-16-le', 'utf-16-be', 'utf-32-le', 'utf-32-be']
+    for i in encodings:
+        try:
+            with open(srt_file_path, 'r', encoding=i) as file:
+                srt_content = file.read()
+                break
+        except:
+            continue
 
     pattern = re.compile(
         r'(\d+)\n'
@@ -211,15 +217,17 @@ def main():
     parser = argparse.ArgumentParser(description='This is a script to convert movies to videos and upload them to S3')
     parser.add_argument('--movie', type=str, help='The name of the movie to convert to a video', required=True)
     parser.add_argument('--srt', type=str, help='The path to the transcript file', required=True)
-    parser.add_argument('--Slug', type=str, help='The Slug of The Movie in DB', required=True)
+    parser.add_argument('--id', type=str, help='The id of The Movie in DB', required=True)
     
     args = parser.parse_args()
-
+    if not does_movie_exist(args.id):
+        print("Movie does not exist in the directory.")
+        return
     subtitles = parse_srt(args.srt)
     important_dialogue = get_important_dialogue(subtitles)
     save_to_csv(args.srt, important_dialogue)
 
-    video_processing(args.movie, important_dialogue, args.Slug)
+    video_processing(args.movie, important_dialogue, args.id)
 
 if __name__ == '__main__':
     main()

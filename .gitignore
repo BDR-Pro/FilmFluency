@@ -11,3 +11,7 @@ __pycache__
 /FilmFluency/MovieToClips
 film_venv
 FilmFluency/learning/MovieToClips/
+*.mp4
+*.csv
+*.wav
+*.jpg

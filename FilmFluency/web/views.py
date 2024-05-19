@@ -70,7 +70,8 @@ def video_detail(request, random_slug):
         video  = get_video_by_slug(random_slug)
         return render(request, 'video_detail.html', {'video': video })
     else:
-        return redirect('payment:payment')
+        # If the user is not a paid user, redirect them to the payment page in payment app 
+        return redirect('payment:products')
 
 def movie_content_type():
     return ContentType.objects.get_for_model(Movie)
@@ -93,6 +94,7 @@ def get_movie_by_slug(request,random_slug):
         reported = Report.objects.filter(user=request.user, content_type = movie_content_type(), object_id = movie.id).exists()
         notifed = Notification.objects.filter(recipient=request.user, movie=movie).exists()
         is_favorite = UserProgress.objects.get(user=request.user).favourite_movies.filter(random_slug=random_slug).exists()
+        avg_complexity = Video.objects.filter(movie=movie).aggregate(Avg('complexity'))['complexity__avg']
     else:
         reported = False
         notifed = False
@@ -100,7 +102,8 @@ def get_movie_by_slug(request,random_slug):
         
     movie.poster = movie.get_poster()
     return render(request, 'movie_detail.html', {'movie': movie, 'views': views, 'does_it_have_videos': does_it_have_videos ,
-                                                 'reported': reported, 'notifed': notifed, 'is_favorite': is_favorite})
+                                                 'reported': reported, 'notifed': notifed, 'is_favorite': is_favorite
+                                                 , 'avg_complexity': avg_complexity})
 
 
 def get_trending_movies():
@@ -345,3 +348,7 @@ def get_transcript_by_moive(request,random_slug):
     transcript = secure_media_view(request, transcript)
     print(f"{transcript=}")
     return (transcript)
+
+
+
+

@@ -4,6 +4,8 @@ import requests
 import logging
 from .models import Product, Payment, Invoice, code
 from django.utils import timezone
+import base64
+import json
 from .functions import calc_weeks,send_mail
 from users.models import UserProfile
 logger = logging.getLogger(__name__)
@@ -83,28 +85,57 @@ def payment_home(request):
     
 
 def crypto_payment(request):
-    amount="14"
     product = request.POST.get('product')
     amount = Product.objects.get(name=product).price
-
     crypto = get_crypto(amount)
     return render(request, 'crypto_payment.html', {'cryptos':crypto})
 
 def create_token(request):
-    
-    quantity = request.POST.get('quantity')
-    subscriptionType = request.POST.get('subscriptionType')
-    isGift = request.POST.get('isGift')
-    paymentType = request.POST.get('paymentType')
-    product = Product.objects.get(id=subscriptionType)
-    Payment.objects.create(user=request.user, product=product, is_completed=False,
-                           payment_method=paymentType, quantity=quantity, isGift=isGift,
-                            expires_at=timezone.now() + timezone.timedelta(weeks=calc_weeks(product)))
-    if paymentType == 'crypto':
-        redirect('payment:crypto-payment', product=product)
-    if paymentType == 'tap':
-        redirect('payment:tap-payment', product=product)
-    
+    if request.method == 'GET':
+        base64_params = request.GET.get('params')
+        if base64_params:
+            try:
+                # Decode the Base64 string
+                decoded_params = base64.b64decode(base64_params).decode('utf-8')
+                # Parse the JSON string
+                params = json.loads(decoded_params)
+
+                quantity = params.get('quantity')
+                subscriptionType = params.get('subscriptionType')
+                isGift = params.get('isGift')
+                paymentType = params.get('paymentType')
+                print(f"Quantity: {quantity}, Subscription Type: {subscriptionType}, isGift: {isGift}, Payment Type: {paymentType} ")
+            except Exception as e:
+                print(f"Failed to decode or parse the parameters: {e}")
+                return redirect('payment:cancelled')
+        else:
+            return redirect('payment:cancelled')
+
+        try:
+            id_= int(str(subscriptionType).replace(" ", ""))
+            product = Product.objects.get(id=id_)
+            payment = Payment.objects.create(
+                user=request.user,
+                product=product,
+                is_completed=False,
+                payment_method=paymentType,
+                quantity=quantity,
+                isGift=isGift,
+                expires_at=timezone.now() + timezone.timedelta(weeks=calc_weeks(product))
+            )
+            
+            if paymentType == 'crypto':
+                return redirect('payment:crypto-payment', product=product.id)
+            elif paymentType == 'tap':
+                return redirect('payment:tap-payment', product=product.id)
+            else:
+                return JsonResponse({'error': 'Invalid payment method'})
+        except Product.DoesNotExist:
+            print("Product does not exist.")
+            return redirect('payment:cancelled')
+        except Exception as e:
+            print(f"Error creating payment: {e}")
+            return redirect('payment:cancelled')
     else:
         return render(request, 'payment.html')
 
@@ -149,7 +180,10 @@ def tap_payment(request):
 
 
 def cancelled(request):
-    Payment.objects.get(user=request.user, is_completed=False).delete()
+    try:
+        Payment.objects.get(user=request.user, is_completed=False).delete()
+    except Payment.DoesNotExist:
+        pass
     return render(request, 'cancelled.html')
 
 

@@ -62,6 +62,16 @@
             <p class="mb-3">
                 <i class="bi bi-camera-video-fill"></i> Videos: {{ movie.videos.count }}
             </p>
+            <!-- avg_complexity -->
+            <p class="mb-3">
+                <i class="bi bi-bar-chart-fill"></i> Easy-lang-Meter (lower is harder): {{ avg_complexity|floatformat:2 }}
+            </p>
+            <!-- id for testing-->
+            {% if request.user.is_staff %}
+            <p class="mb-3">
+                <i class="bi bi-bar-chart-fill"></i> Movie ID: {{ movie.id }}
+            </p>
+            {% endif %}
             {% if does_it_have_videos %}
             <a href="{% url 'learning:videos_by_movie' movie.random_slug %}" class="btn btn-primary {% if not request.user.is_authenticated %}disabled{% endif %}">
                 <i class="bi bi-play-fill"></i> View Related Videos

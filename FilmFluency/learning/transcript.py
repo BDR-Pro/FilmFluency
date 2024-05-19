@@ -1,10 +1,16 @@
 import os
 from moviepy.editor import VideoFileClip
 from .models import Video, Movie
+import sys
+def does_movie_exist(id):
+    """Check if the movie exists in the database."""
+    try:
+        movie=Movie.objects.get(id=id)
+        print(movie)
+        return True
+    except Movie.DoesNotExist:
+        sys.exit("Movie does not exist in the database.")
 
-
-def get_complexity(video_path):
-    return float(os.path.basename(video_path).split("_")[0])
 
 def get_length(video_path):
     return VideoFileClip(video_path).duration
@@ -19,26 +25,18 @@ def get_video_directory():
     print(os.path.exists(video_dir))
     return video_dir
 
-def create_video_obj(video_path, transcript_path, slug ,thumbnail,audio,complexity,length):
+def create_video_obj(video_path, transcript_path, id ,thumbnail,audio,complexity,length):
     """Create a Video object and save it to the database."""
-    try:
-        movie = Movie.objects.get(random_slug=slug)
-        video = Video.objects.create(
-            movie=movie,
-            video=video_path,
-            text=transcript_path,
-            length=length,
-            complexity=complexity,
-            audio=audio,
-            thumbnail=thumbnail,
-        )
-    except Movie.DoesNotExist:
-        with open('errors.txt', 'a') as f:
-            f.write(f"Movie {movie} does not exist in the database.\n")
-    except Exception as e:
-        with open('errors.txt', 'a') as f:
-            f.write(f"Error creating video object: {str(e)}\n")
-
+    movie = Movie.objects.get(id=id)
+    video = Video.objects.create(
+        movie=movie,
+        video=video_path,
+        text=transcript_path,
+        length=length,
+        complexity=complexity,
+        audio=audio,
+        thumbnail=thumbnail,
+    )
 
 def get_length_video(video_path):
     return VideoFileClip(video_path).duration
