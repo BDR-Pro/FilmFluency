@@ -1,6 +1,5 @@
 import os
 import django
-import torchaudio
 
 # Django settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'FilmFluency.settings')
@@ -17,67 +16,11 @@ from datetime import datetime, timedelta
 from api.upload_to_s3 import upload_to_s3
 from learning.transcript import create_video_obj
 
-
 # Download nltk data
 nltk.download('punkt')
-import torch
-from pydub import AudioSegment
-from transformers import Wav2Vec2ForCTC, Wav2Vec2Tokenizer
-from datasets import load_dataset
 
-def extract_audio(video_path, audio_path):
-    """Extract audio from video using ffmpeg."""
-    (
-        ffmpeg
-        .input(video_path)
-        .output(audio_path, format='wav', acodec='pcm_s16le', ac=1, ar='16000')
-        .run(overwrite_output=True)
-    )
 
-def transcribe_audio(audio_path):
-    """Transcribe audio using Hugging Face Wav2Vec2 model."""
-    tokenizer = Wav2Vec2Tokenizer.from_pretrained("facebook/wav2vec2-base-960h")
-    model = Wav2Vec2ForCTC.from_pretrained("facebook/wav2vec2-base-960h")
 
-    # Load audio file and prepare it for the model
-    speech, _ = torchaudio.load(audio_path)
-    input_values = tokenizer(speech.squeeze().numpy(), return_tensors="pt", padding="longest").input_values
-
-    # Perform inference
-    with torch.no_grad():
-        logits = model(input_values).logits
-
-    # Decode the logits
-    predicted_ids = torch.argmax(logits, dim=-1)
-    transcription = tokenizer.batch_decode(predicted_ids)[0]
-
-    return transcription
-
-def analyze_understandability(transcript):
-    """Analyze the understandability of the transcript."""
-    words = transcript.split()
-    return len(words) >= 5
-
-def is_it_understandable(video_path):
-    """Check if the video is understandable using AI voice recognition."""
-    audio_path = "temp_audio.wav"
-
-    try:
-        # Extract audio from video
-        extract_audio(video_path, audio_path)
-        
-        # Transcribe audio to text
-        transcript = transcribe_audio(audio_path)
-
-        # Analyze understandability
-        return analyze_understandability(transcript)
-    except Exception as e:
-        print(f"Error processing video: {e}")
-        return False
-    finally:
-        if os.path.exists(audio_path):
-            os.remove(audio_path)
-            
 
 
 def parse_srt(srt_file_path):
@@ -226,6 +169,17 @@ def video_to_audio(video_path):
     )
     return output_path
 
+
+def filter_dialogue(line):
+    """Filter out non-dialogue lines from the subtitle content."""
+    # Regex pattern to match lines representing non-dialogue sounds or actions
+    non_dialogue_pattern = re.compile(r'^\[.*\]$')
+    
+    # Check if the line matches the non-dialogue pattern
+    if non_dialogue_pattern.match(line) or not line.strip():
+        return None
+    return line.strip()
+
 def video_to_db(video_path, transcript, movie, complexity, thumbnail, audio):
     """Call Django function to save the video to the database."""
     create_video_obj(video_path, transcript, movie, thumbnail, audio, complexity)
@@ -238,7 +192,7 @@ def video_processing(movie, important_dialogue, slug):
     for idx, video_path in enumerate(video_paths):
         dialogue = important_dialogue[idx]
         complexity = dialogue['complexity']
-        if not is_it_understandable(video_path):
+        if not filter_dialogue(dialogue['sentence']):
             continue
         video_s3=f"videos/{movie}/{uuid.uuid4()}.mp4"
         upload_to_s3(video_path, video_s3)
