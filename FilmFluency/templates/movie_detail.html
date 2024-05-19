@@ -58,6 +58,10 @@
             <p class="mb-3">
                 <i class="bi bi-eye-fill"></i> Views: {{ views }}
             </p>
+            <!-- Add how many videos are available for this movie -->
+            <p class="mb-3">
+                <i class="bi bi-camera-video-fill"></i> Videos: {{ movie.videos.count }}
+            </p>
             {% if does_it_have_videos %}
             <a href="{% url 'learning:videos_by_movie' movie.random_slug %}" class="btn btn-primary {% if not request.user.is_authenticated %}disabled{% endif %}">
                 <i class="bi bi-play-fill"></i> View Related Videos

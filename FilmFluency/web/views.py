@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from django.db.models import F
 from learning.models import Video, TrendingMovies, Movie, Notification
-from users.models import UserProgress
+from users.models import UserProgress, UserProfile
 from django.db.models import Max
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.shortcuts import render
@@ -55,7 +55,7 @@ def get_video_by_slug(slug):
 def video_detail(request, random_slug):
     """ Show details for a specific video, including related transcript and options. """
     user_progress = UserProgress.objects.get(user=request.user)
-    if user_progress.paid_user:
+    if UserProfile.objects.get(user=request.user).paid_user:
         if request.method == 'POST':
             video = get_video_by_slug(random_slug)
             user_progress = UserProgress.objects.get(user=request.user)
