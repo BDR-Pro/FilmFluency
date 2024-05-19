@@ -181,9 +181,9 @@ def filter_dialogue(line):
         return None
     return line.strip()
 
-def video_to_db(video_path, transcript, movie, complexity, thumbnail, audio):
+def video_to_db(video_path, transcript, movie, complexity, thumbnail, audio, length):
     """Call Django function to save the video to the database."""
-    create_video_obj(video_path, transcript, movie, thumbnail, audio, complexity)
+    create_video_obj(video_path, transcript, movie, thumbnail, audio, complexity, length)
 
 def video_processing(movie, important_dialogue, slug):
     video_paths = convert_movie_to_video(movie, important_dialogue)
