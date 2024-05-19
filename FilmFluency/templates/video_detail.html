@@ -67,8 +67,10 @@
             </div>
         </div>
         <div class="col-lg-4">
+            <a href="{% url 'learning:videos_by_movie' video.movie.random_slug %}">
             <h2>{{ video.movie.original_title }}</h2>
             <hr>
+            </a>
             <p><strong>Complexity:</strong> {{ video.complexity }}</p>
             <p><strong>Length:</strong> {{ video.length }} seconds</p>
             <audio id="audioPlayer" controls preload="none" class="w-100">
