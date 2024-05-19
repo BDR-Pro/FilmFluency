@@ -292,7 +292,7 @@ class Video(models.Model):
         # Ensures the method returns a URL path for the thumbnail
         s3_url = "https://filmfluency.fra1.cdn.digitaloceanspaces.com/"
         
-        return s3_url + quote(self.thumbnail.url)
+        return s3_url + quote(self.thumbnail)
 
     def transcript(self):
         """Read from postgress database"""

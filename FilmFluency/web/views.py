@@ -85,7 +85,7 @@ def get_movie_by_slug(request,random_slug):
     isittrendy[0].views = views
     isittrendy[0].save()
     
-    does_it_have_videos = Video.objects.filter(movie=movie).count() > 0
+    does_it_have_videos = True if Video.objects.filter(movie=movie).count() > 0 else False
     if request.user.is_authenticated:
         user_progress = UserProgress.objects.get(user=request.user)
         user_progress.watched_movies.add(movie)

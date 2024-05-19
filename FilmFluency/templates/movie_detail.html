@@ -58,7 +58,7 @@
             <p class="mb-3">
                 <i class="bi bi-eye-fill"></i> Views: {{ views }}
             </p>
-            {% if movie.does_it_have_videos %}
+            {% if does_it_have_videos %}
             <a href="{% url 'learning:videos_by_movie' movie.random_slug %}" class="btn btn-primary {% if not request.user.is_authenticated %}disabled{% endif %}">
                 <i class="bi bi-play-fill"></i> View Related Videos
             </a>

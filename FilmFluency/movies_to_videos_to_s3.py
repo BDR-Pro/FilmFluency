@@ -201,9 +201,11 @@ def video_processing(movie, important_dialogue, slug):
         path=screenshot_video(video_path)
         if path:
             file_name = path.split('\\')[-1]
-            thumbnail = upload_to_s3(path, f"thumbnail/{movie}/{file_name}")
-        audio = upload_to_s3(video_to_audio(video_path), f"audio/{movie}/{uuid.uuid4()}.wav")
-        video_to_db(video_s3, dialogue['sentence'], slug, complexity, thumbnail, audio, length)
+            thumbnail_in_s3 = f"thumbnails/{movie}/{file_name}"
+            upload_to_s3(path, thumbnail_in_s3)
+        audio_in_s3 = f"audio/{movie}/{uuid.uuid4()}.wav"
+        upload_to_s3(video_to_audio(video_path), audio_in_s3)
+        video_to_db(video_s3, dialogue['sentence'], slug, complexity, thumbnail_in_s3, audio_in_s3, length)
 
 def main():
     parser = argparse.ArgumentParser(description='This is a script to convert movies to videos and upload them to S3')
