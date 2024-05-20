@@ -15,6 +15,7 @@ pycountry
 ffmpy
 filelock
 requests[socks]
+djangorestframework-simplejwt
 fonttools>=4.43.0
 fsspec
 django-countries
