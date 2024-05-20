@@ -66,13 +66,23 @@ def video_detail(request, random_slug):
             user_progress.check_and_update_level()
             user_progress.known_languages.add(video.movie.original_language)
             user_progress.save()
-            return redirect('web:home')
+            return redirect
         video  = get_video_by_slug(random_slug)
-        return render(request, 'video_detail.html', {'video': video })
+        next_video = get_the_next_video(video).random_slug
+        longest_word = get_longest_word(video.transcript())
+        return render(request, 'video_detail.html', {'video': video, 'next_video': next_video, 'longest_word':longest_word})
     else:
         # If the user is not a paid user, redirect them to the payment page in payment app 
         return redirect('payment:products')
+    
+get_longest_word = lambda transcript: max(transcript.split(), key=len)
 
+def get_the_next_video(video):
+    try:
+        next_video = Video.objects.filter(movie=video.movie, date_added__gt=video.date_added).order_by('date_added')[0]
+        return next_video
+    except:
+        return None
 def movie_content_type():
     return ContentType.objects.get_for_model(Movie)
 

@@ -2,124 +2,201 @@
 
 {% block content %}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.0.0/css/flag-icons.min.css"/>
+{% block title %}{{ user_profile.nickname }} - Film Fluency{% endblock %}
+
+<style>
+    .container {
+        max-width: 600px;
+        margin: auto;
+    }
+    .user-card {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 20px;
+        background-color: #fff;
+    }
+    .user-card img {
+        max-width: 100%;
+        border-radius: 8px;
+    }
+    .user-card .avatar-holder img {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        margin-top: -50px;
+        border: 3px solid #fff;
+    }
+    .name {
+        margin-top: 10px;
+        font-size: 1.5em;
+        font-weight: bold;
+    }
+    .followers {
+        color: #666;
+        font-size: 0.9em;
+    }
+    .stat, .skill {
+        margin-bottom: 15px;
+    }
+    .stat h6, .skill h6 {
+        font-size: 1em;
+        margin-bottom: 5px;
+    }
+    .progress {
+        height: 6px;
+        border-radius: 3px;
+        background-color: #f0f0f0;
+    }
+    .progress-bar {
+        border-radius: 3px;
+    }
+    .btn {
+        font-size: 1em;
+    }
+    .text-muted {
+        font-size: 0.9em;
+        color: #888;
+    }
+</style>
 
 <div class="container py-5">
-    <div class="card user-card">
-        <!-- Top area with a design similar to ds-top -->
-        <div class="user-card-top"></div>
-         <!-- Avatar header-->
-         <figure class="figure">
-            <img src={{user_profile.get_cover}} class="figure-img img-fluid rounded" alt="profile header for {{user_profile.nickname}}">
-            <figcaption class="figure-caption">{{ user_profile.bio }}</figcaption>
-          </figure>
+    <div class="card user-card text-center">
+        <!-- Avatar header-->
+        <figure class="figure mb-0">
+            <img src="{{ user_profile.get_cover }}" class="figure-img img-fluid" alt="profile header for {{ user_profile.nickname }}">
+        </figure>
+
         <!-- Avatar holder with user interaction -->
-        <div class="avatar-holder text-center">
-            <img src="{{ user_profile.get_avatar }}" alt="Profile Picture" class="rounded-circle">
+        <div class="avatar-holder">
+            <img src="{{ user_profile.get_avatar }}" alt="Profile Picture">
         </div>
 
         <!-- User Information -->
-        <div class="name text-center">
-            <a href="#">{{ user_profile.nickname }}</a>
-            <h6><i class="fas fa-users"></i> <span class="followers">{{ user_profile.friends.count }}</span> Followers</h6>
+        <div class="name mt-3">
+            <a href="">{{ user_profile.nickname }}</a>
+            <figcaption class="figure-caption">{{ user_profile.bio }}</figcaption>
+
+            <h6 class="followers">{{ user_profile.friends.count }} Followers</h6>
         </div>
 
+        {% if request.user != user_profile.user %}
         <!-- Action Button -->
-        <div class="button text-center my-3">
-            <button class="btn btn-primary" onmousedown="follow();">Follow <i class="fas fa-user-plus"></i></button>
+        <div class="my-3">
+            <button class="btn btn-outline-primary follow-btn" onmousedown="follow();">Follow <i class="fas fa-user-plus"></i></button>
         </div>
+        {% endif %}
 
         <!-- Stats -->
-        <div class="ds-info text-center">
-            <div class="pens">
-                <h6>Pens <i class="fas fa-edit"></i></h6>
+        <div class="ds-info">
+            <div class="stat">
+                <h6>Pens</h6>
                 <p>{{ user_profile.posts.count }}</p>
             </div>
-            <div class="projects">
-                <h6>Projects <i class="fas fa-project-diagram"></i></h6>
-                <p>{{ user_profile.projects.count }}</p>
-            </div>
-            <div class="posts">
-                <h6>Posts <i class="fas fa-comments"></i></h6>
+            <div class="stat">
+                <h6>Posts</h6>
                 <p>{{ user_profile.comments.count }}</p>
             </div>
         </div>
 
         <!-- Skills -->
         <div class="ds-skill">
-            <div class="skill html">
-                <h6><i class="fab fa-html5"></i> HTML5 </h6>
+            <div class="skill">
+                <h6>Movies Completed</h6>
                 <div class="progress">
-                    <div class="progress-bar" role="progressbar" style="width: 95%" aria-valuenow="95" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar bg-success" role="progressbar" style="width: {{ progress.percentage_movies_completed }}%" aria-valuenow="{{ progress.percentage_movies_completed }}" aria-valuemin="0" aria-valuemax="100"></div>
                 </div>
             </div>
-            <div class="skill css">
-                <h6><i class="fab fa-css3-alt"></i> Movies Completed {{progress.watched_movies.count}} </h6>
+            <div class="skill">
+                <h6>Average Complexity</h6>
                 <div class="progress">
-                    <div class="progress-bar bg-success" role="progressbar" style="{{ progress.percentage_movies_completed }}%" aria-valuenow="{{ progress.percentage_movies_completed }}" aria-valuemin="0" aria-valuemax="100"></div>
-                </div>
-            </div>
-            <div class="skill javascript">
-                <h6><i class="fab fa-js"></i> Average Complexity {{ progress.average_complexity }} </h6>
-                <div class="progress">
-                    <div class="progress-bar bg-warning" role="progressbar" style="width: {{percntage_complexity}}%" aria-valuenow="{{percntage_complexity}}" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar bg-warning" role="progressbar" style="width: {{ progress.percentage_complexity }}%" aria-valuenow="{{ progress.percentage_complexity }}" aria-valuemin="0" aria-valuemax="100"></div>
                 </div>
             </div>
         </div>
 
         <!-- More stats -->
-        <div class="row text-center mt-4">
+        <div class="row mt-4">
             <div class="col">
-                <strong>{{ user_progress.points }}</strong> Total Points
+                <strong>{{ user_progress.points }}</strong><br>Total Points
             </div>
             <div class="col">
-                <strong>{{ user_progress.user_level }}</strong> Level
+                <strong>{{ user_progress.user_level }}</strong><br>Level
             </div>
             <div class="col">
-                <strong>{{ user_progress.highest_score }}</strong> High Score
+                <strong>{{ user_progress.highest_score }}</strong><br>High Score
             </div>
         </div>
 
         <!-- Bio and More -->
-        <div class="text-center">
+        <div class="text-center mt-4">
             {% if user_profile.country %}
-            <strong>Country:</strong> <span class="flag-icon-custom fi fi-{{ user_profile.country|lower }}"> </span>
-            {% else %}
+            <strong>Country:</strong> <span class="flag-icon fi fi-{{ user_profile.country|lower }}"></span>
             {% endif %}
             {% if user_profile.known_languages.all %}
             <strong>Languages Known:</strong>
             {% for language in user_profile.known_languages.all %}
-            <span class="badge bg-secondary">{{ language.name }}</span>
+            <span class="badge bg-light text-dark">{{ language.name }}</span>
             {% endfor %}
             {% else %}
-            <p class="text-center text-muted"> please edit your fav language</p>
+            <p class="text-muted">Please edit your favorite language</p>
+            {% endif %}
+            <!--add user_profile.referral_code-->
+            <p class="text-muted">Referral Code: {{ user_profile.referral_code }}</p>
+
+            <p class="text-muted">Member Since: {{ user_profile.user.date_joined|date:"F d, Y" }}</p>
+
+            <p class="text-muted">Last Seen: {{ user_profile.user.last_login|date:"F d, Y" }}</p>
+
+            {% if user_profile.user == request.user %}
+            <!--user_profile.credit_points-->
+            <p class="text-muted">Credit Points: {{ user_profile.credit }}$</p>
             {% endif %}
         </div>
+
+        {% if user == request.user %}
+        <!-- User's edit profile  -->
+        <div class="text-center mt-4">
+            <a href="{% url 'users:edit_profile' %}" class="btn btn-outline-secondary">Edit Profile</a>
+        </div>
+        {% endif %} 
     </div>
-
-    <!-- User's edit profile  -->
-
-    <a href="{% url 'users:edit_profile' %}" class="btn btn-primary mt-3">Edit Profile</a>
-
 
 </div>
 
+{% if request.user != user_profile.user %}
 <script>
     const follow = () => {
-        const btn = document.querySelector('.btn');
+        const btn = document.querySelector('.follow-btn');
         const followers = document.querySelector('.followers');
         let currentFollowers = parseInt(followers.textContent);
+        const userToFollow = '{{ user_profile.nickname }}';
 
-        btn.classList.toggle('following');
-        if (btn.classList.contains('following')) {
-            btn.innerHTML = 'Following <i class="fas fa-user-times"></i>';
-            currentFollowers++;
-        } else {
-            btn.innerHTML = 'Follow <i class="fas fa-user-plus"></i>';
-            currentFollowers--;
-        }
-
-        followers.textContent = currentFollowers;
+        fetch("{% url 'users:follow_user' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ user: userToFollow })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                btn.classList.toggle('following');
+                if (btn.classList.contains('following')) {
+                    btn.innerHTML = 'Following <i class="fas fa-user-times"></i>';
+                    currentFollowers++;
+                } else {
+                    btn.innerHTML = 'Follow <i class="fas fa-user-plus"></i>';
+                    currentFollowers--;
+                }
+                followers.textContent = currentFollowers;
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => console.error('Error:', error));
     };
 </script>
-
+{% endif %}
 {% endblock %}

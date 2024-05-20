@@ -24,7 +24,8 @@ def signup_view(request):
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password1')
             email = form.cleaned_data.get('email')  # Access email data
-
+            refferal = form.cleaned_data.get('referred_by')
+            
             if not regex_email(email):
                 return render(request, 'signup.html', {'form': form, 'error': 'Invalid email address (Do not use disposable emails)'})
             # Authenticate and log the user in
@@ -34,12 +35,23 @@ def signup_view(request):
 
             # Initialize user-related data
             UserProgress.objects.create(user=user)
-            UserProfile.objects.create(user=user)
-
+            UserProfile.objects.get_or_create(user=user)
+            if refferal:
+                profile = UserProfile.objects.get(user=user)
+                profile.credit += 7.5
+                profile.referred_by = User.objects.get(referral_code=refferal)
+                profile.save()
+                referred_by = User.objects.get(referral_code=refferal)
+                referred_by_profile = UserProfile.objects.get(user=referred_by)
+                referred_by_profile.credit += 7.5
+                referred_by_profile.save()
             next_url = request.GET.get('next')
             if next_url and url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}, require_https=request.is_secure()):
                 return redirect(next_url)
-            
+            profile = UserProfile.objects.get(user=request.user)
+            profile.cover_picture = 'https://filmfluency.fra1.digitaloceanspaces.com/covers/night.gif'
+            profile.profile_picture = 'https://filmfluency.fra1.digitaloceanspaces.com/avatars/giphy.gif'
+            profile.save()
             return redirect('users:profile')  # Redirect to profile page after signup
         else:
             print(form.errors)
@@ -74,11 +86,22 @@ def logout_view(request):
 
 
 from django.db import models
-@login_required(login_url='users:login')
+from django.urls import reverse
+from urllib.parse import urlencode
+
 def profile(request):
-    # Get or create UserProgress object for the logged-in user
-    user_progress, created = UserProgress.objects.get_or_create(user=request.user)
-    user_profile, created = UserProfile.objects.get_or_create(user=request.user)
+
+    user = request.GET.get('user')
+    if user == None:
+        if request.user.is_anonymous:
+            return redirect('users:login')
+        base_url=reverse('users:profile')
+        query_string = urlencode({'user': str(request.user)})
+        url = f"{base_url}?{query_string}"
+        return redirect(url)
+    user = User.objects.get(username=user)
+    user_progress, created = UserProgress.objects.get_or_create(user=user)
+    user_profile, created = UserProfile.objects.get_or_create(user=user)
 
     highest_complexity = Video.objects.order_by('-complexity').first()
     user_complexity_avg_complexity = user_progress.videos_watched.aggregate(models.Avg('complexity'))['complexity__avg']
@@ -94,13 +117,31 @@ def profile(request):
         user_progress.points = 0
         user_progress.user_level = 1
         user_progress.save()
+        
+    
+    user_profile = UserProfile.objects.get(user=user)
 
+    
     return render(request, 'profile.html', {
         'user': request.user,
         'user_profile': user_profile,
         'user_progress': user_progress,
         'percntage_complexity': percntage_complexity,
     })
+    
+@login_required(login_url='users:login')
+def follow_user(request):
+        # Get or create UserProgress object for the logged-in user
+    if request.method == 'POST':
+        #follow user
+        if request.POST.get('user') == request.user.username:
+            return JsonResponse({'success': False, 'message': 'You cannot follow yourself.'})
+        user = User.objects.get(username=request.POST.get('user'))
+        user_profile, _ = UserProfile.objects.get_or_create(user=request.user)
+        user_profile.friends.add(user)
+        user_profile.save()
+        return JsonResponse({'success': True, 'message': 'User followed successfully.'})
+    return JsonResponse({'success': False, 'message': 'Use POST method to follow a user.'})
 
 def leaderboard(request):
     entries = LeaderboardEntry.objects.all()[:10]  # Top 10 entries

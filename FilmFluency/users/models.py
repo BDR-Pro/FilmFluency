@@ -4,6 +4,7 @@ from learning.models import Video, Movie
 import random
 from django_countries.fields import CountryField
 from api.upload_to_s3 import get_random_file
+import string
 
 def default_profile_pic():
     return get_random_file('avatars')
@@ -46,7 +47,24 @@ class UserProfile(models.Model):
     card_id = models.CharField(max_length=255, null=True, blank=True)
     paid_user = models.BooleanField(default=False)
     reports = models.ManyToManyField('users.Report', related_name='reported_by', blank=True) 
-   
+    credit = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    
+    referral_code = models.CharField(max_length=8, unique=True, null=True, blank=True)
+    referred_by = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='referred_users')
+    
+    def save(self, *args, **kwargs):
+        if not self.referral_code:
+            self.referral_code = self.generate_unique_referral_code()
+        super().save(*args, **kwargs)
+
+    def generate_unique_referral_code(self):
+        length = 8
+        characters = string.ascii_uppercase + string.digits
+        while True:
+            referral_code = ''.join(random.choices(characters, k=length))
+            if not UserProfile.objects.filter(referral_code=referral_code).exists():
+                return referral_code
+
     def __str__(self):
         return f"{self.nickname} - {self.user.username}"
 
@@ -54,10 +72,10 @@ class UserProfile(models.Model):
         return self.friends.all()
     
     def get_avatar(self):
-        return self.profile_picture.url.split('?')[0]
+        return 'https://' + self.profile_picture.url.split('%3A')[1].replace('/','',1).split('?')[0]  if "%3A" in self.profile_picture.url else self.profile_picture.url.split('?')[0]
     
     def get_cover(self):
-        return self.cover_picture.url.split('?')[0]
+        return 'https://' + self.cover_picture.url.split('%3A')[1].replace('/','',1).split('?')[0] if "%3A" in self.cover_picture.url else self.cover_picture.url.split('?')[0]
  
 
 class UserProgress(models.Model):
