@@ -1,6 +1,6 @@
 from .models import Product
 
-
+from contact.contact_logic import send_contact_email
 def calc_weeks(product_name: str) -> float:
     """
     Calculate the number of weeks coverage based on the amount paid.
@@ -28,4 +28,5 @@ def send_mail(subject: str, message: str, recipient: str) -> None:
     Returns:
     None
     """
-    pass
+    send_contact_email(subject, message, recipient)
+    

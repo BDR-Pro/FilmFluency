@@ -39,7 +39,7 @@ def getSubject(email_type):
     return subjects.get(email_type, "Important Notification")
 
 def send_contact_email(subject, message, recipient_list):
-
+    
     email_from = settings.EMAIL_HOST_USER
     send_mail(subject, message, email_from, recipient_list)
 

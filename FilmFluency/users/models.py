@@ -48,7 +48,6 @@ class UserProfile(models.Model):
     paid_user = models.BooleanField(default=False)
     reports = models.ManyToManyField('users.Report', related_name='reported_by', blank=True) 
     credit = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    
     referral_code = models.CharField(max_length=8, unique=True, null=True, blank=True)
     referred_by = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='referred_users')
     
@@ -193,3 +192,22 @@ class Report(models.Model):
 
     def __str__(self):
         return self.report
+
+
+import uuid
+class UserSettings(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    is_active = models.BooleanField(default=False)
+    uuid = models.CharField(max_length=255, null=True, blank=True)
+    
+    def __str__(self):
+        return self.user.username
+    
+    def generate_uuid(self):
+        return uuid.uuid4().hex
+    
+    def save(self, *args, **kwargs):
+        if not self.uuid:
+            self.uuid = self.generate_uuid()
+        super().save(*args, **kwargs)
+    

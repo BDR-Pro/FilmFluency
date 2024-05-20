@@ -7,14 +7,15 @@ from learning.models import Movie , Video
 from users.models import Report
 from learning.models import Language
 from django.utils.http import url_has_allowed_host_and_scheme
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import get_object_or_404
 from .forms import SignUpForm
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User
 from .func import regex_email
 from django_countries import countries
-
+from contact.contact_logic import send_contact_email
+from users.models import UserSettings
 
 def signup_view(request):
     if request.method == 'POST':
@@ -52,6 +53,11 @@ def signup_view(request):
             profile.cover_picture = 'https://filmfluency.fra1.digitaloceanspaces.com/covers/night.gif'
             profile.profile_picture = 'https://filmfluency.fra1.digitaloceanspaces.com/avatars/giphy.gif'
             profile.save()
+            user_settigns = UserSettings.objects.get(user=request.user)
+            uuid = user_settigns.uuid
+            send_contact_email('Welcome to FilmFluency',
+                       f'Welcome to FilmFluency! We are excited to have you on board. Enjoy your learning experience.\n to activate your account click on the link below\n\n https://filmfluency.com/activate/?uuid{uuid}&email={email}', 
+                       [email])
             return redirect('users:profile')  # Redirect to profile page after signup
         else:
             print(form.errors)
@@ -239,10 +245,43 @@ def report_item(request):
 
 
 def password_reset(request):
+    if request.method == 'GET':
+        email = request.GET.get('email')
+        user = User.objects.get(email=email)
+        user_settigns = UserSettings.objects.get(user=user)
+        uuid = user_settigns.uuid
+        send_contact_email('Password Reset',
+                f'You have requested a password reset. Click on the link below to reset your password\n\n https://filmfluency.com/reset-password/?uuid{uuid}&email={email}', 
+                [email])
+    return render(request, 'password_reset.html')
+
+
+def resend_activation_email(request):
+    user = User.objects.get(user=request.user)
+    email = user.email
+    user_settigns = UserSettings.objects.get(user=user)
+    uuid = user_settigns.uuid
+    send_contact_email('Welcome to FilmFluency',
+                f'Welcome to FilmFluency! We are excited to have you on board. Enjoy your learning experience.\n to activate your account click on the link below\n\n https://filmfluency.com/activate/?uuid{uuid}&email={email}', 
+                [email])
+    return HttpResponse('Activation email sent successfully')
+
+def reset_password(request):
+    if request.method == 'GET':
+        email = request.GET.get('email')
+        uuid = request.GET.get('uuid')
+        user = User.objects.get(email=email)
+        user_settigns = UserSettings.objects.get(user=user)
+        if uuid == user_settigns.uuid:
+            return render(request, 'reset_password.html')
+        
     if request.method == 'POST':
         email = request.POST.get('email')
+        uuid = request.POST.get('uuid')
         user = User.objects.get(email=email)
-        user.set_password('new_password')
-        user.save()
-        return render(request, 'password_reset.html') 
-    return render(request, 'password_reset.html')
+        user_settigns = UserSettings.objects.get(user=user)
+        if uuid == user_settigns.uuid:
+            user.set_password(request.POST.get('password'))
+            user.save()
+            return redirect('users:login')
+        

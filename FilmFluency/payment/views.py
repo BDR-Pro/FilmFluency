@@ -15,7 +15,7 @@ from django.contrib.auth.decorators import login_required
 from users.models import UserProfile
 import random 
 import string
-
+from users.models import UserSettings
 TAP_SECRET_KEY = settings.TAP_SECRET_KEY
 
 def get_icon_url(name):
@@ -279,3 +279,8 @@ def get_qr_code_url(crypto):
 
 def how_its_works(request):
     return render(request, 'how_its_works.html')
+
+
+
+def please_activate_your_email(request):
+    return render(request, 'please_activate_your_email.html')
