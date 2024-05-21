@@ -16,6 +16,8 @@ from .func import regex_email
 from django_countries import countries
 from contact.contact_logic import send_contact_email
 from users.models import UserSettings
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_password
 
 def signup_view(request):
     if request.method == 'POST':
@@ -282,7 +284,13 @@ def reset_password(request):
         user = User.objects.get(email=email)
         user_settigns = UserSettings.objects.get(user=user)
         if uuid == user_settigns.uuid:
-            user.set_password(request.POST.get('password'))
+            #jango.contrib.auth.password_validation.validate_password called on it
+            password = request.POST.get('password')
+            try:
+                validate_password(password)
+            except ValidationError as e:
+                return render(request, 'reset_password.html', {'error': e})
+            user.set_password(password)
             user.save()
             return redirect('users:login')
         
