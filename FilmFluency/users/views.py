@@ -286,3 +286,6 @@ def reset_password(request):
             user.save()
             return redirect('users:login')
         
+        
+def money(request):
+    return render(request, 'money.html')

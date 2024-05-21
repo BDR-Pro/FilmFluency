@@ -147,6 +147,12 @@
                     <span class="nav-text">Leaderboard</span>
                 </a>
             </li>
+            <!--refferal and rewarding programm-->
+            <li class="nav-item">
+                <a href="{% url 'users:referral' %}" class="nav-link text-white">
+                    <i class="bi bi-gift"></i>
+                    <span class="nav-text">Make Money</span>
+                </a>
             {% if request.user.is_authenticated %}
                 <li class="nav-item">
                     <a href="{% url 'users:logout' %}" class="nav-link text-white">

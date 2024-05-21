@@ -59,6 +59,11 @@ def define(request):
 
 def upload_movie(request, slug_or_id):
     if request.method == 'POST':
+        slug_or_id.replace('placeholder', '') if 'placeholder' in slug_or_id else slug_or_id
+        #if the movie already exists and the video is existing, return error
+        if Movie.objects.filter(random_slug=slug_or_id).exists():
+            if Movie.objects.get(random_slug=slug_or_id).video:
+                return JsonResponse({'error': 'Video already uploaded'}, status=400)
         video = request.FILES.get('video')
         transcript = request.FILES.get('transcript')
         if Movie.objects.filter(random_slug=slug_or_id).exists():
@@ -88,9 +93,14 @@ def upload_movie(request, slug_or_id):
         return JsonResponse({'error': 'Method not allowed'}, status=405)
     
 
-def api_is_it_a_valid_imdb_id(imdb_id):
-    if is_it_a_valid_imdb_id(imdb_id):
-        return JsonResponse({'valid': True})
+def api_is_it_a_valid_imdb_id(request):
+    imdb_id = request.GET.get('imdb_id', '')
+    # return (data['movie_results'][0]['original_title'],data['movie_results'][0]['original_language'],data['movie_results'][0]['backdrop_path'])
+    data = is_it_a_valid_imdb_id(imdb_id)
+    if data:
+        poster = f"https://image.tmdb.org/t/p/original{data[2]}" 
+        return JsonResponse({'valid': True, 'title': data[0], 'language': data[1], 'poster': poster})
+    return JsonResponse({'valid': False})
 
 
 def notify_admin(movie, title, message, upload, by):

@@ -5,17 +5,20 @@ from api.upload_to_s3 import upload_to_s3
 from django.conf import settings
 
 def is_it_a_valid_imdb_id(slug_or_id):
-    if len(slug_or_id) == 9 and slug_or_id.startswith('tt'):
-        imdb_id = slug_or_id
-        url = f"https://api.themoviedb.org/3/find/{imdb_id}?api_key={settings.TMDB_API_KEY}&external_source=imdb_id"
-        response = requests.get(url)
-        if response.status_code == 200:
-            data = response.json()
-            if data.get('movie_results'):
-                return True
-                
+   
+    imdb_id = slug_or_id
+    url = f"https://api.themoviedb.org/3/find/{imdb_id}?api_key={settings.TMDB_API_KEY}&external_source=imdb_id"
+    response = requests.get(url)
+    if response.status_code == 200:
+        data = response.json()
+        #return title of the movie from the response movie_results original_title
+        if data['movie_results']:
+            return (data['movie_results'][0]['original_title'],data['movie_results'][0]['original_language'],data['movie_results'][0]['backdrop_path'])
+        else:
+            return False
+    else:
+        print(f"Failed to check IMDb ID: {response.status_code}")
     return False
-
 
 def get_movie_data_from_tmdb(imdb_id):
     api_key = settings.TMDB_API_KEY
