@@ -97,6 +97,8 @@ def get_movie_by_slug(request,random_slug):
     isittrendy[0].save()
     
     does_it_have_videos = True if Video.objects.filter(movie=movie).count() > 0 else False
+    avg_complexity = Video.objects.filter(movie=movie).aggregate(Avg('complexity'))['complexity__avg']
+    
     if request.user.is_authenticated:
         user_progress = UserProgress.objects.get(user=request.user)
         user_progress.watched_movies.add(movie)
@@ -104,16 +106,20 @@ def get_movie_by_slug(request,random_slug):
         reported = Report.objects.filter(user=request.user, content_type = movie_content_type(), object_id = movie.id).exists()
         notifed = Notification.objects.filter(recipient=request.user, movie=movie).exists()
         is_favorite = UserProgress.objects.get(user=request.user).favourite_movies.filter(random_slug=random_slug).exists()
-        avg_complexity = Video.objects.filter(movie=movie).aggregate(Avg('complexity'))['complexity__avg']
     else:
         reported = False
         notifed = False
         is_favorite = False
         
     movie.poster = movie.get_poster()
-    return render(request, 'movie_detail.html', {'movie': movie, 'views': views, 'does_it_have_videos': does_it_have_videos ,
+    if hasattr(request, 'is_iframe') and request.is_iframe:
+        page='iframe_movie.html'
+    else:
+        page='movie_detail.html'
+   
+    return render(request, page, {'movie': movie, 'views': views, 'does_it_have_videos': does_it_have_videos ,
                                                  'reported': reported, 'notifed': notifed, 'is_favorite': is_favorite
-                                                 , 'avg_complexity': avg_complexity})
+                                                 , 'avg_complexity': avg_complexity, 'is_iframe': True if page == 'iframe_movie.html' else False})
 
 
 def get_trending_movies():
@@ -152,7 +158,11 @@ def get_latest_movies():
 
 def home(request):
     """ Render the homepage with introductory information and top trending movies based on user selection or cookie. """
-    
+    page = 'index.html'
+    if hasattr(request, 'is_iframe') and request.is_iframe:
+        page='iframe.html'
+
+
     # Default source
     default_source = 'trending'
     if 'reset_preferences' in request.GET:
@@ -188,12 +198,13 @@ def home(request):
     #remove any duplicates from the list of flags
     flags = list(dict.fromkeys(flags))
     # Render response with initial movie data
-    response = render(request, 'index.html', {
+    response = render(request, page, {
         'movies': movies[:5],  # Limit to 5 movies for simplicity
         'message': message,
         'current_source': user_choice,
         'unique_country_flag': flags,
-        'current_country': country_flag
+        'current_country': country_flag,
+        'is_iframe': True if page == 'iframe.html' else False
     })
     if not 'reset_preferences' in request.GET:
 
@@ -214,7 +225,6 @@ def home(request):
             httponly=True, 
             secure=True
         )
-        
     return response
 
 

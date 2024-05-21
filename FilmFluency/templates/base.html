@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.0.0/css/flag-icons.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <meta http-equiv="Content-Security-Policy">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:site" content="@youraccount">
     <meta name="twitter:title" content="{%if movie %}{{ movie.title }}{% endif %}--Learn Languages with Film Fluency">
@@ -32,7 +33,6 @@
 
     gtag('config', 'G-LEQEVRLGW0');
     </script>
-
 </head>
 
 <style>
@@ -107,48 +107,57 @@
     }
 </style>
 
-
 <body>
-    
+    <script>
+        // Check if the page is in an iframe
+        if (window.self !== window.top) {
+            if (!window.location.search.includes('iframe=true')) {
+                // Reload the page with the 'iframe' query parameter if not already present
+                window.location.search += (window.location.search ? '&' : '?') + 'iframe=true';
+            }
+        }
+    </script>
+
 {% block styles %}
 {% endblock %}
+{% if not is_iframe %}
     <div class="vertical-nav bg-dark" id="sidebar">
         <ul class="nav flex-column">
             <li class="nav-item">
                 <a href="{% url 'web:home' %}" class="nav-link text-white">
                     <i class="bi bi-house-fill"></i>
-                    <span>Home</span>
+                    <span class="nav-text">Home</span>
                 </a>
             </li>
             <li class="nav-item">
                 <a href="{% url 'web:video_list' %}" class="nav-link text-white">
                     <i class="bi bi-camera-video"></i>
-                    <span>All Videos</span>
+                    <span class="nav-text">All Videos</span>
                 </a>
             </li>
             <li class="nav-item">
                 <a href="{% url 'learning:unique_movies' %}" class="nav-link text-white">
                     <i class="bi bi-camera-reels-fill"></i>
-                    <span>Unique Movies</span>
+                    <span class="nav-text">Unique Movies</span>
                 </a>
             </li>
             <li class="nav-item">
                 <a href="{% url 'users:leaderboard' %}" class="nav-link text-white">
                     <i class="bi bi-trophy"></i>
-                    <span>Leaderboard</span>
+                    <span class="nav-text">Leaderboard</span>
                 </a>
             </li>
             {% if request.user.is_authenticated %}
                 <li class="nav-item">
                     <a href="{% url 'users:logout' %}" class="nav-link text-white">
                         <i class="bi bi-box-arrow-right"></i>
-                        <span>Logout</span>
+                        <span class="nav-text">Logout</span>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="{% url 'users:profile' %}" class="nav-link text-white">
                         <i class="bi bi-person-badge"></i>
-                        <span>Profile</span>
+                        <span class="nav-text">Profile</span>
                     </a>
                 </li>
             {% endif %}
@@ -156,13 +165,13 @@
                 <li class="nav-item">
                     <a href="{% url 'users:login' %}" class="nav-link text-white">
                         <i class="bi bi-box-arrow-left"></i>
-                        <span>Login</span>
+                        <span class="nav-text">Login</span>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="{% url 'users:signup' %}" class="nav-link text-white">
                         <i class="bi bi-door-open"></i>
-                        <span>Register</span>
+                        <span class="nav-text">Register</span>
                     </a>
                 </li>
             {% endif %}
@@ -171,7 +180,7 @@
                 <li class="nav-item">
                     <a href="{% url 'payment:products' %}" class="nav-link text-white">
                         <i class="bi bi-cart4"></i>
-                        <span>Subscribe</span>
+                        <span class="nav-text">Subscribe</span>
                     </a>
                 </li>
             {% endif %}
@@ -180,14 +189,14 @@
             <li class="nav-item">
                     <a href="{% url 'admin:index' %}" class="nav-link text-white">
                         <i class="bi bi-person-circle"></i>
-                        <span>Admin</span>
+                        <span class="nav-text">Admin</span>
                     </a>
                 </li>
 
             <li class="nav-item">
                     <a href="{% url 'web:dashboard' %}" class="nav-link text-white">
                         <i class="bi bi-speedometer2"></i>
-                        <span>Dashboard</span>
+                        <span class="nav-text">Dashboard</span>
                     </a>
                 </li>
             {% endif %}
@@ -195,21 +204,19 @@
             <li class="nav-item">
                 <a href="{% url 'web:random' %}" class="nav-link text-white">
                     <i class="bi bi-shuffle"></i>
-                    <span>Random</span>
+                    <span class="nav-text">Random</span>
                 </a>
             </li>
 
             <li class="nav-item">
                 <a href="{% url 'web:search_movies' %}" class="nav-link text-white">
                     <i class="bi bi-search"></i>
-                    <span>Search</span>
+                    <span class="nav-text">Search</span>
                 </a>
             </li>
-            
-
         </ul>
     </div>
-
+{% endif %}
     <div class="main-content">
         {% block content %}{% endblock %}
     </div>
@@ -219,35 +226,34 @@
     <footer class="footer">
         <div class="container">© 2024 Film Fluency. All rights reserved.</div>
     </footer>
-    <script>
-        $('.nav-link').click(function() {
-            if ($(window).width() < 768) {
-                $('.vertical-nav').width(70); // Collapse sidebar after clicking
-            }
-        });
-        document.addEventListener('DOMContentLoaded', function() {
-            var nav = document.querySelector('.vertical-nav');
-            nav.addEventListener('dblclick', function() {
-                nav.style.width = nav.style.width === '200px' ? '70px' : '200px';
-            });
-        });
-
-            document.addEventListener('DOMContentLoaded', function () {
-                const navLinks = document.querySelectorAll('.vertical-nav .nav-link');
-        
-                navLinks.forEach(link => {
-                    link.addEventListener('click', function () {
-                        // Remove active class from all links
-                        navLinks.forEach(lnk => lnk.classList.remove('active'));
-                        // Add active class to the clicked link
-                        this.classList.add('active');
-                    });
-                });
-            });
-        
-    </script>
+    
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const navLinks = document.querySelectorAll('.vertical-nav .nav-link');
+            
+            navLinks.forEach(link => {
+                link.addEventListener('click', function () {
+                    // Remove active class from all links
+                    navLinks.forEach(lnk => lnk.classList.remove('active'));
+                    // Add active class to the clicked link
+                    this.classList.add('active');
+                    
+                    // Collapse the sidebar if window width is less than 768px
+                    if (window.innerWidth < 768) {
+                        document.getElementById('sidebar').style.width = '70px';
+                    }
+                });
+            });
+            
+            // Handle double-click to toggle sidebar width
+            const sidebar = document.getElementById('sidebar');
+            sidebar.addEventListener('dblclick', function () {
+                sidebar.style.width = sidebar.style.width === '200px' ? '70px' : '200px';
+            });
+        });
+    </script>
 </body>
 </html>

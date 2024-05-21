@@ -29,7 +29,70 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['filmfluency.com', 'www.filmfluency.com', 'localhost']
 
+SECURE_FRAME_DENY = False
 
+# Allow all origins to embed this site in an iframe
+CSP_FRAME_ANCESTORS = ['*']
+
+# Add CSP header
+
+
+# Configure CSP settings
+CSP_DEFAULT_SRC = ("'self'",)
+CSP_SCRIPT_SRC = (
+    "'self'",
+    'https://ajax.googleapis.com',
+    'https://maxcdn.bootstrapcdn.com',
+    'https://www.googletagmanager.com',
+    'https://code.jquery.com',
+    'https://cdn.jsdelivr.net',
+    'https://stackpath.bootstrapcdn.com',
+    "'unsafe-inline'",  # Allow inline scripts if necessary
+)
+CSP_STYLE_SRC = (
+    "'self'",
+    'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css',
+    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css',
+    'https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css',
+    'https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.0.0/css/flag-icons.min.css',
+    'https://fonts.googleapis.com',
+    'https://maxcdn.bootstrapcdn.com',
+    "'unsafe-inline'",  # Allow inline styles if necessary
+)
+CSP_IMG_SRC = ("'self'", 'data:')
+CSP_FONT_SRC = ("'self'", 'https://fonts.gstatic.com','https://cdnjs.cloudflare.com/','https://cdn.jsdelivr.net/')
+CSP_FRAME_ANCESTORS = ("*",)
+CSP_CONNECT_SRC = ("'self'",)
+CSP_IMG_SRC = ("*",)  # Allow images from any source
+# Optionally allow inline styles and scripts if absolutely necessary
+CSP_STYLE_SRC_ELEM = CSP_STYLE_SRC
+CSP_SCRIPT_SRC_ELEM = CSP_SCRIPT_SRC
+CSP_IMG_SRC_ELEM = CSP_IMG_SRC
+CSP_FONT_SRC_ELEM = CSP_FONT_SRC
+CSP_CONNECT_SRC_ELEM = CSP_CONNECT_SRC
+CSP_BASE_URI = ("'self'",)
+CSP_OBJECT_SRC = ("'none'",)
+CSP_FORM_ACTION = ("'self'",)
+CSP_FRAME_SRC = ("'self'",)
+CSP_MEDIA_SRC = ("'self'",)
+CSP_CHILD_SRC = ("'self'",)
+CSP_MANIFEST_SRC = ("'self'",)
+CSP_WORKER_SRC = ("'self'",)
+CSP_PREFETCH_SRC = ("'self'",)
+CSP_BLOCK_ALL_MIXED_CONTENT = True
+CSP_UPGRADE_INSECURE_REQUESTS = True
+# settings.py
+
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_HSTS_SECONDS = 31536000
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+X_FRAME_OPTIONS = 'ALLOWALL'  # Allow framing from any origin
+
+
+
+# Optionally add other CSP settings as needed
 import os
 from django.conf import settings
 
@@ -52,19 +115,23 @@ INSTALLED_APPS = [
     'api',
     'payment',
     'contact',
+    'csp',
     
     
 ]
+X_FRAME_OPTIONS = 'ALLOWALL'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'web.middleware.CheckIframeMiddleware',
+    'web.middleware.CheckRefferalUrlMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+    'csp.middleware.CSPMiddleware',
         
 ]
 

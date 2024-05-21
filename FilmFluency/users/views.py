@@ -26,7 +26,8 @@ def signup_view(request):
             password = form.cleaned_data.get('password1')
             email = form.cleaned_data.get('email')  # Access email data
             refferal = form.cleaned_data.get('referred_by')
-            
+            if not refferal and 'refferal' in request.session:
+                refferal = request.session['refferal']
             if not regex_email(email):
                 return render(request, 'signup.html', {'form': form, 'error': 'Invalid email address (Do not use disposable emails)'})
             # Authenticate and log the user in

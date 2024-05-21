@@ -11,6 +11,7 @@ fastapi>=0.109.1
 django-storages[boto3]
 boto3
 django-storages
+django-csp
 pycountry
 ffmpy
 filelock
