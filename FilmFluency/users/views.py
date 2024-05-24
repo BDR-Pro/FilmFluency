@@ -16,8 +16,10 @@ from .func import regex_email
 from django_countries import countries
 from contact.contact_logic import send_contact_email
 from users.models import UserSettings
-from django.core.exceptions import ValidationError
-from django.core.validators import validate_password
+import re
+
+is_valid_password =  lambda password: bool(re.match(r'^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).{8,}$', password))
+    
 
 def signup_view(request):
     if request.method == 'POST':
@@ -286,10 +288,11 @@ def reset_password(request):
         if uuid == user_settigns.uuid:
             #jango.contrib.auth.password_validation.validate_password called on it
             password = request.POST.get('password')
-            try:
-                validate_password(password)
-            except ValidationError as e:
+            
+            if not is_valid_password(password):
+                e = 'Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one number.'
                 return render(request, 'reset_password.html', {'error': e})
+            
             user.set_password(password)
             user.save()
             return redirect('users:login')
