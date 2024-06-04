@@ -198,6 +198,11 @@ def home(request):
     #remove any duplicates from the list of flags
     flags = list(dict.fromkeys(flags))
     # Render response with initial movie data
+    if country_flag:
+        if country_flag in flags:
+            pass
+        else:
+            country_flag = 'us'
     response = render(request, page, {
         'movies': movies[:5],  # Limit to 5 movies for simplicity
         'message': message,
