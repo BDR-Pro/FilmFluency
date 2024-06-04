@@ -79,7 +79,10 @@ def get_unique_movies(request):
         order_by = 'rating'
     
     country = request.GET.get('country', '')
+
     if country:
+        if country not in get_unique_country_flag():
+            country = 'us'
         movies = Movie.objects.filter(country_flag=country).distinct().order_by('-' + order_by)    
     
     if mode == 'true':
