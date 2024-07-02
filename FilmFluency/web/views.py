@@ -203,8 +203,24 @@ def home(request):
             pass
         else:
             country_flag = 'us'
+    #fix movies url by adding cdn url 
+    cdn_url = "https://filmfluency.fra1.cdn.digitaloceanspaces.com"
+    movies = movies[:5]
+    # Iterate through each movie object and update the poster attribute if necessary
+    for movie in movies:
+        if not movie.poster.startswith(cdn_url):
+            movie.poster = cdn_url + movie.poster
+
+    # Save changes to the database if necessary
+    for movie in movies:
+        movie.save()
+
+    # Print updated movie posters for verification
+    for movie in movies:
+        print(movie.poster)
+        
     response = render(request, page, {
-        'movies': movies[:5],  # Limit to 5 movies for simplicity
+        'movies': movies,
         'message': message,
         'current_source': user_choice,
         'unique_country_flag': flags,

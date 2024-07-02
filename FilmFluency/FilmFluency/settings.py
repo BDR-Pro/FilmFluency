@@ -74,11 +74,10 @@ CSP_BASE_URI = ("'self'",)
 CSP_OBJECT_SRC = ("'none'",)
 CSP_FORM_ACTION = ("'self'",)
 CSP_FRAME_SRC = ("'self'",)
-CSP_MEDIA_SRC = ("'self'",)
+CSP_MEDIA_SRC = ("'self'","https://fra1.digitaloceanspaces.com/")
 CSP_CHILD_SRC = ("'self'",)
 CSP_MANIFEST_SRC = ("'self'",)
 CSP_WORKER_SRC = ("'self'",)
-CSP_PREFETCH_SRC = ("'self'",)
 CSP_BLOCK_ALL_MIXED_CONTENT = True
 CSP_UPGRADE_INSECURE_REQUESTS = True
 # settings.py
