@@ -1,57 +1,74 @@
-# 🎬 Film Fluency 🌟
+# 🎬 FilmFluency 🌟
 
-Hey fam! Welcome to **Film Fluency**, your go-to app for learning English with your fave movies! 🍿✨ Get ready to level up your language skills in the most chill way possible. 😎📈
+Welcome to **FilmFluency**, your premier app for learning English through movies. 🍿✨ Enhance your language skills in an interactive and enjoyable way, no matter your current proficiency level. 📈
 
-## What's the Buzz? 🐝
+## Overview 🐝
 
-Our app uses Flutter magic for a rad user experience, Python powers for backend smarts, and cloud goodness for storage. 🤖☁️ Whether you're a total newbie or an English pro, we've got you covered!
+FilmFluency leverages **Flutter** for an intuitive user interface, **Python** for robust backend functionalities, and cloud storage for seamless access. Whether you're a beginner or an advanced learner, our app caters to all.
 
-## Features 🚀
+## Key Features 🚀
 
-- **User Authentication**: Secure login/signup because privacy is key! 🔐
-- **Movie Catalog**: Browse and filter through a sick collection of flicks. 🎞️
-- **Downloadable Goodies**: Grab the movie and its transcript with a tap! 📥
-- **Learning Corner**: Snatch those complex English sentences and clips that'll make you sound like a native. 🎓
+- **User Authentication**: Secure login and registration processes, ensuring privacy and security. 🔐
+- **Extensive Movie Catalog**: Browse and filter through a diverse collection of films. 🎞️
+- **Downloadable Content**: Easily download movies and transcripts for offline learning. 📥
+- **Learning Tools**: Access complex English sentences and video clips to improve your language comprehension. 🎓
 
-## Get Started 🏁
+## Getting Started 🏁
 
-1. Clone this repo to your local machine, 'cause that's where the magic begins!
-2. Ensure you have Flutter and Python installed - they're the heart and soul of this show. 💖
-3. Set up your virtual environment and run `pip install -r requirements.txt` to get all the backstage crew ready (aka dependencies).
+1. Clone this repository to your local machine.
+2. Ensure both **Flutter** and **Python** are installed as they form the core technologies.
+3. Set up a virtual environment and install the required dependencies:
 
-## Downloading Movies 🎥
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-Legally download your chosen flicks and their English transcripts - 'cause we play by the rules. 📜✅
+## Movie Downloads 🎥
 
-## Processing Transcripts 📑
+FilmFluency allows you to legally download selected movies along with their English transcripts, ensuring full compliance with copyright regulations. 📜✅
 
-Our smart Python scripts 🐍 will read through the transcripts and pick out the English sentences that are totes important for learning.
+## Transcript Processing 📑
 
-## Cutting Video Clips ✂️
+Our advanced Python scripts analyze the downloaded transcripts, highlighting essential English sentences to facilitate learning.
 
-Got a fave scene? We’ll cut it out for you to keep using FFMPEG - talk about keeping memories! 🎞️❤️
+## Video Clip Creation ✂️
+
+Users can cut and save their favorite movie scenes using FFMPEG, providing a personalized learning experience. 🎞️
 
 ## Deployment and Hosting 🌐
 
-All the digital goodness is hosted on the cloud, so you can access it anytime, anywhere! 🌩️
+The entire platform is cloud-hosted, enabling convenient access to all features from any location. 🌩️
 
-## Dive In! 🏊
+## Running the Application 🏃‍♂️
+
+To launch the app:
 
 ```bash
-flutter run # To get the frontend rolling! SOON 
-python main.py # To start the backend engine!
+flutter run   # Starts the frontend
+python main.py # Initiates the backend
 ```
+
+## Videos 📹
+
+To see how the app works, check out the following videos:
+
+To see how the app works, check out the following videos:
+
+- [Big Update Home Screen](FilmFluency\FilmFluencyVideos\BigUpdate_HomeScreen_23_4.mp4)
+- [Cry Pay](FilmFluency\FilmFluencyVideos\cry_pay.mp4)
+- [FilmFluency](FilmFluency\FilmFluencyVideos\filmfluency.mp4)
+- [Home](FilmFluency\FilmFluencyVideos\home_21_4.mp4)
+- [Homepage](FilmFluency\FilmFluencyVideos\homepage_20_4.mp4)
+- [How It Works](FilmFluency\FilmFluencyVideos\how_its_works.mp4)
+- [Language Support](FilmFluency\FilmFluencyVideos\lang_support.mp4)
+- [Payment](FilmFluency\FilmFluencyVideos\payment.mp4)
+
+Remember to replace the file paths with the appropriate links or embed the videos in your markdown.
 
 ## Contributing 🤝
 
-Wanna jump on this bandwagon? Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change. 🗣️🔧
+Contributions are always welcome! If you wish to collaborate, feel free to submit a pull request. For major changes, kindly open an issue to discuss your ideas beforehand. 🛠️
 
 ## License 📜
 
-Distributed under the MIT License. See `LICENSE` for more information.
-
-## Final Deets 📢
-
-This README is more than just a guide; it's an invite to a whole new world of learning - stylish, effective, and absolutely Gen Z-approved! 🎉👾
-
-So, what are you waiting for? Let's get this party started! 🥳👩‍💻👨‍💻
+This project is licensed under the MIT License. Refer to the `LICENSE` file for more details.
