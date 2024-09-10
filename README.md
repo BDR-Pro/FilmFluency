@@ -72,3 +72,42 @@ Contributions are always welcome! If you wish to collaborate, feel free to submi
 ## License 📜
 
 This project is licensed under the MIT License. Refer to the `LICENSE` file for more details.
+
+## **Fair Use Copyright Disclaimer**
+
+At **FilmFluency**, we are committed to adhering to copyright laws and respecting the intellectual property rights of content creators. As part of our mission to provide educational services through language learning, we utilize selected short clips from movies and other media to enhance the learning experience. We believe that this usage falls under the legal doctrine of "Fair Use" as outlined in the U.S. Copyright Law (17 U.S.C. § 107).
+
+The doctrine of Fair Use permits limited use of copyrighted material without the need for permission from the copyright holder under specific conditions, especially for purposes such as:
+
+- **Education**
+- **Teaching**
+- **Research**
+- **Commentary**
+- **Criticism**
+- **News reporting**
+
+Our use of short clips from movies and other media is intended for **transformative educational purposes**, specifically to:
+
+1. **Teach foreign languages** by providing real-world context through movie dialogues.
+2. **Enhance language comprehension** through visual and auditory stimuli.
+3. **Encourage cultural understanding** by showcasing films in their original language context.
+
+## **Fair Use Factors**
+
+When determining if our usage qualifies as Fair Use, we consider the following factors:
+
+1. **Purpose and Character of the Use**:
+   - Our use is non-commercial and solely for educational purposes. We aim to provide a transformative service by using the clips to teach language and provide commentary on linguistic elements.
+
+2. **Nature of the Copyrighted Work**:
+   - While we use copyrighted films, our focus is on short excerpts that serve an instructional purpose and do not replace the original work.
+
+3. **Amount and Substantiality of the Portion Used**:
+   - We limit the length of the clips to the minimum necessary for language instruction, typically only a few seconds to a few minutes, focusing on specific dialogues or scenes that demonstrate linguistic points.
+
+4. **Effect of the Use on the Market**:
+   - Our use of short clips does not harm the market for the original work. In fact, it can potentially increase interest in the films from learners who may wish to view the full movie for further educational purposes.
+
+## **Copyright Contact**
+
+If any copyright holder believes that their work has been used inappropriately or outside the scope of Fair Use, we encourage them to contact us directly . We are committed to addressing any concerns and taking immediate action where necessary.
