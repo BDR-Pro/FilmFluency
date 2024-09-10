@@ -62,9 +62,11 @@
 <div class="container py-5">
     <div class="card user-card text-center">
         <!-- Avatar header-->
+         {% if user_profile.get_cover %}
         <figure class="figure mb-0">
             <img src="{{ user_profile.get_cover }}" class="figure-img img-fluid" alt="profile header for {{ user_profile.nickname }}">
         </figure>
+        {% endif %}
 
         <!-- Avatar holder with user interaction -->
         <div class="avatar-holder">
