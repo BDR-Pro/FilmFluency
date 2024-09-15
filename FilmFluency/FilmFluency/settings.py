@@ -27,7 +27,7 @@ SECRET_KEY = os.environ.get('django')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['filmfluency.com', 'www.filmfluency.com', 'localhost']
+ALLOWED_HOSTS = ['filmfluency.com', 'www.filmfluency.com', 'localhost','198.211.113.206']
 
 SECURE_FRAME_DENY = False
 
