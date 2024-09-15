@@ -73,6 +73,7 @@ class Product(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2,help_text="Price in decimal format and USD")
     days = models.PositiveIntegerField(default=1)
     description = models.TextField()
+    zid_url = models.URLField(default="")
     created_at = models.DateTimeField(auto_now_add=True)
     image = models.URLField(default="")
     featured = models.BooleanField(default=False)
