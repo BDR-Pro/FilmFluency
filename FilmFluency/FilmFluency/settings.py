@@ -167,7 +167,6 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 ACCESS_KEY = os.environ.get('ACCESS_KEY')
 # Payment
 
-TAP_SECRET_KEY = os.environ.get('TAP_SECRET_KEY')
 #DB 
 DB_PASS = os.environ.get('DB_PASS')
 
@@ -224,7 +223,7 @@ print("EMAIL_HOST_USER: ", EMAIL_HOST_USER)
 print("EMAIL_HOST_PASSWORD: ", EMAIL_HOST_PASSWORD)
 print("TMDB_API_KEY: ", TMDB_API_KEY)
 print("RD_PASS: ", RD_PASS)
-
+print("Dajngo:", os.environ.get('django'))
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
