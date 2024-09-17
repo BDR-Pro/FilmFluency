@@ -14,4 +14,5 @@ urlpatterns = [
     path('search/', views.search_movies, name='search_movies'),
     path('dashboard', views.dashboard_view, name='dashboard'),
     path('posters/<str:random_slug>/', views.get_posters, name='posters'),
+    path('redeem/', views.redeem_code, name='redeem'),
 ]

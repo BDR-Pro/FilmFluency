@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Redeem Code
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Redeem Your Code</h2>
+
+    {% if message %}
+        <div class="alert alert-success" role="alert">
+            {{ message }}
+        </div>
+    {% endif %}
+
+    {% if error %}
+        <div class="alert alert-danger" role="alert">
+            {{ error }}
+        </div>
+    {% endif %}
+{% endblock %}

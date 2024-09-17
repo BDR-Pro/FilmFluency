@@ -90,3 +90,14 @@ class code(models.Model):
     
     def __str__(self):
         return f"{self.code} - {self.user.username}"
+    
+    
+
+class SubscriptionCode(models.Model):
+    hex_code = models.CharField(max_length=16, unique=True)
+    subscription_length = models.IntegerField(help_text="Subscription length in months")
+    is_redeemed = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.hex_code} - {self.subscription_length} months"

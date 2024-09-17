@@ -7,98 +7,148 @@
 {% block content %} 
 <div class="container mt-5">
     <div class="row row-cols-1 row-cols-md-3 g-4 justify-content-center">
-        {% for product in products %}
-        <a href="{% url 'payment:subscribe' %}?product={{product.id}}" class="col btn custom-btn">
+        <a href="https://shop.filmfluency.com/" class="col btn custom-btn">
             <div class="col">
-                <div class="card h-100 {% if product.featured %}featured{% endif %}" onclick="toggleDetails(this)">
+                <div class="card h-100">
                     <img src="{{ product.image }}" class="card-img-top" alt="{{ product.name }}">
                     <div class="card-body">
-                        <h5 class="card-title text-truncate">{{ product.name }}</h5>
-                        <p class="card-text">{{ product.price }}</p>
-                        {% if product.featured %}
-                            <span class="badge bg-warning text-dark">Best Price</span>
-                        {% endif %}
-                        <div class="details">
-                            <p class="card-text">{{ product.description }}</p>
-                            <p class="card-text">Duration: {{ product.days }} day(s)</p>
+                        <h5 class="card-title text-truncate">Subscription</h5>
+                        <p class="card-text">{{ product.description }}</p>
+                        <div class="btn-group mt-3" role="group" aria-label="Subscription options">
+                            <button type="button" class="btn btn-outline-primary">1 month</button>
+                            <button type="button" class="btn btn-outline-primary">6 months</button>
+                            <button type="button" class="btn btn-outline-primary">12 months</button>
                         </div>
                     </div>
                 </div>
             </div>
         </a>
-        {% endfor %}
     </div>
 </div>
 
-<a href="{% url 'payment:how-its-works' %}" 
-
-<div class="d-grid gap-2">
-    <button class="btn btn-outline-info" type="button">How it Works</button>
-
+<div class="d-flex justify-content-around mt-4" style="gap: 10px;">
+    <a href="{% url 'payment:how-its-works' %}" class="btn btn-outline-info btn-md" type="button">How it Works</a>
+    <!-- Redeem code button -->
+    <button class="btn btn-outline-success btn-md" type="button" onclick="redeemCode()">Redeem Code</button>
 </div>
-</a>
 
 {% endblock %}
 
-
 {% block extra_css %}
 <style>
+    /* General Body Styling */
+    body {
+        background-color: #f8f9fa;
+        font-family: 'Arial', sans-serif;
+    }
+
+    /* Card Styling */
     .card {
         cursor: pointer;
         transition: transform 0.3s ease, box-shadow 0.3s ease;
-        margin-bottom: 2rem; /* Extra space at the bottom */
+        border-radius: 12px; /* Smooth corners for cards */
+        background-color: #ffffff;
+        border: none;
+        margin-bottom: 2rem;
     }
+
     .card:hover, .card:focus {
-        transform: scale(1.03); /* Slight scale on hover and focus for all cards */
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Shadow for depth */
+        transform: scale(1.05); /* Slight scale on hover and focus */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Larger shadow for depth */
     }
-    .featured {
-        transform: scale(1.1) !important; /* Larger scale for featured card */
-        z-index: 1;
-        position: relative; /* To ensure z-index is applied correctly */
-        box-shadow: 0 6px 12px rgba(0,0,0,0.1); /* Stronger shadow for featured card */
+
+    /* Card Image */
+    .card .card-img-top {
+        height: 220px;
+        object-fit: cover;
+        border-top-left-radius: 12px; /* Rounded corners at the top */
+        border-top-right-radius: 12px;
     }
-    .featured:hover, .featured:focus {
-        box-shadow: 0 8px 16px rgba(0,0,0,0.2); /* Even stronger shadow on hover/focus for featured */
+
+    /* Card Body */
+    .card-body {
+        padding: 20px;
     }
-    .featured .card-body::before {
-        content: 'Best Price';
-        color: #fff;
-        background-color: #dc3545;
-        font-size: 14px;
+
+    .card-title {
+        font-size: 1.2rem;
         font-weight: bold;
-        padding: 5px 10px;
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        border-radius: 5px;
+        color: #343a40;
     }
-    .details {
-        max-height: 0;
-        overflow: hidden;
-        transition: max-height 0.5s ease-out;
+
+    .card-text {
+        font-size: 1rem;
+        color: #6c757d;
     }
-    .card:hover .details,
-    .card:focus .details,
-    .card:active .details {  /* Ensure it works on click for all cards */
-        max-height: 500px; /* Large enough max-height to show all content */
+
+    /* Button Group */
+    .btn-group .btn {
+        font-size: 0.9rem;
+        padding: 10px 20px;
     }
+
+    .btn-group .btn:hover {
+        background-color: #007bff;
+        color: white;
+    }
+
+    /* Buttons Styling */
+    .btn-outline-primary, .btn-outline-info, .btn-outline-success {
+        border-radius: 25px; /* Rounded buttons */
+        transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .btn-outline-info:hover {
+        background-color: #17a2b8;
+        color: #ffffff;
+        box-shadow: 0 5px 10px rgba(23, 162, 184, 0.3);
+    }
+
+    .btn-outline-success:hover {
+        background-color: #28a745;
+        color: #ffffff;
+        box-shadow: 0 5px 10px rgba(40, 167, 69, 0.3);
+    }
+
+    /* Adjusting the spacing between buttons */
+    .d-flex {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px; /* Smaller gap between buttons */
+    }
+
+    /* Button sizes */
+    .btn-md {
+        padding: 10px 20px;
+        font-size: 1rem;
+    }
+
+    /* Custom Link Button Styling */
     .custom-btn {
         text-decoration: none;
         color: inherit;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .card-img-top {
+            height: 180px;
+        }
+
+        .d-flex {
+            flex-direction: column;
+            gap: 15px;
+        }
     }
 </style>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-    function toggleDetails(cardElement) {
-        const details = cardElement.querySelector('.details');
-        // Allow all cards to toggle details, including featured
-        if (details.style.maxHeight) {
-            details.style.maxHeight = null;
-        } else {
-            details.style.maxHeight = details.scrollHeight + "px";
+    function redeemCode() {
+        const code = prompt("Please enter your redeem code:");
+        if (code) {
+            window.location.href = `/redeem/?code=${code}`;
         }
     }
 </script>

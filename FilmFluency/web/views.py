@@ -16,8 +16,9 @@ from django.contrib.auth.decorators import login_required
 from contact.models import ContactMessage
 from payment.models import Payment
 from django.core.cache import cache
+from payment.models import SubscriptionCode
 from api.views import secure_media_view
-
+from django.utils import timezone
 
 def get_latest_updated_movies():
     """ Return the 5 most recently added movies based on their associated videos. """
@@ -391,5 +392,23 @@ def get_transcript_by_moive(request,random_slug):
     return (transcript)
 
 
-
+def redeem_code(request):
+    if request.method == 'GET':
+        code = request.GET.get('code')
+        try:
+            subscription = SubscriptionCode.objects.get(hex_code=code)
+            subscription_length = subscription.subscription_length
+            user_profile = UserProfile.objects.get(user=request.user)
+            user_profile.paid_user = True
+            # add number of days to the current date
+            if not user_profile.subscriptionExpiry:
+                user_profile.subscriptionExpiry = timezone.now() + timezone.timedelta(days=subscription_length*30)
+            else:
+                user_profile.subscriptionExpiry = user_profile.subscriptionExpiry + timezone.timedelta(days=subscription_length*30)
+            user_profile.save()
+            subscription.delete()
+            return render(request, 'redeem_code.html', {'error': ''},{"message":f"Subscription activated successfully for {subscription_length} months"})
+        except SubscriptionCode.DoesNotExist:
+            return render(request, 'redeem_code.html', {'error': 'Invalid code'})
+    return render(request, 'redeem_code.html', {'error': ''})
 

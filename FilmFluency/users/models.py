@@ -46,6 +46,7 @@ class UserProfile(models.Model):
     joined_date = models.DateTimeField(auto_now_add=True)
     card_id = models.CharField(max_length=255, null=True, blank=True)
     paid_user = models.BooleanField(default=False)
+    subscriptionExpiry = models.DateTimeField(null=True, blank=True)
     reports = models.ManyToManyField('users.Report', related_name='reported_by', blank=True) 
     credit = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     referral_code = models.CharField(max_length=8, unique=True, null=True, blank=True)
